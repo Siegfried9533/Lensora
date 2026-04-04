@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_lensora
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Hoalt@2005
+      POSTGRES_DB: LensoraDB
+    ports:
+      - "5433:5432" # Map port 5433 máy thật vào 5432 của container
+    volumes:
+      - lensora_db_data:/var/lib/postgresql/data
+
+  backend:
+    build: backend
+    container_name: java_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/LensoraDB
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=Hoalt@2005
+
+volumes:
+  lensora_db_data:

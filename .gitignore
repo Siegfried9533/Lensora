@@ -1,0 +1,12 @@
+# Java & Maven
+target/
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Docker rác
+.DS_Store
