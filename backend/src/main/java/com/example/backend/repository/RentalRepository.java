@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RentalRepository extends JpaRepository<Rental, Long> {
-    // Lưu đơn thuê vào cơ sở dữ liệu
 
 }
