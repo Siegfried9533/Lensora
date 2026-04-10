@@ -1,5 +1,5 @@
-# 1. Build mã nguồn bằng Maven và Java 25
-FROM maven:3.9.6-eclipse-temurin-25-alpine AS build
+# 1. Build mã nguồn bằng Maven và Java 21
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 # Copy file cấu hình Maven để tận dụng cache (giúp build nhanh hơn ở các lần sau)
@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # 2. Chạy ứng dụng với JRE gọn nhẹ
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Copy file JAR đã build từ giai đoạn 1 sang giai đoạn 2

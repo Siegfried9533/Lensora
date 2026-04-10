@@ -18,11 +18,16 @@ public class User {
     private String role;
     private int trustScore = 100; // Mặc định 100 điểm uy tín
 
+    // Default Constructor
+    public User() {
+    }
+
+    // Constructor
     public User(String userName, String password, String email, String role, int trustScore) {
         this.userName = userName;
         this.password = password;
         this.email = email;
-        this.role = role;
+        this.role = role; // user | admin
         this.trustScore = trustScore;
     }
 }
