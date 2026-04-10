@@ -26,11 +26,18 @@ public class RentalService {
     // Tạo đơn thuê mới
     public Rental createRental(Long customerId, Long cameraId, int days) {
         // Kiểm tra Camera có tồn tại không
+        if (cameraId == null) {
+            throw new RuntimeException("CAMERA_ID_REQUIRED");
+        }
         Camera camera = cameraRepo.findById(cameraId).orElseThrow(() -> new RuntimeException("CAMERA_NOT_FOUND"));
 
         // Kiểm tra Camera có sẵn sàng không
         if (camera.getStatus() != CameraStatus.AVAILABLE) {
             throw new RuntimeException("CAMERA_NOT_AVAILABLE");
+        }
+
+        if (customerId == null) {
+            throw new RuntimeException("CUSTOMER_ID_REQUIRED");
         }
 
         // Kiểm tra Khách hàng có tồn tại không (Không tự động tạo)
@@ -56,6 +63,9 @@ public class RentalService {
     // Trả máy
     @Transactional
     public Rental returnCamera(Long rentalId) {
+        if (rentalId == null) {
+            throw new RuntimeException("RENTAL_ID_REQUIRED");
+        }
         Rental rental = rentalRepo.findById(rentalId)
                 .orElseThrow(() -> new RuntimeException("RENTAL_NOT_FOUND"));
 
