@@ -11,9 +11,6 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
-    @Column(nullable = false)
     private String categoryName;
-
-    // type = 'PRODUCT' | 'ASSET';
-    private String type;
+    private String type; // type = 'PRODUCT' | 'ASSET';
 }

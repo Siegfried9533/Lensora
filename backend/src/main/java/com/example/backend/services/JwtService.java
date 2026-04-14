@@ -34,4 +34,18 @@ public class JwtService {
             return false;
         }
     }
+
+    public String extractUsername(String token) {
+        try {
+            Claims claims = Jwts.parser().verifyWith(secretKey).build().parseClaimsJws(token).getBody();
+            return claims.get("email", String.class);
+        } catch (JwtException e) {
+            return null;
+        }
+    }
+
+    public boolean isTokenValid(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
+        String email = extractUsername(token);
+        return (email != null && email.equals(userDetails.getUsername()) && validateToken(token));
+    }
 }

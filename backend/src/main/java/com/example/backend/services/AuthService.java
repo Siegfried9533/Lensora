@@ -28,7 +28,11 @@ public class AuthService {
         user.setUserName(request.username());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
-        user.setRole("user"); // default role
+        if (request.role() == null || request.role().isEmpty()) {
+            user.setRole("user"); // default role
+        } else {
+            user.setRole(request.role());
+        }
         user.setTrustScore(100); // default trust score
 
         userRepository.save(user);

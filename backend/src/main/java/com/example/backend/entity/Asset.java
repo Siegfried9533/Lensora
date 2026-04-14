@@ -11,21 +11,17 @@ public class Asset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long assetId;
 
-    @Column(nullable = false)
-    private Long categoryId;
+    @ManyToOne // Kết nối trực tiếp với bảng Category
+    @JoinColumn(name = "categoryId")
+    private Category category;
 
-    @Column(nullable = false)
     private String modelName;
-
-    @Column(nullable = false)
     private String brand;
+    private String description;
 
-    @Column(nullable = false)
-    private Double dailyRate;
+    private Double dailyRate; // Giá thuê theo ngày
+    private Double depositValue; // tiến cọc
 
-    @Column(nullable = false) // 'AVAILABLE' | 'RENTED' | 'MAINTENANCE';
-    private String status;
-
-    @Column(unique = true)
+    private String status; // 'AVAILABLE', 'RENTED', 'MAINTENANCE'
     private String serialNumber;
 }
