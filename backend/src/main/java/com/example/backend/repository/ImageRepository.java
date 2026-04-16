@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long> {
-    List<Image> findByEntityId(Long entityId, String type);
+    List<Image> findByEntityIdAndType(Long entityId, String type);
+    
 }

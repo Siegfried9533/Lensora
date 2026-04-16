@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "Users") // Trong JPA dùng @Table để đặt tên bảng
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id

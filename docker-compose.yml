@@ -10,7 +10,7 @@ services:
     ports:
       - "5433:5432" # Map port 5433 máy thật vào 5432 của container
     volumes:
-      - lensora_db_data:/var/lib/postgresql/data
+      - lensora_db_data:/var/lib/postgresql/data # Đảm bảo rằng dữ liệu được lưu trữ bền vững ngay cả khi container bị xóa
 
   backend:
     build: backend

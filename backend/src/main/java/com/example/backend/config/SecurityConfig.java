@@ -15,10 +15,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter)
-        throws Exception {
+            throws Exception {
         http.csrf(csrf -> csrf.disable()) // Tắt CSRF cho API
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Cho phép vào login/signup không cần token
+                        .requestMatchers("/api/assets").permitAll() // Cho phép truy cập vào các endpoint liên quan
+                                                                    // đến assets
+                        .requestMatchers("/api/assets/{id}").permitAll()
                         .anyRequest().authenticated() // Các cái khác phải có token
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

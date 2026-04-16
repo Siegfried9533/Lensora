@@ -19,11 +19,11 @@ public class Rental {
     private Long rentalId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Customer customer;
+    @JoinColumn(name = "userId")
+    private User user;
 
     @ManyToOne
-    @JoinColumn(name = "asset_id")
+    @JoinColumn(name = "assetId")
     private Asset asset;
 
     private LocalDate startDate;
