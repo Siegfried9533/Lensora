@@ -181,7 +181,8 @@ public class NotificationController {
 
             Notification.NotificationType notificationType = Notification.NotificationType.valueOf(type);
 
-            NotificationDTO.NotificationResponse notification = notificationService.createNotification(
+            // userDetails.getUsername() returns email, createNotification expects userId
+            NotificationDTO.NotificationResponse notification = notificationService.createNotificationForUser(
                     userDetails.getUsername(),
                     title,
                     message,
@@ -197,6 +198,22 @@ public class NotificationController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Failed to create test notification: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get system/broadcast notifications (public, no auth required)
+     * GET /api/notifications/system
+     */
+    @GetMapping("/system")
+    public ResponseEntity<ApiResponse> getSystemNotifications() {
+        try {
+            List<NotificationDTO.NotificationResponse> notifications =
+                    notificationService.getSystemNotifications();
+            return ResponseEntity.ok(ApiResponse.success(notifications));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Failed to get system notifications: " + e.getMessage()));
         }
     }
 }

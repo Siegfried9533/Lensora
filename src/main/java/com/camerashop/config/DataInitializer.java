@@ -4,6 +4,7 @@ import com.camerashop.entity.*;
 import com.camerashop.entity.User.Role;
 import com.camerashop.entity.Category.EntityType;
 import com.camerashop.entity.Asset.AssetStatus;
+import com.camerashop.entity.Notification.NotificationType;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -36,6 +37,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private AssetImageRepository assetImageRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public void run(String... args) {
@@ -153,6 +157,38 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             assetImageRepository.save(image);
         }
+
+        // Create seed notifications for test users
+        List<Notification> seedNotifications = Arrays.asList(
+                Notification.builder()
+                        .notificationId(java.util.UUID.randomUUID().toString())
+                        .user(testUser)
+                        .title("Welcome to Camera Shop!")
+                        .message("Thank you for joining Camera Shop! Browse our collection of premium cameras, lenses, and equipment. Feel free to explore and find the perfect gear for your needs.")
+                        .type(NotificationType.SYSTEM)
+                        .isRead(false)
+                        .isActionRequired(false)
+                        .build(),
+                Notification.builder()
+                        .notificationId(java.util.UUID.randomUUID().toString())
+                        .user(testUser)
+                        .title("New Arrivals: Leica M11")
+                        .message("Check out the latest Leica M11 digital rangefinder — now available in our shop! Classic design meets cutting-edge technology.")
+                        .type(NotificationType.PROMOTION)
+                        .isRead(false)
+                        .isActionRequired(false)
+                        .build(),
+                Notification.builder()
+                        .notificationId(java.util.UUID.randomUUID().toString())
+                        .user(adminUser)
+                        .title("Welcome to Camera Shop!")
+                        .message("Thank you for joining Camera Shop! As an admin, you can manage products, orders, and users from your dashboard.")
+                        .type(NotificationType.SYSTEM)
+                        .isRead(false)
+                        .isActionRequired(false)
+                        .build()
+        );
+        notificationRepository.saveAll(seedNotifications);
     }
 
     private Product createProduct(User user, Category category, String name, String brand, String desc, Long price, Integer stock) {

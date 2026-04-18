@@ -36,6 +36,9 @@ public class AuthService {
     @Autowired
     private EmailVerificationTokenService tokenService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public AuthResponse register(RegisterRequest request) {
         try {
             if (userRepository.existsByEmail(request.getEmail())) {
@@ -54,6 +57,13 @@ public class AuthService {
 
             userRepository.save(user);
             System.out.println("User saved: " + user.getEmail());
+
+            // Send welcome notification
+            try {
+                notificationService.createWelcomeNotification(user.getUserId());
+            } catch (Exception e) {
+                System.err.println("Failed to send welcome notification: " + e.getMessage());
+            }
 
             // Create verification token (fail-safe)
             EmailVerificationToken token = null;

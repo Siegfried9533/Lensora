@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -275,6 +276,63 @@ public class NotificationService {
         int deletedOld = notificationRepository.deleteOldReadNotifications(thirtyDaysAgo);
 
         System.out.println("Cleanup: deleted " + deletedExpired + " expired and " + deletedOld + " old read notifications");
+    }
+
+    /**
+     * Create notification for a user by email (resolves email to userId)
+     */
+    @Transactional
+    public NotificationDTO.NotificationResponse createNotificationForUser(
+            String email,
+            String title,
+            String message,
+            Notification.NotificationType type,
+            String referenceId,
+            Notification.ReferenceType referenceType,
+            Boolean isActionRequired,
+            String actionUrl
+    ) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return createNotification(
+                user.getUserId(),
+                title,
+                message,
+                type,
+                referenceId,
+                referenceType,
+                isActionRequired,
+                actionUrl
+        );
+    }
+
+    /**
+     * Get system/broadcast notifications (no auth required)
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationDTO.NotificationResponse> getSystemNotifications() {
+        List<Notification> notifications = notificationRepository.findByTypeInAndExpiresAtAfterOrExpiresAtIsNull(
+                Arrays.asList(Notification.NotificationType.SYSTEM, Notification.NotificationType.PROMOTION),
+                LocalDateTime.now()
+        );
+        return notifications.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    /**
+     * Create a welcome notification for a new user
+     */
+    @Transactional
+    public void createWelcomeNotification(String userId) {
+        createNotification(
+                userId,
+                "Welcome to Camera Shop!",
+                "Thank you for joining Camera Shop! Browse our collection of premium cameras, lenses, and equipment. Feel free to explore and find the perfect gear for your needs.",
+                Notification.NotificationType.SYSTEM,
+                null,
+                null,
+                false,
+                null
+        );
     }
 
     // Helper methods
