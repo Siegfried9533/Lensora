@@ -56,9 +56,9 @@ public class AuthService {
     }
 
     // get current user
-    public AuthResponse getCurrentUser(org.springframework.security.core.userdetails.UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+    public AuthResponse getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         return new AuthResponse(null, user.getUserId().toString(), user.getUserName(), user.getEmail(),
                 user.getRole());
