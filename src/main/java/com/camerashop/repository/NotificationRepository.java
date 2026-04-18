@@ -66,4 +66,13 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.isRead = true AND n.createdAt < :cutoffDate")
     int deleteOldReadNotifications(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+    /**
+     * Get system/promotion notifications that haven't expired
+     */
+    @Query("SELECT n FROM Notification n WHERE n.type IN :types AND (n.expiresAt IS NULL OR n.expiresAt > :now)")
+    List<Notification> findByTypeInAndExpiresAtAfterOrExpiresAtIsNull(
+            @Param("types") List<NotificationType> types,
+            @Param("now") LocalDateTime now
+    );
 }
