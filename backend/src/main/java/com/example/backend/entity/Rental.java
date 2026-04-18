@@ -29,7 +29,7 @@ public class Rental {
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate returnDate;
-    private Double depositFee;
+    private Double depositFee; // Tiền cọc
     private Double totalRentFee;
     private Double penaltyFee;
     private String status; // 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';

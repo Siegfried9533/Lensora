@@ -33,6 +33,7 @@ public class AssetService {
         asset.setModelName(request.getModelName());
         asset.setBrand(request.getBrand());
         asset.setDescription(request.getDescription());
+        asset.setPrice(request.getPrice());
         asset.setDailyRate(request.getDailyRate());
         asset.setDepositValue(request.getDepositValue());
         asset.setSerialNumber(request.getSerialNumber());
@@ -68,6 +69,7 @@ public class AssetService {
                 .modelName(asset.getModelName())
                 .brand(asset.getBrand())
                 .description(asset.getDescription())
+                .price(asset.getPrice())
                 .dailyRate(asset.getDailyRate())
                 .depositValue(asset.getDepositValue())
                 .status(asset.getStatus())
@@ -89,6 +91,7 @@ public class AssetService {
                     .modelName(asset.getModelName())
                     .brand(asset.getBrand())
                     .description(asset.getDescription())
+                    .price(asset.getPrice())
                     .dailyRate(asset.getDailyRate())
                     .depositValue(asset.getDepositValue())
                     .status(asset.getStatus())

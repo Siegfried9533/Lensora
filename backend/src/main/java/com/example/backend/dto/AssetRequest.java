@@ -13,6 +13,7 @@ public class AssetRequest {
     private String modelName;
     private String brand;
     private String description;
+    private Double price;
     private Double dailyRate;
     private Double depositValue;
     private String serialNumber;
