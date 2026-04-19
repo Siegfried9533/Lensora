@@ -23,16 +23,18 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    /**
-     * Get all notifications for current user (paginated)
-     * GET /api/notifications?page=0&size=20
-     */
+    private ResponseEntity<ApiResponse> unauthorized() {
+        return ResponseEntity.status(401)
+                .body(ApiResponse.error("Unauthorized - please login"));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse> getNotifications(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             Page<NotificationDTO.NotificationResponse> notifications =
                     notificationService.getUserNotifications(userDetails.getUsername(), page, size);
@@ -54,14 +56,11 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Get unread notifications for current user
-     * GET /api/notifications/unread
-     */
     @GetMapping("/unread")
     public ResponseEntity<ApiResponse> getUnreadNotifications(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             List<NotificationDTO.NotificationResponse> notifications =
                     notificationService.getUnreadNotifications(userDetails.getUsername());
@@ -74,14 +73,11 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Get unread notification count
-     * GET /api/notifications/unread/count
-     */
     @GetMapping("/unread/count")
     public ResponseEntity<ApiResponse> getUnreadCount(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             long count = notificationService.getUnreadCount(userDetails.getUsername());
 
@@ -96,15 +92,12 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Mark a notification as read
-     * POST /api/notifications/{id}/read
-     */
     @PostMapping("/{notificationId}/read")
     public ResponseEntity<ApiResponse> markAsRead(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String notificationId
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             NotificationDTO.NotificationResponse notification =
                     notificationService.markAsRead(notificationId, userDetails.getUsername());
@@ -120,14 +113,11 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Mark all notifications as read
-     * POST /api/notifications/read-all
-     */
     @PostMapping("/read-all")
     public ResponseEntity<ApiResponse> markAllAsRead(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             int count = notificationService.markAllAsRead(userDetails.getUsername());
 
@@ -142,15 +132,12 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Delete a notification
-     * DELETE /api/notifications/{id}
-     */
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<ApiResponse> deleteNotification(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String notificationId
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             notificationService.deleteNotification(notificationId, userDetails.getUsername());
 
@@ -165,15 +152,12 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Create a test notification (for development/testing)
-     * POST /api/notifications/test
-     */
     @PostMapping("/test")
     public ResponseEntity<ApiResponse> createTestNotification(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Map<String, String> body
     ) {
+        if (userDetails == null) return unauthorized();
         try {
             String type = body.getOrDefault("type", "SYSTEM");
             String title = body.getOrDefault("title", "Test Notification");
@@ -181,7 +165,6 @@ public class NotificationController {
 
             Notification.NotificationType notificationType = Notification.NotificationType.valueOf(type);
 
-            // userDetails.getUsername() returns email, createNotification expects userId
             NotificationDTO.NotificationResponse notification = notificationService.createNotificationForUser(
                     userDetails.getUsername(),
                     title,
@@ -201,10 +184,6 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Get system/broadcast notifications (public, no auth required)
-     * GET /api/notifications/system
-     */
     @GetMapping("/system")
     public ResponseEntity<ApiResponse> getSystemNotifications() {
         try {

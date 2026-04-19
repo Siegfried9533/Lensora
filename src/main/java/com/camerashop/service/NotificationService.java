@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -307,15 +308,21 @@ public class NotificationService {
     }
 
     /**
-     * Get system/broadcast notifications (no auth required)
+     * Get system/broadcast notifications (no auth required, limited to 10 most recent)
      */
     @Transactional(readOnly = true)
     public List<NotificationDTO.NotificationResponse> getSystemNotifications() {
         List<Notification> notifications = notificationRepository.findByTypeInAndExpiresAtAfterOrExpiresAtIsNull(
                 Arrays.asList(Notification.NotificationType.SYSTEM, Notification.NotificationType.PROMOTION),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))
         );
-        return notifications.stream().map(this::toResponse).collect(Collectors.toList());
+        // Deduplicate by title to avoid showing same broadcast for every user
+        Map<String, Notification> uniqueByTitle = new java.util.LinkedHashMap<>();
+        for (Notification n : notifications) {
+            uniqueByTitle.putIfAbsent(n.getTitle(), n);
+        }
+        return uniqueByTitle.values().stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     /**
