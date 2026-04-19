@@ -27,7 +27,7 @@ public class Notification {
     @Column(length = 36)
     private String notificationId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
