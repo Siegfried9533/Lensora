@@ -1,45 +1,65 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
 
 @Entity
-@Data
 @Table(name = "rentals")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Rental {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String rentalId;
 
-    // Thông tin về camera được thuê
-    @ManyToOne
-    @JoinColumn(name = "camera_id")
-    private Camera camera;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // Thong tin về khách hàng thuê camera
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "asset_id", nullable = false)
+    private Asset asset;
 
-    // Thông tin về ngày thuê và trả camera
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
+
     private LocalDate returnDate;
 
-    // Giá thuê
-    private Double totalRentAmount; // Tổng số tiền thuê
-    private Double depositAmount; // Số tiền đặt cọc
+    @Column(nullable = false)
+    private Long depositFee;
 
-    // Trạng thái của đơn thuê (PENDING, ACTIVE, COMPLETED, CANCELLED)
+    @Column(nullable = false)
+    private Long totalRentFee;
+
+    @Builder.Default
+    private Long penaltyFee = 0L;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private RentalStatus status; // Trạng thái của đơn thuê
+    @Builder.Default
+    private RentalStatus status = RentalStatus.PENDING;
+
+    private String shippingAddress;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    @Builder.Default
+    private Long shippingFee = 0L;
+
+    public enum RentalStatus {
+        PENDING, ACTIVE, COMPLETED, CANCELLED
+    }
+
+    public enum PaymentMethod {
+        COD, MoMo
+    }
 }
