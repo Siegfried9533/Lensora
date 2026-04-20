@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.example.backend.services.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.example.backend.dto.AuthResponse;
 import com.example.backend.dto.SignUpRequest;
+import com.example.backend.service.AuthService;
 import com.example.backend.dto.LoginRequest;
 
 @RestController
