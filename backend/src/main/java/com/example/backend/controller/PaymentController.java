@@ -13,9 +13,10 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,11 +49,25 @@ public class PaymentController {
      * POST /api/payment/momo/create
      */
     @PostMapping("/momo/create")
-    public ResponseEntity<ApiResponse> createMoMoPayment(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<ApiResponse> createMoMoPayment(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, Object> body) {
         try {
             String orderId = (String) body.get("orderId");
-            Long amount = ((Number) body.get("amount")).longValue();
-            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo") : "Thanh toan don hang: " + orderId;
+            Number amountNumber = (Number) body.get("amount");
+            if (orderId == null || orderId.isBlank() || amountNumber == null) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("orderId and amount are required"));
+            }
+
+            Long amount = amountNumber.longValue();
+            if (amount <= 0) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("amount must be greater than 0"));
+            }
+
+            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo")
+                    : "Thanh toan don hang: " + orderId;
             String requestType = body.get("requestType") != null ? (String) body.get("requestType") : "captureWallet";
 
             // Verify order exists
@@ -63,6 +78,16 @@ public class PaymentController {
             }
 
             Order order = orderOpt.get();
+
+            if (!isOrderOwnedByCurrentUser(order, userDetails.getUsername())) {
+                return ResponseEntity.status(403)
+                        .body(ApiResponse.error("Not authorized"));
+            }
+
+            if ("SUCCESS".equals(order.getPaymentStatus())) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("Order has already been paid"));
+            }
 
             // Calculate total amount (including shipping if applicable)
             long totalAmount = order.getTotalAmount();
@@ -104,10 +129,18 @@ public class PaymentController {
      * POST /api/payment/momo/create-rental
      */
     @PostMapping("/momo/create-rental")
-    public ResponseEntity<ApiResponse> createMoMoPaymentRental(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<ApiResponse> createMoMoPaymentRental(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, Object> body) {
         try {
             String rentalId = (String) body.get("rentalId");
-            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo") : "Thanh toan thue: " + rentalId;
+            if (rentalId == null || rentalId.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("rentalId is required"));
+            }
+
+            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo")
+                    : "Thanh toan thue: " + rentalId;
 
             // Verify rental exists
             Optional<Rental> rentalOpt = rentalRepository.findById(rentalId);
@@ -117,6 +150,12 @@ public class PaymentController {
             }
 
             Rental rental = rentalOpt.get();
+
+            if (!isRentalOwnedByCurrentUser(rental, userDetails.getUsername())) {
+                return ResponseEntity.status(403)
+                        .body(ApiResponse.error("Not authorized"));
+            }
+
             long totalAmount = rental.getTotalRentFee() + rental.getDepositFee();
 
             // Create MoMo payment URL
@@ -159,6 +198,19 @@ public class PaymentController {
             String amount = params.get("amount");
             String message = params.get("message");
 
+            if (orderId == null || orderId.isBlank() || transId == null || transId.isBlank()) {
+                response.put("errorCode", "99");
+                response.put("message", "Missing required IPN fields");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // MoMo may retry callbacks; return success when transaction already recorded.
+            if (paymentTransactionRepository.findByTransactionRef(transId).isPresent()) {
+                response.put("errorCode", "0");
+                response.put("message", "success");
+                return ResponseEntity.ok(response);
+            }
+
             // Parse amount
             long paymentAmount = 0;
             if (amount != null && !amount.isEmpty()) {
@@ -176,13 +228,23 @@ public class PaymentController {
                     .paymentMethod("MoMo")
                     .responseCode(errorCode)
                     .responseMessage(message)
-                    .status(isSuccess ? PaymentTransaction.PaymentStatus.SUCCESS : PaymentTransaction.PaymentStatus.FAILED)
+                    .status(isSuccess ? PaymentTransaction.PaymentStatus.SUCCESS
+                            : PaymentTransaction.PaymentStatus.FAILED)
                     .build();
 
             // Check if this is for an order or rental
             Optional<Order> orderOpt = orderRepository.findById(orderId);
             if (orderOpt.isPresent()) {
                 Order order = orderOpt.get();
+
+                long expectedAmount = order.getTotalAmount()
+                        + (order.getShippingFee() != null ? order.getShippingFee() : 0L);
+                if (paymentAmount != expectedAmount) {
+                    response.put("errorCode", "99");
+                    response.put("message", "Amount mismatch");
+                    return ResponseEntity.badRequest().body(response);
+                }
+
                 transaction.setOrder(order);
                 paymentTransactionRepository.save(transaction);
 
@@ -211,6 +273,14 @@ public class PaymentController {
                 Optional<Rental> rentalOpt = rentalRepository.findById(orderId);
                 if (rentalOpt.isPresent()) {
                     Rental rental = rentalOpt.get();
+
+                    long expectedAmount = rental.getTotalRentFee() + rental.getDepositFee();
+                    if (paymentAmount != expectedAmount) {
+                        response.put("errorCode", "99");
+                        response.put("message", "Amount mismatch");
+                        return ResponseEntity.badRequest().body(response);
+                    }
+
                     transaction.setRental(rental);
                     paymentTransactionRepository.save(transaction);
 
@@ -278,12 +348,26 @@ public class PaymentController {
      * GET /api/payment/status/{orderCode}
      */
     @GetMapping("/status/{orderCode}")
-    public ResponseEntity<ApiResponse> getPaymentStatus(@PathVariable String orderCode) {
+    public ResponseEntity<ApiResponse> getPaymentStatus(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String orderCode) {
         try {
-            Optional<PaymentTransaction> transactionOpt = paymentTransactionRepository.findByOrderCode(orderCode);
+            Optional<PaymentTransaction> transactionOpt = paymentTransactionRepository
+                    .findTopByOrderCodeOrderByCreatedAtDesc(orderCode);
 
             if (transactionOpt.isPresent()) {
                 PaymentTransaction transaction = transactionOpt.get();
+
+                if (transaction.getOrder() != null
+                        && !isOrderOwnedByCurrentUser(transaction.getOrder(), userDetails.getUsername())) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Not authorized"));
+                }
+
+                if (transaction.getRental() != null
+                        && !isRentalOwnedByCurrentUser(transaction.getRental(), userDetails.getUsername())) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Not authorized"));
+                }
+
                 Map<String, Object> result = new HashMap<>();
                 result.put("success", transaction.getStatus() == PaymentTransaction.PaymentStatus.SUCCESS);
                 result.put("message", transaction.getResponseMessage());
@@ -298,6 +382,11 @@ public class PaymentController {
             Optional<Order> orderOpt = orderRepository.findById(orderCode);
             if (orderOpt.isPresent()) {
                 Order order = orderOpt.get();
+
+                if (!isOrderOwnedByCurrentUser(order, userDetails.getUsername())) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Not authorized"));
+                }
+
                 Map<String, Object> result = new HashMap<>();
                 result.put("success", "SUCCESS".equals(order.getPaymentStatus()));
                 result.put("orderCode", orderCode);
@@ -323,7 +412,9 @@ public class PaymentController {
      * POST /api/payment/momo/query
      */
     @PostMapping("/momo/query")
-    public ResponseEntity<ApiResponse> queryMoMoTransaction(@RequestBody Map<String, String> body) {
+    public ResponseEntity<ApiResponse> queryMoMoTransaction(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> body) {
         try {
             String orderId = body.get("orderId");
             String requestId = body.get("requestId");
@@ -333,6 +424,16 @@ public class PaymentController {
                         .body(ApiResponse.error("orderId and requestId are required"));
             }
 
+            Optional<Order> orderOpt = orderRepository.findById(orderId);
+            if (orderOpt.isPresent() && !isOrderOwnedByCurrentUser(orderOpt.get(), userDetails.getUsername())) {
+                return ResponseEntity.status(403).body(ApiResponse.error("Not authorized"));
+            }
+
+            Optional<Rental> rentalOpt = rentalRepository.findById(orderId);
+            if (rentalOpt.isPresent() && !isRentalOwnedByCurrentUser(rentalOpt.get(), userDetails.getUsername())) {
+                return ResponseEntity.status(403).body(ApiResponse.error("Not authorized"));
+            }
+
             Map<String, Object> result = momoService.queryTransaction(orderId, requestId);
             return ResponseEntity.ok(ApiResponse.success(result));
 
@@ -340,6 +441,16 @@ public class PaymentController {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Failed to query transaction: " + e.getMessage()));
         }
+    }
+
+    private boolean isOrderOwnedByCurrentUser(Order order, String userEmail) {
+        return order.getUser() != null && order.getUser().getEmail() != null
+                && order.getUser().getEmail().equals(userEmail);
+    }
+
+    private boolean isRentalOwnedByCurrentUser(Rental rental, String userEmail) {
+        return rental.getUser() != null && rental.getUser().getEmail() != null
+                && rental.getUser().getEmail().equals(userEmail);
     }
 
     private void sendOrderConfirmationEmail(Order order) throws MessagingException {
@@ -369,7 +480,6 @@ public class PaymentController {
                 order.getOrderId(),
                 orderDetails.toString(),
                 (double) order.getTotalAmount(),
-                order.getPaymentStatus()
-        );
+                order.getPaymentStatus());
     }
 }

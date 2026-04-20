@@ -64,9 +64,9 @@ public class MoMoService {
     /**
      * Create MoMo payment URL
      *
-     * @param orderId Unique order ID from your system
-     * @param amount Amount in VND
-     * @param orderInfo Order description
+     * @param orderId     Unique order ID from your system
+     * @param amount      Amount in VND
+     * @param orderInfo   Order description
      * @param requestType Payment method type
      * @return MoMo payment URL
      */
@@ -102,11 +102,10 @@ public class MoMoService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    momoUrl + "/v2/gateway/api/create",
+                    buildApiUrl("create"),
                     HttpMethod.POST,
                     request,
-                    String.class
-            );
+                    String.class);
 
             // Parse response
             JsonNode jsonResponse = objectMapper.readTree(response.getBody());
@@ -218,7 +217,7 @@ public class MoMoService {
     /**
      * Query MoMo transaction status
      *
-     * @param orderId Order ID to query
+     * @param orderId   Order ID to query
      * @param requestId Unique request ID
      * @return Transaction status response
      */
@@ -234,9 +233,9 @@ public class MoMoService {
 
             // Generate signature
             String rawData = "partnerCode=" + partnerCode +
-                           "&accessKey=" + accessKey +
-                           "&requestId=" + requestId +
-                           "&orderId=" + orderId;
+                    "&accessKey=" + accessKey +
+                    "&requestId=" + requestId +
+                    "&orderId=" + orderId;
             String signature = hmacSHA256(secretKey, rawData);
             requestBody.put("signature", signature);
 
@@ -247,11 +246,10 @@ public class MoMoService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    momoUrl + "/v2/gateway/api/query",
+                    buildApiUrl("query"),
                     HttpMethod.POST,
                     request,
-                    String.class
-            );
+                    String.class);
 
             // Parse response
             JsonNode jsonResponse = objectMapper.readTree(response.getBody());
@@ -279,16 +277,17 @@ public class MoMoService {
     private String generateSignature(Map<String, Object> requestBody, String secretKey) {
         try {
             // Build raw signature string in EXACT order as MoMo docs
-            // Order: partnerCode|accessKey|requestId|amount|orderId|orderInfo|redirectUrl|ipnUrl|extraData
+            // Order:
+            // partnerCode|accessKey|requestId|amount|orderId|orderInfo|redirectUrl|ipnUrl|extraData
             String rawData = "partnerCode=" + requestBody.get("partnerCode") +
-                           "&accessKey=" + requestBody.get("accessKey") +
-                           "&requestId=" + requestBody.get("requestId") +
-                           "&amount=" + requestBody.get("amount") +
-                           "&orderId=" + requestBody.get("orderId") +
-                           "&orderInfo=" + requestBody.get("orderInfo") +
-                           "&redirectUrl=" + requestBody.get("redirectUrl") +
-                           "&ipnUrl=" + requestBody.get("ipnUrl") +
-                           "&extraData=" + requestBody.get("extraData");
+                    "&accessKey=" + requestBody.get("accessKey") +
+                    "&requestId=" + requestBody.get("requestId") +
+                    "&amount=" + requestBody.get("amount") +
+                    "&orderId=" + requestBody.get("orderId") +
+                    "&orderInfo=" + requestBody.get("orderInfo") +
+                    "&redirectUrl=" + requestBody.get("redirectUrl") +
+                    "&ipnUrl=" + requestBody.get("ipnUrl") +
+                    "&extraData=" + requestBody.get("extraData");
 
             return hmacSHA256(secretKey, rawData);
 
@@ -311,7 +310,8 @@ public class MoMoService {
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1)
+                    hexString.append('0');
                 hexString.append(hex);
             }
             return hexString.toString();
@@ -319,5 +319,23 @@ public class MoMoService {
         } catch (Exception e) {
             throw new RuntimeException("Error calculating HMAC SHA256", e);
         }
+    }
+
+    private String buildApiUrl(String action) {
+        String configuredUrl = momoUrl == null ? "" : momoUrl.trim();
+        String createPath = "/v2/gateway/api/create";
+        String queryPath = "/v2/gateway/api/query";
+
+        if (configuredUrl.endsWith(createPath)) {
+            configuredUrl = configuredUrl.substring(0, configuredUrl.length() - createPath.length());
+        } else if (configuredUrl.endsWith(queryPath)) {
+            configuredUrl = configuredUrl.substring(0, configuredUrl.length() - queryPath.length());
+        }
+
+        if (configuredUrl.endsWith("/")) {
+            configuredUrl = configuredUrl.substring(0, configuredUrl.length() - 1);
+        }
+
+        return configuredUrl + "/v2/gateway/api/" + action;
     }
 }
