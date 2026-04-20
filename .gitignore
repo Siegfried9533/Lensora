@@ -1,12 +1,26 @@
-# Java & Maven
+# Build output
 target/
+build/
 *.jar
 *.war
+*.class
 
 # IDE
 .idea/
 *.iml
 .vscode/
+.settings/
+.classpath
+.project
 
-# Docker rác
+# OS
 .DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.env.local
+
+# Logs
+*.log
+logs/
