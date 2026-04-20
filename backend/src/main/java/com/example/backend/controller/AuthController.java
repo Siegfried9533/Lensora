@@ -1,46 +1,78 @@
 package com.example.backend.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import com.example.backend.dto.AuthResponse;
-import com.example.backend.dto.SignUpRequest;
+import com.example.backend.dto.*;
 import com.example.backend.service.AuthService;
-import com.example.backend.dto.LoginRequest;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AuthController {
-    private final AuthService authService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignUpRequest request) {
-        AuthResponse response = authService.signup(request);
-        return ResponseEntity.ok(response);
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            AuthResponse response = authService.register(request);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse> login(@Valid @RequestBody AuthRequest request) {
+        try {
+            AuthResponse response = authService.login(request);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid email or password"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.error("Login failed: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/me")
-    public ResponseEntity<AuthResponse> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<ApiResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            UserDTO user = authService.getCurrentUser(userDetails.getUsername());
+            return ResponseEntity.ok(ApiResponse.success(user));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
+    }
 
-        AuthResponse response = authService.getCurrentUser(authentication.getName());
-        return ResponseEntity.ok(response);
+    @PutMapping("/avatar")
+    public ResponseEntity<ApiResponse> updateAvatar(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> body) {
+        try {
+            UserDTO user = authService.updateAvatar(userDetails.getUsername(), body.get("avatarUrl"));
+            return ResponseEntity.ok(ApiResponse.success(user));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> body) {
+        try {
+            authService.changePassword(userDetails.getUsername(), body.get("oldPassword"), body.get("newPassword"));
+            return ResponseEntity.ok(ApiResponse.success("Password changed successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 }

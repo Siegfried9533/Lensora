@@ -1,92 +1,75 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ProductRequest;
-import com.example.backend.dto.ProductResponse;
-import com.example.backend.entity.Category;
-import com.example.backend.entity.Image;
+import com.example.backend.dto.ProductDTO;
 import com.example.backend.entity.Product;
-import com.example.backend.repository.CategoryRepository;
-import com.example.backend.repository.ImageRepository;
+import com.example.backend.entity.ProductImage;
 import com.example.backend.repository.ProductRepository;
-import jakarta.transaction.Transactional;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.example.backend.repository.ProductImageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-@RequiredArgsConstructor
 public class ProductService {
-    private final ProductRepository productRepository;
-    private final ImageRepository imageRepository;
-    private final CategoryRepository categoryRepository;
 
-    @Transactional
-    public ProductResponse createProduct(ProductRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+    @Autowired
+    private ProductRepository productRepository;
 
-        Product product = new Product();
-        product.setCategory(category);
-        product.setProductName(request.getProductName());
-        product.setBrand(request.getBrand());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setStockQuantity(request.getStockQuantity());
+    @Autowired
+    private ProductImageRepository productImageRepository;
 
-        Product savedProduct = productRepository.save(product);
-
-        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-            for (String url : request.getImageUrls()) {
-                Image img = new Image();
-                img.setUrl(url);
-                img.setEntityId(savedProduct.getProductId());
-                img.setType("PRODUCT");
-                imageRepository.save(img);
-            }
-        }
-
-        return getProductById(savedProduct.getProductId());
+    public Page<ProductDTO> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable).map(this::toDTO);
     }
 
-    public ProductResponse getProductById(@NonNull Long id) {
+    public Page<ProductDTO> getProductsByCategory(String categoryId, Pageable pageable) {
+        return productRepository.findByCategoryId(categoryId, pageable).map(this::toDTO);
+    }
+
+    public Page<ProductDTO> searchProducts(String searchQuery, String categoryId, Pageable pageable) {
+        return productRepository.searchProducts(searchQuery, categoryId, pageable).map(this::toDTO);
+    }
+
+    public ProductDTO getProductById(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Khong tim thay san pham voi ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        return toDTO(product);
+    }
 
-        List<String> imageUrls = imageRepository.findByEntityIdAndType(id, "PRODUCT")
-                .stream()
-                .map(Image::getUrl)
-                .toList();
+    public List<ProductDTO> getProductsByUser(String userId) {
+        return productRepository.findByUserId(userId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
 
-        return ProductResponse.builder()
+    private ProductDTO toDTO(Product product) {
+        List<ProductImage> images = productImageRepository.findByProductId(product.getProductId());
+        String primaryImageUrl = images.stream()
+                .filter(ProductImage::getIsPrimary)
+                .findFirst()
+                .map(ProductImage::getUrl)
+                .orElse("https://via.placeholder.com/800");
+
+        List<String> imageUrls = images.stream()
+                .map(ProductImage::getUrl)
+                .collect(Collectors.toList());
+
+        return ProductDTO.builder()
                 .productId(product.getProductId())
+                .categoryId(product.getCategory().getCategoryId())
                 .categoryName(product.getCategory().getCategoryName())
+                .userId(product.getUser().getUserId())
                 .productName(product.getProductName())
                 .brand(product.getBrand())
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .imageUrls(imageUrls)
+                .primaryImageUrl(primaryImageUrl)
                 .build();
-    }
-
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream().map(product -> {
-            List<String> imageUrls = imageRepository.findByEntityIdAndType(product.getProductId(), "PRODUCT")
-                    .stream()
-                    .map(Image::getUrl)
-                    .toList();
-
-            return ProductResponse.builder()
-                    .productId(product.getProductId())
-                    .categoryName(product.getCategory().getCategoryName())
-                    .productName(product.getProductName())
-                    .brand(product.getBrand())
-                    .description(product.getDescription())
-                    .price(product.getPrice())
-                    .stockQuantity(product.getStockQuantity())
-                    .imageUrls(imageUrls)
-                    .build();
-        }).toList();
     }
 }

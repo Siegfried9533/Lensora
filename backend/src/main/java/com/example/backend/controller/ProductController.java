@@ -1,39 +1,60 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ProductRequest;
-import com.example.backend.dto.ProductResponse;
+import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.ProductDTO;
 import com.example.backend.service.ProductService;
-
-import java.util.List;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/products")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ProductController {
-    private final ProductService productService;
+
+    @Autowired
+    private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<ApiResponse> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductDTO> products = productService.getAllProducts(pageable);
+        return ResponseEntity.ok(ApiResponse.success(products));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse> searchProducts(
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductDTO> products = productService.searchProducts(searchQuery, categoryId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(products));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    public ResponseEntity<ApiResponse> getProductById(@PathVariable String id) {
+        try {
+            ProductDTO product = productService.getProductById(id);
+            return ResponseEntity.ok(ApiResponse.success(product));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
-        return ResponseEntity.ok(productService.createProduct(request));
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ApiResponse> getProductsByCategory(
+            @PathVariable String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductDTO> products = productService.getProductsByCategory(categoryId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(products));
     }
 }

@@ -1,36 +1,65 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-import lombok.Data;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Rentals")
-@Data
+@Table(name = "rentals")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Rental {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long rentalId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String rentalId;
 
-    @ManyToOne
-    @JoinColumn(name = "userId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "assetId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
 
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
+
     private LocalDate returnDate;
-    private Double depositFee; // Tiền cọc
-    private Double totalRentFee;
-    private Double penaltyFee;
-    private String status; // 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+
+    @Column(nullable = false)
+    private Long depositFee;
+
+    @Column(nullable = false)
+    private Long totalRentFee;
+
+    @Builder.Default
+    private Long penaltyFee = 0L;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private RentalStatus status = RentalStatus.PENDING;
+
+    private String shippingAddress;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    @Builder.Default
+    private Long shippingFee = 0L;
+
+    public enum RentalStatus {
+        PENDING, ACTIVE, COMPLETED, CANCELLED
+    }
+
+    public enum PaymentMethod {
+        COD, MoMo
+    }
 }

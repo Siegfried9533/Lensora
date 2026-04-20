@@ -1,67 +1,261 @@
 package com.example.backend.service;
 
-import lombok.RequiredArgsConstructor;
+import com.example.backend.dto.*;
+import com.example.backend.entity.EmailVerificationToken;
+import com.example.backend.entity.User;
+import com.example.backend.entity.User.Role;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.util.JwtUtil;
+import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.example.backend.entity.User;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.dto.AuthResponse;
-import com.example.backend.dto.SignUpRequest;
-import com.example.backend.dto.LoginRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
 public class AuthService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
 
-    // AuthResponse
-    // SignUpRequest
-    public AuthResponse signup(SignUpRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email already exists!");
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private EmailVerificationTokenService tokenService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    public AuthResponse register(RegisterRequest request) {
+        try {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Email already registered");
+            }
+
+            User user = User.builder()
+                    .userName(request.getUserName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(Role.USER)
+                    .trustScore(100)
+                    .emailVerified(false)
+                    .provider("local")
+                    .build();
+
+            userRepository.save(user);
+            System.out.println("User saved: " + user.getEmail());
+
+            // Send welcome notification
+            try {
+                notificationService.createWelcomeNotification(user.getUserId());
+            } catch (Exception e) {
+                System.err.println("Failed to send welcome notification: " + e.getMessage());
+            }
+
+            // Create verification token (fail-safe)
+            EmailVerificationToken token = null;
+            try {
+                token = tokenService.createVerificationToken(user);
+                System.out.println("Verification token created: " + token.getToken());
+            } catch (Exception e) {
+                System.err.println("Failed to create verification token: " + e.getMessage());
+            }
+
+            // Send verification email (fail-safe - don't fail registration if email fails)
+            if (token != null) {
+                try {
+                    emailService.sendEmailVerification(user.getEmail(), user.getUserName(), token.getToken());
+                    System.out.println("Verification email sent");
+                } catch (Exception e) {
+                    // Log error but don't fail registration - email service might not be configured
+                    System.err.println("Failed to send verification email (this is OK for development): " + e.getMessage());
+                }
+            }
+
+            // Generate JWT token directly using email as subject
+            var userDetails = new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    user.getPassword(),
+                    java.util.Collections.singletonList(
+                            new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                    )
+            );
+            System.out.println("UserDetails created: " + userDetails.getUsername());
+
+            String jwtToken = jwtUtil.generateToken(userDetails);
+            System.out.println("JWT token generated successfully");
+
+            return AuthResponse.builder()
+                    .token(jwtToken)
+                    .email(user.getEmail())
+                    .userName(user.getUserName())
+                    .role(user.getRole().name())
+                    .userId(user.getUserId())
+                    .emailVerified(false)
+                    .message("Registration successful. Please check your email to verify your account.")
+                    .build();
+        } catch (Exception e) {
+            System.err.println("Registration error: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Registration failed: " + e.getMessage(), e);
         }
+    }
 
-        User user = new User();
-        user.setUserName(request.username());
-        user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
-        if (request.role() == null || request.role().isEmpty()) {
-            user.setRole("user"); // default role
+    @Transactional
+    public AuthResponse registerOAuthUser(String email, String name, String provider, String providerId) {
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            // Create new user
+            user = User.builder()
+                    .userName(name)
+                    .email(email)
+                    .password(null) // No password for OAuth users
+                    .role(Role.USER)
+                    .trustScore(100)
+                    .emailVerified(true) // OAuth emails are pre-verified
+                    .provider(provider)
+                    .providerId(providerId)
+                    .build();
+            userRepository.save(user);
         } else {
-            user.setRole(request.role());
-        }
-        user.setTrustScore(100); // default trust score
-
-        userRepository.save(user);
-        String token = jwtService.generateToken(user);
-        return new AuthResponse(token, user.getUserId().toString(), user.getUserName(), user.getEmail(),
-                user.getRole());
-    }
-
-    // login request
-    public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + request.email()));
-
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid password!");
+            // Update existing user with OAuth info
+            user.setProvider(provider);
+            user.setProviderId(providerId);
+            user.setEmailVerified(true);
+            userRepository.save(user);
         }
 
-        String token = jwtService.generateToken(user);
-        return new AuthResponse(token, user.getUserId().toString(), user.getUserName(), user.getEmail(),
-                user.getRole());
+        String token = jwtUtil.generateToken(
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password("")
+                        .roles(user.getRole().name())
+                        .build()
+        );
+
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .userName(user.getUserName())
+                .role(user.getRole().name())
+                .userId(user.getUserId())
+                .emailVerified(true)
+                .build();
     }
 
-    // get current user
-    public AuthResponse getCurrentUser(String email) {
+    public void verifyEmail(String token) {
+        EmailVerificationToken verificationToken = tokenService.getVerificationToken(token);
+
+        if (verificationToken == null) {
+            throw new RuntimeException("Invalid verification token");
+        }
+
+        if (tokenService.isTokenExpired(verificationToken)) {
+            throw new RuntimeException("Verification token has expired");
+        }
+
+        if (verificationToken.isUsed()) {
+            throw new RuntimeException("Token has already been used");
+        }
+
+        tokenService.confirmVerification(verificationToken);
+    }
+
+    public void resendVerificationEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new AuthResponse(null, user.getUserId().toString(), user.getUserName(), user.getEmail(),
-                user.getRole());
+        if (user.isEmailVerified()) {
+            throw new RuntimeException("Email is already verified");
+        }
+
+        EmailVerificationToken token = tokenService.createVerificationToken(user);
+        try {
+            emailService.sendEmailVerification(user.getEmail(), user.getUserName(), token.getToken());
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send verification email", e);
+        }
     }
 
+    public AuthResponse login(AuthRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        String token = jwtUtil.generateToken(
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password(user.getPassword())
+                        .roles(user.getRole().name())
+                        .build()
+        );
+
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .userName(user.getUserName())
+                .role(user.getRole().name())
+                .userId(user.getUserId())
+                .build();
+    }
+
+    public UserDTO getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return UserDTO.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .role(user.getRole().name())
+                .trustScore(user.getTrustScore())
+                .build();
+    }
+
+    public UserDTO updateAvatar(String email, String avatarUrl) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+
+        return UserDTO.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .role(user.getRole().name())
+                .trustScore(user.getTrustScore())
+                .build();
+    }
+
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }

@@ -1,139 +1,244 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.RentalRequest;
-import com.example.backend.dto.RentalResponse;
-import com.example.backend.entity.Asset;
-import com.example.backend.entity.Image;
-import com.example.backend.entity.Rental;
-import com.example.backend.entity.User;
-import com.example.backend.repository.AssetRepository;
-import com.example.backend.repository.ImageRepository;
-import com.example.backend.repository.RentalRepository;
-import com.example.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import com.example.backend.dto.RentalDTO;
+import com.example.backend.entity.*;
+import com.example.backend.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class RentalService {
-        private final RentalRepository rentalRepository;
-        private final UserRepository userRepository;
-        private final AssetRepository assetRepository;
-        private final ImageRepository imageRepository;
 
-        // Tạo đơn thuê mới
-        @Transactional
-        public RentalResponse createRental(RentalRequest request, String userEmail) {
-                // Lấy user theo email trong JWT để tránh giả mạo userId ở request body.
-                User user = userRepository.findByEmail(userEmail)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+    @Autowired
+    private RentalRepository rentalRepository;
 
-                // Kiểm tra asset hợp lệ
-                Asset asset = assetRepository.findById(request.getAssetId())
-                                .orElseThrow(() -> new RuntimeException("Asset not found"));
+    @Autowired
+    private UserRepository userRepository;
 
-                // kiểm tra trùng lịch
-                List<Rental> conflictingRentals = rentalRepository.findConflictingRentals(
-                                request.getAssetId(),
-                                request.getStartDate(),
-                                request.getEndDate());
+    @Autowired
+    private AssetRepository assetRepository;
 
-                if (!conflictingRentals.isEmpty()) {
-                        throw new RuntimeException("Asset is already rented for the selected dates");
-                }
+    @Autowired
+    private AssetImageRepository assetImageRepository;
 
-                // tính chi phí
-                Double depositFee = asset.getDepositValue();
-                long rentalDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
-                Double totalRentFee = rentalDays * asset.getDailyRate();
-                Double penaltyFee = 0.0; // phí phạt sẽ tính khi trả muộn
+    @Autowired
+    private NotificationService notificationService;
 
-                // tạo đơn thuê
-                Rental rental = new Rental();
-                rental.setUser(user);
-                rental.setAsset(asset);
-                rental.setStartDate(request.getStartDate());
-                rental.setEndDate(request.getEndDate());
-                rental.setDepositFee(depositFee);
-                rental.setTotalRentFee(totalRentFee);
-                rental.setPenaltyFee(penaltyFee);
-                rental.setStatus("PENDING");
-                Rental savedRental = rentalRepository.save(rental);
-
-                return mapToResponse(savedRental);
+    /**
+     * Check if an asset is available for the given date range
+     */
+    public boolean isAssetAvailable(String assetId, LocalDate startDate, LocalDate endDate) {
+        // Check if asset exists and is available
+        Asset asset = assetRepository.findById(assetId).orElse(null);
+        if (asset == null || asset.getStatus() != Asset.AssetStatus.AVAILABLE) {
+            return false;
         }
 
-        // Trả tài sản
-        @Transactional
-        public RentalResponse returnAsset(Long rentalId, String userEmail) {
-                Rental rental = rentalRepository.findById(rentalId)
-                                .orElseThrow(() -> new RuntimeException("Rental not found"));
+        // Check for overlapping rentals
+        List<Rental> existingRentals = rentalRepository.findByAssetId(assetId);
+        for (Rental rental : existingRentals) {
+            // Skip cancelled or completed rentals
+            if (rental.getStatus() == Rental.RentalStatus.CANCELLED ||
+                rental.getStatus() == Rental.RentalStatus.COMPLETED) {
+                continue;
+            }
 
-                if (!rental.getUser().getEmail().equals(userEmail)) {
-                        throw new RuntimeException("You can only return your own rentals");
-                }
-
-                if (!"ACTIVE".equals(rental.getStatus())) {
-                        throw new RuntimeException("This rental is already completed or cancelled");
-                }
-
-                // cập nhật ngày trả và trạng thái
-                LocalDate now = LocalDate.now();
-                rental.setReturnDate(now);
-                rental.setStatus("COMPLETED");
-
-                // cập nhật trạng thái Asset về AVAILABLE
-                Asset asset = rental.getAsset();
-                asset.setStatus("AVAILABLE");
-
-                // tính số ngày trễ hạng
-                long daysLate = ChronoUnit.DAYS.between(rental.getEndDate(), now);
-                if (daysLate > 0) {
-                        Double penaltyFee = daysLate * rental.getAsset().getDailyRate() * 1.5; // phí phạt 150% giá thuê
-                        rental.setPenaltyFee(penaltyFee);
-                        rentalRepository.save(rental);
-                }
-                // lưu rental với ngày trả và trạng thái mới
-                return mapToResponse(rental);
+            // Check for date overlap
+            boolean overlaps = !(endDate.isBefore(rental.getStartDate()) ||
+                                startDate.isAfter(rental.getEndDate()));
+            if (overlaps) {
+                return false;
+            }
         }
 
-        // Lấy lịch sử thuê của một người dùng
-        public List<RentalResponse> getUserRentalHistory(String userEmail) {
-                User user = userRepository.findByEmail(userEmail)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+        return true;
+    }
 
-                return rentalRepository.findByUserUserIdOrderByStartDateDesc(user.getUserId())
-                                .stream()
-                                .map(this::mapToResponse)
-                                .toList();
+    @Transactional
+    public RentalDTO createRental(String email, String assetId, LocalDate startDate, LocalDate endDate,
+                                   String shippingAddress, String paymentMethod, Long shippingFee) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new RuntimeException("Asset not found"));
+
+        if (asset.getStatus() != Asset.AssetStatus.AVAILABLE) {
+            throw new RuntimeException("Asset is not available for rent");
         }
 
-        private RentalResponse mapToResponse(Rental rental) {
-                // Lấy ảnh đại diện (Primary) để hiện lên đơn hàng cho đẹp
-                String primaryImg = imageRepository.findByEntityIdAndType(rental.getAsset().getAssetId(), "ASSET")
-                                .stream()
-                                .filter(Image::getIsPrimary)
-                                .map(Image::getUrl)
-                                .findFirst()
-                                .orElse(null);
-
-                return RentalResponse.builder()
-                                .rentalId(rental.getRentalId())
-                                .userName(rental.getUser().getUserName())
-                                .email(rental.getUser().getEmail())
-                                .assetId(rental.getAsset().getAssetId())
-                                .modelName(rental.getAsset().getModelName())
-                                .brand(rental.getAsset().getBrand())
-                                .primaryImageUrl(primaryImg)
-                                .startDate(rental.getStartDate())
-                                .endDate(rental.getEndDate())
-                                .depositFee(rental.getDepositFee())
-                                .totalRentFee(rental.getTotalRentFee())
-                                .status(rental.getStatus())
-                                .build();
+        // Check availability for the date range
+        if (!isAssetAvailable(assetId, startDate, endDate)) {
+            throw new RuntimeException("Asset is not available for the selected dates");
         }
+
+        long days = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+        if (days <= 0) {
+            throw new RuntimeException("End date must be after start date");
+        }
+
+        // Calculate fees
+        long totalRentFee = asset.getDailyRate() * days;
+        long depositFee = asset.getDailyRate() * 3; // 3 days deposit
+
+        Rental.PaymentMethod paymentMethodEnum = Rental.PaymentMethod.valueOf(paymentMethod);
+
+        Rental rental = Rental.builder()
+                .user(user)
+                .asset(asset)
+                .startDate(startDate)
+                .endDate(endDate)
+                .depositFee(depositFee)
+                .totalRentFee(totalRentFee)
+                .penaltyFee(0L)
+                .status(Rental.RentalStatus.PENDING)
+                .shippingAddress(shippingAddress)
+                .paymentMethod(paymentMethodEnum)
+                .shippingFee(shippingFee)
+                .build();
+
+        rentalRepository.save(rental);
+
+        return toDTO(rental);
+    }
+
+    /**
+     * Extend a rental period
+     */
+    @Transactional
+    public RentalDTO extendRental(String rentalId, LocalDate newEndDate) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new RuntimeException("Rental not found"));
+
+        if (rental.getStatus() != Rental.RentalStatus.ACTIVE &&
+            rental.getStatus() != Rental.RentalStatus.PENDING) {
+            throw new RuntimeException("Cannot extend rental with status: " + rental.getStatus());
+        }
+
+        if (newEndDate.isBefore(rental.getEndDate())) {
+            throw new RuntimeException("New end date must be after current end date");
+        }
+
+        long additionalDays = java.time.temporal.ChronoUnit.DAYS.between(rental.getEndDate(), newEndDate);
+        long additionalFee = rental.getAsset().getDailyRate() * additionalDays;
+
+        rental.setEndDate(newEndDate);
+        rental.setTotalRentFee(rental.getTotalRentFee() + additionalFee);
+
+        rentalRepository.save(rental);
+
+        return toDTO(rental);
+    }
+
+    /**
+     * Process rental return
+     */
+    @Transactional
+    public RentalDTO returnRental(String rentalId, LocalDate returnDate) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new RuntimeException("Rental not found"));
+
+        if (rental.getStatus() == Rental.RentalStatus.COMPLETED) {
+            throw new RuntimeException("Rental already completed");
+        }
+
+        rental.setReturnDate(returnDate);
+
+        // Calculate penalty if late
+        if (returnDate.isAfter(rental.getEndDate())) {
+            long lateDays = java.time.temporal.ChronoUnit.DAYS.between(rental.getEndDate(), returnDate);
+            long penaltyRate = rental.getAsset().getDailyRate() * 2; // 2x daily rate for late penalty
+            rental.setPenaltyFee(penaltyRate * lateDays);
+
+            // Send overdue notification
+            try {
+                notificationService.notifyRentalOverdue(rental, lateDays);
+            } catch (Exception e) {
+                System.err.println("Failed to send overdue notification: " + e.getMessage());
+            }
+        }
+
+        rental.setStatus(Rental.RentalStatus.COMPLETED);
+
+        // Update asset status back to available
+        Asset asset = rental.getAsset();
+        asset.setStatus(Asset.AssetStatus.AVAILABLE);
+        assetRepository.save(asset);
+
+        rentalRepository.save(rental);
+
+        return toDTO(rental);
+    }
+
+    /**
+     * Calculate rental price without creating a rental
+     */
+    public Map<String, Object> calculateRentalPrice(String assetId, LocalDate startDate, LocalDate endDate) {
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new RuntimeException("Asset not found"));
+
+        long days = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+        if (days <= 0) {
+            throw new RuntimeException("End date must be after start date");
+        }
+
+        long totalRentFee = asset.getDailyRate() * days;
+        long depositFee = asset.getDailyRate() * 3;
+
+        return Map.of(
+                "dailyRate", asset.getDailyRate(),
+                "days", days,
+                "totalRentFee", totalRentFee,
+                "depositFee", depositFee,
+                "total", totalRentFee + depositFee
+        );
+    }
+
+    public List<RentalDTO> getRentalsByUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return rentalRepository.findByUserId(user.getUserId(), org.springframework.data.domain.PageRequest.of(0, 100))
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public RentalDTO getRentalById(String rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new RuntimeException("Rental not found"));
+        return toDTO(rental);
+    }
+
+    private RentalDTO toDTO(Rental rental) {
+        String primaryImageUrl = null;
+        AssetImage img = assetImageRepository.findByAssetIdAndIsPrimaryTrue(rental.getAsset().getAssetId());
+        if (img != null) {
+            primaryImageUrl = img.getUrl();
+        }
+
+        return RentalDTO.builder()
+                .rentalId(rental.getRentalId())
+                .userId(rental.getUser().getUserId())
+                .assetId(rental.getAsset().getAssetId())
+                .assetName(rental.getAsset().getModelName())
+                .assetBrand(rental.getAsset().getBrand())
+                .primaryImageUrl(primaryImageUrl)
+                .startDate(rental.getStartDate())
+                .endDate(rental.getEndDate())
+                .returnDate(rental.getReturnDate())
+                .depositFee(rental.getDepositFee())
+                .totalRentFee(rental.getTotalRentFee())
+                .penaltyFee(rental.getPenaltyFee())
+                .status(rental.getStatus().name())
+                .shippingAddress(rental.getShippingAddress())
+                .paymentMethod(rental.getPaymentMethod() != null ? rental.getPaymentMethod().name() : null)
+                .shippingFee(rental.getShippingFee())
+                .build();
+    }
 }
