@@ -1,42 +1,65 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Data
+@Table(name = "assets")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Assets")
+@Builder
 public class Asset {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long assetId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String assetId;
 
-    @ManyToOne // Kết nối trực tiếp với bảng Category
-    @JoinColumn(name = "categoryId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false)
     private String modelName;
+
+    @Column(nullable = false)
     private String brand;
-    private String description;
 
-    // thêm thuộc tính mới Price - giá trị gốc của tài sản cho thuê phục vụ tính
-    // toán giá cọc
-    private Double price;
-    private Double dailyRate; // Giá thuê theo ngày
-    private Double depositValue; // tiến cọc
+    @Column(nullable = false)
+    private Long dailyRate;
 
-    private String status; // 'AVAILABLE', 'RENTED', 'MAINTENANCE'
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private AssetStatus status = AssetStatus.AVAILABLE;
+
+    @Column(nullable = false, unique = true)
     private String serialNumber;
 
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
     @PrePersist
-    @PreUpdate
-    public void calculateDeposit() {
-        if (this.depositValue == null) { // nếu chưa có giá trị cọc, tự động tính dựa trên giá gốc
-            this.depositValue = this.price * 0.3; // Cọc 30% giá trị tài sản
-        }
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<AssetImage> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Rental> rentals = new ArrayList<>();
+
+    public enum AssetStatus {
+        AVAILABLE, RENTED, MAINTENANCE
     }
 }

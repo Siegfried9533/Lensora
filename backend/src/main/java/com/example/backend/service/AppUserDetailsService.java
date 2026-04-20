@@ -1,7 +1,5 @@
 package com.example.backend.service;
 
-import java.util.Locale;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +21,7 @@ public class AppUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        String role = user.getRole() == null ? "USER" : user.getRole().toUpperCase(Locale.ROOT);
+        String role = user.getRole() == null ? "USER" : user.getRole().name();
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

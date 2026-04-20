@@ -1,9 +1,18 @@
 package com.example.backend.dto;
 
-public record AuthResponse(
-        String token,
-        String userId,
-        String username,
-        String email,
-        String role) {
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AuthResponse {
+    private String token;
+    private String email;
+    private String userName;
+    private String role;
+    private String userId;
+    private boolean emailVerified;
+    private String message;
 }

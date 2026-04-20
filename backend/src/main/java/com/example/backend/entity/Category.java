@@ -1,16 +1,28 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
-@Data
-@Table(name = "Categories")
+@Table(name = "categories")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Category {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    @Column(nullable = false, unique = true)
+    private String categoryId;
 
+    @Column(nullable = false)
     private String categoryName;
-    private String type; // type = 'PRODUCT' | 'ASSET';
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EntityType type;
+
+    public enum EntityType {
+        PRODUCT, ASSET
+    }
 }

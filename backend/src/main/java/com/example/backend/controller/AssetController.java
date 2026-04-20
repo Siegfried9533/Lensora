@@ -1,44 +1,61 @@
 package com.example.backend.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.backend.dto.AssetRequest;
-import com.example.backend.dto.AssetResponse;
+import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.AssetDTO;
 import com.example.backend.service.AssetService;
-
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/assets")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AssetController {
-    private final AssetService assetService;
 
-    // xem danh sách máy đang rảnh
+    @Autowired
+    private AssetService assetService;
+
     @GetMapping
-    public ResponseEntity<List<AssetResponse>> getAvailableAssets() {
-        return ResponseEntity.ok(assetService.getAllAvailableAssets());
+    public ResponseEntity<ApiResponse> getAllAssets(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AssetDTO> assets = assetService.getAllAssets(pageable);
+        return ResponseEntity.ok(ApiResponse.success(assets));
     }
 
-    // lấy chi tiết 1 máy
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse> searchAssets(
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AssetDTO> assets = assetService.searchAssets(searchQuery, categoryId, status, pageable);
+        return ResponseEntity.ok(ApiResponse.success(assets));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<AssetResponse> getAsset(@PathVariable Long id) {
-        return ResponseEntity.ok(assetService.getAssetById(id));
+    public ResponseEntity<ApiResponse> getAssetById(@PathVariable String id) {
+        try {
+            AssetDTO asset = assetService.getAssetById(id);
+            return ResponseEntity.ok(ApiResponse.success(asset));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
-    // Admin thêm máy mới
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AssetResponse> createAsset(@RequestBody AssetRequest request) {
-        return ResponseEntity.ok(assetService.createAsset(request));
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ApiResponse> getAssetsByCategory(
+            @PathVariable String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AssetDTO> assets = assetService.getAssetsByCategory(categoryId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(assets));
     }
 }

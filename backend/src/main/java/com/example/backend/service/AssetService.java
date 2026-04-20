@@ -1,103 +1,76 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.AssetRequest;
-import com.example.backend.dto.AssetResponse;
+import com.example.backend.dto.AssetDTO;
 import com.example.backend.entity.Asset;
+import com.example.backend.entity.AssetImage;
 import com.example.backend.repository.AssetRepository;
-import com.example.backend.repository.CategoryRepository;
-import com.example.backend.repository.ImageRepository;
-import jakarta.transaction.Transactional;
-import com.example.backend.entity.Category;
-import com.example.backend.entity.Image;
-import lombok.RequiredArgsConstructor;
-import lombok.NonNull;
+import com.example.backend.repository.AssetImageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class AssetService {
-    private final AssetRepository assetRepository;
-    private final ImageRepository imageRepository;
-    private final CategoryRepository categoryRepository;
 
-    @Transactional
-    public AssetResponse createAsset(AssetRequest request) {
-        // tìm category
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+    @Autowired
+    private AssetRepository assetRepository;
 
-        // lưu asset
-        Asset asset = new Asset();
-        asset.setCategory(category);
-        asset.setModelName(request.getModelName());
-        asset.setBrand(request.getBrand());
-        asset.setDescription(request.getDescription());
-        asset.setPrice(request.getPrice());
-        asset.setDailyRate(request.getDailyRate());
-        asset.setDepositValue(request.getDepositValue());
-        asset.setSerialNumber(request.getSerialNumber());
-        asset.setStatus("AVAILABLE"); // Mặc định khi tạo mới sẽ là AVAILABLE
+    @Autowired
+    private AssetImageRepository assetImageRepository;
 
-        Asset savedAsset = assetRepository.save(asset);
-
-        // lưu image
-        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-            for (String url : request.getImageUrls()) {
-                Image img = new Image();
-                img.setUrl(url);
-                img.setEntityId(savedAsset.getAssetId());
-                img.setType("ASSET"); // Đánh dấu đây là ảnh của Asset
-                imageRepository.save(img);
-            }
-        }
-        return getAssetById(savedAsset.getAssetId());
+    public Page<AssetDTO> getAllAssets(Pageable pageable) {
+        return assetRepository.findAll(pageable).map(this::toDTO);
     }
 
-    public AssetResponse getAssetById(@NonNull Long id) {
+    public Page<AssetDTO> getAssetsByCategory(String categoryId, Pageable pageable) {
+        return assetRepository.findByCategoryId(categoryId, pageable).map(this::toDTO);
+    }
+
+    public Page<AssetDTO> searchAssets(String searchQuery, String categoryId, String status, Pageable pageable) {
+        Asset.AssetStatus assetStatus = status != null ? Asset.AssetStatus.valueOf(status) : null;
+        return assetRepository.searchAssets(searchQuery, categoryId, assetStatus, pageable).map(this::toDTO);
+    }
+
+    public AssetDTO getAssetById(String id) {
         Asset asset = assetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài sản với ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Asset not found"));
+        return toDTO(asset);
+    }
 
-        // 2. Lấy danh sách ảnh từ bảng Images dựa trên ID và loại là ASSET
-        List<String> imageUrls = imageRepository.findByEntityIdAndType(id, "ASSET")
-                .stream()
-                .map(Image::getUrl)
-                .toList();
+    public List<AssetDTO> getAssetsByUser(String userId) {
+        return assetRepository.findByUserId(userId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
 
-        return AssetResponse.builder()
+    private AssetDTO toDTO(Asset asset) {
+        List<AssetImage> images = assetImageRepository.findByAssetId(asset.getAssetId());
+        String primaryImageUrl = images.stream()
+                .filter(AssetImage::getIsPrimary)
+                .findFirst()
+                .map(AssetImage::getUrl)
+                .orElse("https://via.placeholder.com/800");
+
+        List<String> imageUrls = images.stream()
+                .map(AssetImage::getUrl)
+                .collect(Collectors.toList());
+
+        return AssetDTO.builder()
                 .assetId(asset.getAssetId())
+                .categoryId(asset.getCategory().getCategoryId())
+                .categoryName(asset.getCategory().getCategoryName())
+                .userId(asset.getUser().getUserId())
                 .modelName(asset.getModelName())
                 .brand(asset.getBrand())
-                .description(asset.getDescription())
-                .price(asset.getPrice())
                 .dailyRate(asset.getDailyRate())
-                .depositValue(asset.getDepositValue())
-                .status(asset.getStatus())
-                .categoryName(asset.getCategory().getCategoryName())
+                .status(asset.getStatus().name())
+                .serialNumber(asset.getSerialNumber())
                 .imageUrls(imageUrls)
+                .primaryImageUrl(primaryImageUrl)
                 .build();
-    }
-
-    public List<AssetResponse> getAllAvailableAssets() {
-        List<Asset> assets = assetRepository.findByStatus("AVAILABLE");
-        return assets.stream().map(asset -> {
-            List<String> imageUrls = imageRepository.findByEntityIdAndType(asset.getAssetId(), "ASSET")
-                    .stream()
-                    .map(Image::getUrl)
-                    .toList();
-
-            return AssetResponse.builder()
-                    .assetId(asset.getAssetId())
-                    .modelName(asset.getModelName())
-                    .brand(asset.getBrand())
-                    .description(asset.getDescription())
-                    .price(asset.getPrice())
-                    .dailyRate(asset.getDailyRate())
-                    .depositValue(asset.getDepositValue())
-                    .status(asset.getStatus())
-                    .categoryName(asset.getCategory().getCategoryName())
-                    .imageUrls(imageUrls)
-                    .build();
-        }).toList();
     }
 }
