@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.RentalRequest;
 import com.example.backend.dto.RentalResponse;
-import com.example.backend.services.RentalService;
+import com.example.backend.service.RentalService;
+
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
 

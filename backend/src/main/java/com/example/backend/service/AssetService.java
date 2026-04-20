@@ -1,4 +1,4 @@
-package com.example.backend.services;
+package com.example.backend.service;
 
 import com.example.backend.dto.AssetRequest;
 import com.example.backend.dto.AssetResponse;

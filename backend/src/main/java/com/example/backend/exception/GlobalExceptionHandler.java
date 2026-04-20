@@ -1,4 +1,4 @@
-package com.example.backend.exceptions;
+package com.example.backend.exception;
 
 import java.util.Map;
 

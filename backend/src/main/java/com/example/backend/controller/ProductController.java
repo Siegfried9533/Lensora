@@ -2,7 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.ProductRequest;
 import com.example.backend.dto.ProductResponse;
-import com.example.backend.services.ProductService;
+import com.example.backend.service.ProductService;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

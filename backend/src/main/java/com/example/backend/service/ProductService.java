@@ -1,4 +1,4 @@
-package com.example.backend.services;
+package com.example.backend.service;
 
 import com.example.backend.dto.ProductRequest;
 import com.example.backend.dto.ProductResponse;

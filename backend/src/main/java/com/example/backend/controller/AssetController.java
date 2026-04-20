@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.AssetRequest;
 import com.example.backend.dto.AssetResponse;
-import com.example.backend.services.AssetService;
+import com.example.backend.service.AssetService;
+
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
