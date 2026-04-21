@@ -3,12 +3,13 @@ services:
     image: postgres:15
     container_name: postgres_lensora
     restart: always
+    command: ["postgres", "-c", "listen_addresses=*"]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Hoalt@2005
       POSTGRES_DB: LensoraDB
     ports:
-      - "5433:5432" # Map port 5433 máy thật vào 5432 của container
+      - "0.0.0.0:${DB_PORT:-5433}:5432" # Publish cho mọi interface của máy host
     volumes:
       - lensora_db_data:/var/lib/postgresql/data # Đảm bảo rằng dữ liệu được lưu trữ bền vững ngay cả khi container bị xóa
 
@@ -20,7 +21,7 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5433/LensoraDB
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/LensoraDB
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=Hoalt@2005
 
