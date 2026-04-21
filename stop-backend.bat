@@ -3,8 +3,8 @@ setlocal
 
 cd /d "%~dp0"
 
-echo [Lensora] Stopping backend and database...
-docker compose stop backend db
+echo [Lensora] Stopping Docker stack...
+docker compose down
 if errorlevel 1 goto :error
 
 echo.
@@ -16,5 +16,5 @@ exit /b 0
 
 :error
 echo.
-echo [Lensora] Failed to stop backend stack.
+echo [Lensora] Failed to stop Docker stack.
 exit /b 1
