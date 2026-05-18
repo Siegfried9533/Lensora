@@ -1,0 +1,173 @@
+<resources>
+    <string name="app_name">Camera Shop</string>
+
+    <!-- Auth -->
+    <string name="auth_welcome_back">Welcome Back</string>
+    <string name="auth_login_subtitle">Sign in to continue to Camera Shop</string>
+    <string name="auth_signup_title">Tạo tài khoản</string>
+    <string name="auth_signup_subtitle">Đăng ký để bắt đầu mua &amp; thuê thiết bị</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Mật khẩu</string>
+    <string name="auth_confirm_password">Xác nhận mật khẩu</string>
+    <string name="auth_username">Tên người dùng</string>
+    <string name="auth_full_name">Họ và tên</string>
+    <string name="auth_phone">Số điện thoại</string>
+    <string name="auth_login">Sign In</string>
+    <string name="auth_signup">Sign Up</string>
+    <string name="auth_logout">Đăng xuất</string>
+    <string name="auth_forgot_password">Quên mật khẩu?</string>
+    <string name="auth_forgot_password_title">Quên mật khẩu</string>
+    <string name="auth_forgot_password_subtitle">Nhập email để nhận hướng dẫn đặt lại mật khẩu</string>
+    <string name="auth_reset_password">Đặt lại mật khẩu</string>
+    <string name="auth_reset_password_title">Đặt lại mật khẩu</string>
+    <string name="auth_send_reset_link">Gửi liên kết đặt lại</string>
+    <string name="auth_verify_email">Xác minh email</string>
+    <string name="auth_verify_email_subtitle">Nhập mã xác minh đã gửi tới email của bạn</string>
+    <string name="auth_verification_code">Mã xác minh</string>
+    <string name="auth_no_account">Don\'t have an account?</string>
+    <string name="auth_have_account">Đã có tài khoản?</string>
+    <string name="auth_old_password">Mật khẩu hiện tại</string>
+    <string name="auth_new_password">Mật khẩu mới</string>
+    <string name="auth_change_password">Change Password</string>
+
+    <!-- Tabs -->
+    <string name="tab_discover">Discovery</string>
+    <string name="tab_transactions">Giao dịch</string>
+    <string name="tab_chatbot">Chatbot</string>
+    <string name="tab_notifications">Thông báo</string>
+    <string name="tab_profile">Hồ sơ</string>
+
+    <!-- Common actions -->
+    <string name="action_search">Tìm kiếm</string>
+    <string name="action_search_hint">Search equipment...</string>
+    <string name="action_back">Quay lại</string>
+    <string name="action_save">Lưu</string>
+    <string name="action_cancel">Huỷ</string>
+    <string name="action_confirm">Xác nhận</string>
+    <string name="action_delete">Xoá</string>
+    <string name="action_edit">Chỉnh sửa</string>
+    <string name="action_continue">Tiếp tục</string>
+    <string name="action_done">Xong</string>
+    <string name="action_retry">Thử lại</string>
+    <string name="action_view_details">Xem chi tiết</string>
+    <string name="action_view_all">Xem tất cả</string>
+    <string name="action_add_to_cart">Thêm vào giỏ</string>
+    <string name="action_buy_now">Mua ngay</string>
+    <string name="action_rent_now">Thuê ngay</string>
+    <string name="action_share">Chia sẻ</string>
+    <string name="action_favorite">Yêu thích</string>
+    <string name="action_mark_all_read">Đánh dấu tất cả đã đọc</string>
+
+    <!-- Home / Discovery -->
+    <string name="home_buy">Mua thiết bị</string>
+    <string name="home_rent">Thuê thiết bị</string>
+    <string name="home_categories">Danh mục</string>
+    <string name="home_featured">Nổi bật</string>
+    <string name="home_all_products">Tất cả sản phẩm</string>
+    <string name="home_per_day">/ngày</string>
+    <string name="home_empty">Không có sản phẩm nào</string>
+
+    <!-- Cart / Checkout -->
+    <string name="cart_title">Giỏ hàng</string>
+    <string name="cart_empty">Giỏ hàng trống</string>
+    <string name="cart_subtotal">Tạm tính</string>
+    <string name="cart_total">Tổng cộng</string>
+    <string name="cart_quantity">Số lượng</string>
+    <string name="cart_checkout">Thanh toán</string>
+    <string name="checkout_title">Thanh toán</string>
+    <string name="checkout_shipping_address">Địa chỉ giao hàng</string>
+    <string name="checkout_province">Tỉnh / Thành phố</string>
+    <string name="checkout_district">Quận / Huyện</string>
+    <string name="checkout_ward">Phường / Xã</string>
+    <string name="checkout_street">Số nhà, tên đường</string>
+    <string name="checkout_note">Ghi chú</string>
+    <string name="checkout_payment_method">Phương thức thanh toán</string>
+    <string name="checkout_payment_cod">Thanh toán khi nhận hàng (COD)</string>
+    <string name="checkout_payment_momo">Ví MoMo</string>
+    <string name="checkout_shipping_fee">Phí vận chuyển</string>
+    <string name="checkout_place_order">Đặt hàng</string>
+
+    <!-- Status -->
+    <string name="status_pending">Chờ xử lý</string>
+    <string name="status_confirmed">Đã xác nhận</string>
+    <string name="status_shipping">Đang giao</string>
+    <string name="status_shipped">Đã giao</string>
+    <string name="status_delivered">Đã nhận</string>
+    <string name="status_cancelled">Đã huỷ</string>
+    <string name="status_completed">Hoàn tất</string>
+    <string name="status_active">Đang hoạt động</string>
+    <string name="status_returned">Đã trả</string>
+    <string name="status_paid">Đã thanh toán</string>
+    <string name="status_unpaid">Chưa thanh toán</string>
+    <string name="status_failed">Thất bại</string>
+
+    <!-- Transactions -->
+    <string name="tx_orders">Đơn hàng</string>
+    <string name="tx_rentals">Thuê thiết bị</string>
+    <string name="tx_order_code">Mã đơn</string>
+    <string name="tx_order_date">Ngày đặt</string>
+    <string name="tx_rental_period">Thời gian thuê</string>
+
+    <!-- Payment -->
+    <string name="payment_success_title">Thanh toán thành công</string>
+    <string name="payment_failed_title">Thanh toán thất bại</string>
+    <string name="payment_processing">Đang xử lý thanh toán...</string>
+    <string name="payment_view_order">Xem đơn hàng</string>
+
+    <!-- Chatbot -->
+    <string name="chatbot_input_hint">Nhập tin nhắn...</string>
+    <string name="chatbot_send">Gửi</string>
+    <string name="chatbot_empty">Hãy đặt câu hỏi để bắt đầu</string>
+
+    <!-- Notifications -->
+    <string name="notif_empty">Chưa có thông báo nào</string>
+
+    <!-- Profile -->
+    <string name="profile_personal_info">Personal Information</string>
+    <string name="profile_settings">Account Settings</string>
+    <string name="profile_favorites">Favorites</string>
+    <string name="profile_my_equipment">Thiết bị của tôi</string>
+    <string name="profile_spending_stats">Thống kê chi tiêu</string>
+    <string name="profile_privacy_security">Bảo mật &amp; quyền riêng tư</string>
+    <string name="profile_help">Trợ giúp</string>
+    <string name="profile_trust_score">Điểm tin cậy</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Đã xảy ra lỗi. Vui lòng thử lại.</string>
+    <string name="error_network">Không có kết nối mạng</string>
+    <string name="error_invalid_credentials">Email hoặc mật khẩu không đúng</string>
+    <string name="error_required_field">Trường này là bắt buộc</string>
+    <string name="error_invalid_email">Email không hợp lệ</string>
+    <string name="error_password_too_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="error_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="error_login_required">Vui lòng đăng nhập để tiếp tục</string>
+
+    <!-- Profile sub-screens -->
+    <string name="personal_info_save">Lưu thay đổi</string>
+    <string name="personal_info_change_avatar">Thay đổi ảnh</string>
+    <string name="personal_info_avatar_updated">Đã cập nhật ảnh đại diện</string>
+    <string name="personal_info_saved">Thông tin cá nhân đã được cập nhật</string>
+    <string name="change_password_submit">Cập nhật mật khẩu</string>
+    <string name="change_password_success">Mật khẩu đã được thay đổi</string>
+    <string name="change_password_hint">Tạo mật khẩu mới, mạnh và không dùng cho các trang khác.</string>
+    <string name="favorites_empty">Chưa có sản phẩm yêu thích</string>
+    <string name="my_equipment_empty">Bạn chưa có thiết bị nào</string>
+    <string name="spending_total">Tổng chi tiêu</string>
+    <string name="spending_orders_count">Số đơn hàng</string>
+    <string name="spending_avg">Trung bình mỗi đơn</string>
+    <string name="settings_dark_mode">Chế độ tối</string>
+    <string name="settings_language">Ngôn ngữ</string>
+    <string name="settings_version">Phiên bản</string>
+    <string name="settings_terms">Điều khoản sử dụng</string>
+    <string name="settings_privacy_policy">Chính sách bảo mật</string>
+    <string name="privacy_2fa">Xác thực hai yếu tố</string>
+    <string name="privacy_biometric">Đăng nhập sinh trắc học</string>
+    <string name="privacy_share_data">Chia sẻ dữ liệu sử dụng</string>
+    <string name="privacy_notice">Các tuỳ chọn này hiện đang ở trạng thái thử nghiệm.</string>
+    <string name="help_faq_title">Câu hỏi thường gặp</string>
+    <string name="help_contact">Liên hệ hỗ trợ: support@camerashop.vn</string>
+
+    <!-- Misc -->
+    <string name="loading">Đang tải...</string>
+    <string name="currency_symbol">₫</string>
+</resources>

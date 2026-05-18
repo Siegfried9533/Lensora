@@ -1,33 +1,26 @@
-HELP.md
+# Đầu ra build
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
 build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+*.jar
+*.war
+*.class
 
-### VS Code ###
+# Môi trường phát triển tích hợp (IDE)
+.idea/
+*.iml
 .vscode/
+.settings/
+.classpath
+.project
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Môi trường
+.env
+*.env.local
+
+# Nhật ký
+*.log
+logs/
