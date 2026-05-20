@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing (4dp base, Tailwind scale) -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xxl">48dp</dimen>
+    <dimen name="page_padding">24dp</dimen>
+    <dimen name="card_gap">16dp</dimen>
+
+    <!-- Radius (matches design system: 24/16/12 + pill) -->
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_xs">12dp</dimen>
+    <dimen name="radius_input">16dp</dimen>
+    <dimen name="radius_button">16dp</dimen>
+    <dimen name="radius_card">24dp</dimen>
+    <dimen name="radius_pill">999dp</dimen>
+
+    <!-- Text scale (matches ms-t-* tokens) -->
+    <dimen name="text_micro">10sp</dimen>
+    <dimen name="text_caption">12sp</dimen>
+    <dimen name="text_body">14sp</dimen>
+    <dimen name="text_subtitle">16sp</dimen>
+    <dimen name="text_title">18sp</dimen>
+    <dimen name="text_price">20sp</dimen>
+    <dimen name="text_card_title">24sp</dimen>
+    <dimen name="text_heading">20sp</dimen>
+    <dimen name="text_screen_title">30sp</dimen>
+    <dimen name="text_display">30sp</dimen>
+    <dimen name="text_price_lg">36sp</dimen>
+
+    <!-- Component sizes -->
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="input_height">52dp</dimen>
+    <dimen name="bottom_nav_height">82dp</dimen>
+    <dimen name="icon_sm">16dp</dimen>
+    <dimen name="icon_md">20dp</dimen>
+    <dimen name="icon_lg">24dp</dimen>
+    <dimen name="icon_xl">28dp</dimen>
+    <dimen name="avatar_sm">36dp</dimen>
+    <dimen name="avatar_md">48dp</dimen>
+    <dimen name="avatar_lg">72dp</dimen>
+</resources>

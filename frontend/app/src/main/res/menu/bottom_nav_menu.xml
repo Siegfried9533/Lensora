@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_discover"
+        android:icon="@drawable/ic_compass"
+        android:title="@string/tab_discover" />
+    <item
+        android:id="@+id/nav_transactions"
+        android:icon="@drawable/ic_box"
+        android:title="@string/tab_transactions" />
+    <item
+        android:id="@+id/nav_notifications"
+        android:icon="@drawable/ic_bell_outline"
+        android:title="@string/tab_notifications" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_user_outline"
+        android:title="@string/tab_profile" />
+</menu>

@@ -1,0 +1,21 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Force dark theme to match React Native NativeWind dark UI. -->
+    <style name="Base.Theme.My_Mobile_App" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/orange</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/orange_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSurface">@color/ms_surface</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="android:colorBackground">@color/ms_bg</item>
+        <item name="android:windowBackground">@color/ms_bg</item>
+        <item name="android:statusBarColor">@color/ms_bg</item>
+        <item name="android:navigationBarColor">@color/ms_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/text_muted</item>
+    </style>
+
+    <style name="Theme.My_Mobile_App" parent="Base.Theme.My_Mobile_App" />
+</resources>

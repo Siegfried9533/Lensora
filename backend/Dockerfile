@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Copy file JAR đã build từ giai đoạn 1 sang giai đoạn 2
 # Tên file JAR mặc định thường là artifactId-version.jar
-COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 # Mở port 8080
 EXPOSE 8080
