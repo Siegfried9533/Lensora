@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { useRouter } from "expo-router";
 import { ArrowLeft, Package, Trash2 } from "lucide-react-native";
 import { useEffect, useState } from "react";

@@ -4,25 +4,25 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "asset_images")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "asset_images")
 public class AssetImage {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String imageId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "image_id")
+    private Long imageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
 
-    @Column(nullable = false)
+    @Column(name = "url")
     private String url;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isPrimary = false;
+    @Column(name = "is_primary")
+    private Boolean isPrimary;
 }

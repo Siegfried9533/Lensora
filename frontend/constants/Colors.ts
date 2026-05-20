@@ -3,6 +3,8 @@ const tintColorDark = '#fff';
 
 export default {
   light: {
+<<<<<<< HEAD
+=======
     text: '#000',
     background: '#fff',
     cardBackground: '#f5f5f5',
@@ -14,6 +16,7 @@ export default {
     tabIconSelected: tintColorLight,
   },
   dark: {
+>>>>>>> LTH
     text: '#fff',
     background: '#1a1a1a',
     cardBackground: '#0a0a0a',
@@ -24,4 +27,8 @@ export default {
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
   },
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> LTH

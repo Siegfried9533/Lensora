@@ -53,7 +53,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/categories/**", "/api/products/**", "/api/assets/**", "/api/payment/**", "/api/shipping/**", "/api/notifications/system").permitAll()
+                .requestMatchers("/api/auth/**", "/api/categories/**", "/api/products/**", "/api/assets/**", "/api/payment/momo/ipn", "/api/payment/momo/callback", "/api/shipping/**", "/api/notifications/system").permitAll()
                 .requestMatchers("/api/cart/**", "/api/favorites/**", "/api/orders/**", "/api/rentals/**", "/api/notifications/**", "/api/users/**").authenticated()
                 .anyRequest().authenticated()
             )

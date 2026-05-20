@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { BASE_URL } from "@/services/api/config";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";

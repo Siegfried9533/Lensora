@@ -2,7 +2,11 @@ import {
     ASSETS,
     CATEGORIES,
     getPrimaryImage,
+<<<<<<< HEAD
+} from '@/constants/mockData';
+=======
 } from "@/frontend/constants/mockData";
+>>>>>>> LTH
 import { useRouter } from "expo-router";
 import { ArrowLeft, Camera } from "lucide-react-native";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";

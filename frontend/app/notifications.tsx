@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { Notification, notificationApi } from "@/services/api/notificationApi";
 import { usePathname, useRouter } from "expo-router";
 import {

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";

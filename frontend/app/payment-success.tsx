@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { paymentApi } from "@/services/api/paymentApi";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle, XCircle } from "lucide-react-native";

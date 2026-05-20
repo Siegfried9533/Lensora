@@ -153,9 +153,13 @@ public class OrderService {
         List<OrderDTO.OrderItemDTO> itemDTOs = order.getOrderItems().stream()
                 .map(item -> {
                     String imageUrl = null;
-                    ProductImage img = productImageRepository.findByProductIdAndIsPrimaryTrue(item.getProduct().getProductId());
-                    if (img != null) {
-                        imageUrl = img.getUrl();
+                    try {
+                        Long productId = Long.valueOf(item.getProduct().getProductId());
+                        ProductImage img = productImageRepository.findByProductIdAndIsPrimaryTrue(productId);
+                        if (img != null) {
+                            imageUrl = img.getUrl();
+                        }
+                    } catch (NumberFormatException ignored) {
                     }
 
                     return OrderDTO.OrderItemDTO.builder()

@@ -97,7 +97,7 @@ public class FavoriteService {
             dto.setProductName(favorite.getProduct().getProductName());
             dto.setPrice(favorite.getProduct().getPrice());
 
-            ProductImage primaryImage = productImageRepository.findByProductIdAndIsPrimaryTrue(favorite.getProduct().getProductId());
+            ProductImage primaryImage = productImageRepository.findByProductIdAndIsPrimaryTrue(Long.valueOf(favorite.getProduct().getProductId()));
             if (primaryImage != null) {
                 dto.setPrimaryImageUrl(primaryImage.getUrl());
             }
@@ -106,7 +106,7 @@ public class FavoriteService {
             dto.setAssetName(favorite.getAsset().getModelName());
             dto.setPrice(favorite.getAsset().getDailyRate());
 
-            AssetImage primaryImage = assetImageRepository.findByAssetIdAndIsPrimaryTrue(favorite.getAsset().getAssetId());
+            AssetImage primaryImage = assetImageRepository.findByAssetIdAndIsPrimaryTrue(Long.valueOf(favorite.getAsset().getAssetId()));
             if (primaryImage != null) {
                 dto.setPrimaryImageUrl(primaryImage.getUrl());
             }

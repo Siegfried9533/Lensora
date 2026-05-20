@@ -47,7 +47,7 @@ public class ProductService {
     }
 
     private ProductDTO toDTO(Product product) {
-        List<ProductImage> images = productImageRepository.findByProductId(product.getProductId());
+        List<ProductImage> images = productImageRepository.findByProductId(Long.valueOf(product.getProductId()));
         String primaryImageUrl = images.stream()
                 .filter(ProductImage::getIsPrimary)
                 .findFirst()

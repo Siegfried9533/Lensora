@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { orderApi } from "@/services/api/orderApi";
 import { paymentApi } from "@/services/api/paymentApi";
 import { rentalApi } from "@/services/api/rentalApi";
@@ -22,10 +26,18 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 interface CheckoutItem {
   id: string;
   type: "PRODUCT" | "ASSET";
+<<<<<<< HEAD
+  productName?: string;
+  assetName?: string;
+  price: number;
+  quantity: number;
+  primaryImageUrl?: string;
+=======
   name: string;
   price: number;
   quantity: number;
   imageUrl?: string;
+>>>>>>> LTH
   startDate?: string;
   endDate?: string;
   rentalDays?: number;
@@ -259,10 +271,17 @@ export default function CheckoutScreen() {
                   }
                 >
                   <View className="flex-row items-center">
+<<<<<<< HEAD
+                    {item.primaryImageUrl && (
+                      <View className="w-16 h-16 bg-black rounded-xl mr-4 overflow-hidden">
+                        <Image
+                          source={{ uri: item.primaryImageUrl }}
+=======
                     {item.imageUrl && (
                       <View className="w-16 h-16 bg-black rounded-xl mr-4 overflow-hidden">
                         <Image
                           source={{ uri: item.imageUrl }}
+>>>>>>> LTH
                           className="w-full h-full"
                           resizeMode="cover"
                         />
@@ -273,7 +292,11 @@ export default function CheckoutScreen() {
                         className="text-white font-semibold text-base"
                         numberOfLines={2}
                       >
+<<<<<<< HEAD
+                        {item.type === "PRODUCT" ? item.productName : item.assetName}
+=======
                         {item.name}
+>>>>>>> LTH
                       </Text>
                       <View className="flex-row items-center mt-1">
                         <Text className="text-[#FF8C42] font-bold">

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { Rental, rentalApi } from "@/services/api/orderApi";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {

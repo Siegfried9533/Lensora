@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AssetImageRepository extends JpaRepository<AssetImage, String> {
-    @Query("SELECT ai FROM AssetImage ai WHERE ai.asset.assetId = :assetId")
-    List<AssetImage> findByAssetId(@Param("assetId") String assetId);
+public interface AssetImageRepository extends JpaRepository<AssetImage, Long> {
+    @Query("SELECT ai FROM AssetImage ai WHERE ai.assetId = :assetId")
+    List<AssetImage> findByAssetId(@Param("assetId") Long assetId);
 
-    @Query("SELECT ai FROM AssetImage ai WHERE ai.asset.assetId = :assetId AND ai.isPrimary = true")
-    AssetImage findByAssetIdAndIsPrimaryTrue(@Param("assetId") String assetId);
+    @Query("SELECT ai FROM AssetImage ai WHERE ai.assetId = :assetId AND ai.isPrimary = true")
+    AssetImage findByAssetIdAndIsPrimaryTrue(@Param("assetId") Long assetId);
 }

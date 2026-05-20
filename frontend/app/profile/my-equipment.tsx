@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { useRouter } from "expo-router";
 import { ArrowLeft, ChevronRight, Package } from "lucide-react-native";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";

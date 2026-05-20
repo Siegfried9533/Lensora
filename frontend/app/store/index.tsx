@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { Product, productApi } from "@/services/api/productApi";
 import { useRouter } from "expo-router";
 import { ArrowLeft, ShoppingCart } from "lucide-react-native";

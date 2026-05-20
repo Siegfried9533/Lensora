@@ -217,7 +217,7 @@ public class RentalService {
 
     private RentalDTO toDTO(Rental rental) {
         String primaryImageUrl = null;
-        AssetImage img = assetImageRepository.findByAssetIdAndIsPrimaryTrue(rental.getAsset().getAssetId());
+        AssetImage img = assetImageRepository.findByAssetIdAndIsPrimaryTrue(Long.valueOf(rental.getAsset().getAssetId()));
         if (img != null) {
             primaryImageUrl = img.getUrl();
         }

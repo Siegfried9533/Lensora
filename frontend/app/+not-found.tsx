@@ -1,7 +1,11 @@
 import { Link, Stack } from "expo-router";
 import { StyleSheet } from "react-native";
 
+<<<<<<< HEAD
+import { Text, View } from '@/components/Themed';
+=======
 import { Text, View } from "@/frontend/components/Themed";
+>>>>>>> LTH
 
 export default function NotFoundScreen() {
   return (

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { authApi } from "@/services/api/authApi";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Mail } from "lucide-react-native";

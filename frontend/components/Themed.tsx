@@ -5,7 +5,11 @@
 
 import { Text as DefaultText, View as DefaultView } from "react-native";
 
+<<<<<<< HEAD
+import Colors from '@/constants/Colors';
+=======
 import Colors from "@/frontend/constants/Colors";
+>>>>>>> LTH
 import { useColorScheme } from "./useColorScheme";
 
 type ThemeProps = {

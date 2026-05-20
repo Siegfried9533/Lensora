@@ -18,6 +18,10 @@
       "bundleIdentifier": "com.camerashop.mobile"
     },
     "android": {
+<<<<<<< HEAD
+      "usesCleartextTraffic": true,
+=======
+>>>>>>> LTH
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import * as ImagePicker from "expo-image-picker";
 import { Link, useRouter } from "expo-router";
 import {

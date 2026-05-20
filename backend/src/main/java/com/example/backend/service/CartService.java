@@ -92,7 +92,7 @@ public class CartService {
             dto.setProductName(cartItem.getProduct().getProductName());
             dto.setPrice(cartItem.getProduct().getPrice());
 
-            ProductImage primaryImage = productImageRepository.findByProductIdAndIsPrimaryTrue(cartItem.getProduct().getProductId());
+            ProductImage primaryImage = productImageRepository.findByProductIdAndIsPrimaryTrue(Long.valueOf(cartItem.getProduct().getProductId()));
             if (primaryImage != null) {
                 dto.setPrimaryImageUrl(primaryImage.getUrl());
             }
@@ -101,7 +101,7 @@ public class CartService {
             dto.setAssetName(cartItem.getAsset().getModelName());
             dto.setPrice(cartItem.getAsset().getDailyRate());
 
-            AssetImage primaryImage = assetImageRepository.findByAssetIdAndIsPrimaryTrue(cartItem.getAsset().getAssetId());
+            AssetImage primaryImage = assetImageRepository.findByAssetIdAndIsPrimaryTrue(Long.valueOf(cartItem.getAsset().getAssetId()));
             if (primaryImage != null) {
                 dto.setPrimaryImageUrl(primaryImage.getUrl());
             }

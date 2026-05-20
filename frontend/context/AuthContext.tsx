@@ -23,6 +23,10 @@ export interface CartContextItem {
   assetName?: string;
   price?: number;
   primaryImageUrl?: string;
+<<<<<<< HEAD
+  rentalDays?: number;
+=======
+>>>>>>> LTH
 }
 
 export interface FavoriteItem {

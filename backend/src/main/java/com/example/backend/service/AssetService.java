@@ -48,7 +48,7 @@ public class AssetService {
     }
 
     private AssetDTO toDTO(Asset asset) {
-        List<AssetImage> images = assetImageRepository.findByAssetId(asset.getAssetId());
+        List<AssetImage> images = assetImageRepository.findByAssetId(Long.valueOf(asset.getAssetId()));
         String primaryImageUrl = images.stream()
                 .filter(AssetImage::getIsPrimary)
                 .findFirst()

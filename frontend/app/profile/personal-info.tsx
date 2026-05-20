@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useAuth } from '@/context/AuthContext';
+=======
 import { useAuth } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";

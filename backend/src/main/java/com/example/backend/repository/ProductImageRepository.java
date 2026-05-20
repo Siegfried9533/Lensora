@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductImageRepository extends JpaRepository<ProductImage, String> {
-    @Query("SELECT pi FROM ProductImage pi WHERE pi.product.productId = :productId")
-    List<ProductImage> findByProductId(@Param("productId") String productId);
+public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
+    @Query("SELECT pi FROM ProductImage pi WHERE pi.product.id = :productId")
+    List<ProductImage> findByProductId(@Param("productId") Long productId);
 
-    @Query("SELECT pi FROM ProductImage pi WHERE pi.product.productId = :productId AND pi.isPrimary = true")
-    ProductImage findByProductIdAndIsPrimaryTrue(@Param("productId") String productId);
+    @Query("SELECT pi FROM ProductImage pi WHERE pi.product.id = :productId AND pi.isPrimary = true")
+    ProductImage findByProductIdAndIsPrimaryTrue(@Param("productId") Long productId);
 }

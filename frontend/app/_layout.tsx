@@ -10,7 +10,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+<<<<<<< HEAD
+import { useColorScheme } from "@/components/useColorScheme";
+=======
 import { useColorScheme } from "@/frontend/components/useColorScheme";
+>>>>>>> LTH
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -49,7 +53,11 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+<<<<<<< HEAD
+import { AuthProvider } from "@/context/AuthContext";
+=======
 import { AuthProvider } from "@/frontend/context/AuthContext";
+>>>>>>> LTH
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
@@ -96,11 +104,19 @@ function RootLayoutNav() {
             options={{ headerShown: false, animation: "slide_from_right" }}
           />
           <Stack.Screen
+<<<<<<< HEAD
+            name="rentals/index"
+            options={{ headerShown: false, animation: "slide_from_right" }}
+          />
+          <Stack.Screen
+            name="store/index"
+=======
             name="rentals"
             options={{ headerShown: false, animation: "slide_from_right" }}
           />
           <Stack.Screen
             name="store"
+>>>>>>> LTH
             options={{ headerShown: false, animation: "slide_from_right" }}
           />
           <Stack.Screen

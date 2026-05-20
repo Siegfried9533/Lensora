@@ -1,3 +1,79 @@
+<<<<<<< HEAD
+import Constants from 'expo-constants';
+import * as Device from 'expo-device';
+import { Platform } from 'react-native';
+
+// API Base URL Configuration
+// Priority order:
+// 1. EXPO_PUBLIC_API_URL override from .env
+// 2. Android emulator: 10.0.2.2
+// 3. iOS simulator / web: localhost
+// 4. Physical device: reuse the Expo host IP when available
+// 5. Final fallback: localhost
+
+const API_PORT = 8080;
+const API_PATH = '/api';
+
+const normalizeBaseUrl = (host: string) => {
+  const trimmed = host.replace(/\/$/, '');
+  return `http://${trimmed}:${API_PORT}${API_PATH}`;
+};
+
+const getExpoHost = (): string | null => {
+  const hostUri =
+    Constants.expoConfig?.hostUri ??
+    Constants.manifest2?.extra?.expoClient?.hostUri ??
+    // @ts-ignore - legacy Expo manifest shape for older runtimes
+    Constants.manifest?.debuggerHost ??
+    null;
+
+  if (!hostUri) {
+    return null;
+  }
+
+  try {
+    return hostUri.includes('://') ? new URL(`http://${hostUri}`).hostname : new URL(`http://${hostUri}`).hostname;
+  } catch {
+    return hostUri.split(':')[0] ?? null;
+  }
+};
+
+const getEnvUrl = (): string => {
+  const envUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  if (Platform.OS === 'android') {
+    // Android emulators cannot reach the host machine through localhost.
+    if (!Device.isDevice) {
+      return `http://10.0.2.2:${API_PORT}${API_PATH}`;
+    }
+
+    if (envUrl) {
+      return envUrl;
+    }
+
+    const host = getExpoHost();
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return normalizeBaseUrl(host);
+    }
+
+    return `http://localhost:${API_PORT}${API_PATH}`;
+  }
+
+  if (envUrl) {
+    return envUrl;
+  }
+
+  if (Platform.OS === 'ios' || Platform.OS === 'web') {
+    return `http://localhost:${API_PORT}${API_PATH}`;
+  }
+
+  const host = getExpoHost();
+  if (host && host !== 'localhost' && host !== '127.0.0.1') {
+    return normalizeBaseUrl(host);
+  }
+
+  return `http://localhost:${API_PORT}${API_PATH}`;
+=======
 // API Base URL Configuration
 // - iOS Simulator: http://localhost:8080/api works
 // - Android Emulator: Needs http://10.0.2.2:8080/api (Android's localhost alias)
@@ -19,6 +95,7 @@ const getEnvUrl = (): string => {
   }
   // 2. Fallback to localhost (works on iOS Simulator)
   return 'http://localhost:8080/api';
+>>>>>>> LTH
 };
 
 export const BASE_URL = getEnvUrl();
@@ -26,9 +103,14 @@ export const BASE_URL = getEnvUrl();
 // Debug log
 if (__DEV__) {
   console.log('[API Config] BASE_URL:', BASE_URL);
+<<<<<<< HEAD
+  if (!process.env.EXPO_PUBLIC_API_URL) {
+    console.info('[API Config] EXPO_PUBLIC_API_URL not set; using automatic platform-based fallback.');
+=======
   // @ts-ignore
   if (!process.env.EXPO_PUBLIC_API_URL) {
     console.warn('⚠️ EXPO_PUBLIC_API_URL not set — using localhost. For physical devices, set it in .env');
+>>>>>>> LTH
   }
 }
 
