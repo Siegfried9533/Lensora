@@ -74,7 +74,9 @@ public class ProductCardAdapter extends RecyclerView.Adapter<ProductCardAdapter.
 
         boolean isAsset = "ASSET".equals(it.type);
         h.perDay.setVisibility(isAsset ? View.VISIBLE : View.GONE);
-        h.typeBadge.setText(isAsset ? "ASSET" : "PRODUCT");
+        h.typeBadge.setText(context.getString(isAsset
+                ? R.string.home_type_asset
+                : R.string.home_type_product));
 
         Glide.with(context)
                 .load(it.primaryImageUrl)

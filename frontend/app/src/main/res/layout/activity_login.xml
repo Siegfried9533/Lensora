@@ -147,7 +147,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="18dp"
-                android:text="OR CONTINUE WITH"
+                android:text="@string/auth_social_divider"
                 android:textColor="@color/nav_inactive"
                 android:textSize="15sp" />
 
@@ -164,7 +164,7 @@
             android:layout_marginTop="32dp"
             android:background="@drawable/bg_social_google"
             android:gravity="center"
-            android:text="Continue with Google"
+            android:text="@string/auth_continue_google"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -176,7 +176,7 @@
             android:layout_marginTop="18dp"
             android:background="@drawable/bg_social_apple"
             android:gravity="center"
-            android:text="Continue with Apple"
+            android:text="@string/auth_continue_apple"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -189,7 +189,7 @@
             android:background="@drawable/bg_card"
             android:lineSpacingExtra="4dp"
             android:padding="18dp"
-            android:text="TEST CREDENTIALS:\n\nEmail: test@example.com\nPassword: password123\n\nOR (Admin):\nEmail: john@example.com\nPassword: password123"
+            android:text="@string/auth_test_credentials"
             android:textColor="@color/text_muted"
             android:textSize="16sp"
             android:visibility="gone" />

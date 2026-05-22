@@ -91,7 +91,7 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<CartItem>>> call, @NonNull Throwable t) {
                         swipe.setRefreshing(false);
-                        showError("Lỗi tải giỏ hàng");
+                        showError(getString(R.string.error_load_cart));
                     }
                 });
     }
@@ -114,8 +114,8 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
     private void clearCart() {
         if (items.isEmpty()) return;
         new AlertDialog.Builder(this)
-                .setTitle("Xoá giỏ hàng")
-                .setMessage("Bạn có chắc muốn xoá tất cả sản phẩm khỏi giỏ?")
+                .setTitle(R.string.cart_clear)
+                .setMessage(R.string.cart_clear_confirm)
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_delete, (d, w) -> {
                     showLoading();
@@ -130,7 +130,7 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
                                 @Override public void onFailure(@NonNull Call<ApiResponse<Void>> call,
                                                                 @NonNull Throwable t) {
                                     hideLoading();
-                                    showError("Không thể xoá giỏ hàng");
+                                    showError(getString(R.string.error_clear_cart));
                                 }
                             });
                 })
@@ -146,7 +146,7 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
                         load();
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<CartItem>> call, @NonNull Throwable t) {
-                        showError("Lỗi cập nhật số lượng");
+                        showError(getString(R.string.error_update_quantity));
                     }
                 });
     }
@@ -154,8 +154,8 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
     @Override
     public void onRemove(CartItem item) {
         new AlertDialog.Builder(this)
-                .setTitle("Xoá sản phẩm")
-                .setMessage("Bạn có chắc muốn xoá khỏi giỏ?")
+                .setTitle(R.string.cart_remove_title)
+                .setMessage(R.string.cart_remove_confirm)
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_delete, (d, w) -> {
                     ApiClient.get(this).create(CartService.class).removeFromCart(item.cartItemId)
@@ -164,7 +164,7 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
                                     load();
                                 }
                                 @Override public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
-                                    showError("Không thể xoá");
+                                    showError(getString(R.string.error_delete_item));
                                 }
                             });
                 })

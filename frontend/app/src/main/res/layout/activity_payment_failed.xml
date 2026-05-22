@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="Giao dịch không thành công. Vui lòng thử lại."
+        android:text="@string/payment_failed_body"
         android:textColor="@color/text_muted"
         android:textSize="14sp" />
 
@@ -46,5 +46,5 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="12dp"
-        android:text="Về trang chủ" />
+        android:text="@string/action_home" />
 </LinearLayout>

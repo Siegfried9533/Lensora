@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_md"
                 android:layout_weight="1"
-                android:text="Chi tiết thuê" />
+                android:text="@string/rental_detail_title" />
         </LinearLayout>
 
         <ImageView
@@ -79,7 +79,7 @@
                 style="@style/Text.Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Thời gian thuê" />
+                android:text="@string/rental_period_title" />
 
             <TextView
                 android:id="@+id/txt_rental_period"
@@ -93,7 +93,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_sm"
-                android:text="Ngày trả thực tế" />
+                android:text="@string/rental_actual_return_date" />
 
             <TextView
                 android:id="@+id/txt_return_date"
@@ -115,7 +115,7 @@
                 style="@style/Text.Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Chi phí" />
+                android:text="@string/rental_costs" />
 
             <TextView
                 android:id="@+id/txt_deposit"

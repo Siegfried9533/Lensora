@@ -52,9 +52,10 @@ public class RentalListAdapter extends RecyclerView.Adapter<RentalListAdapter.VH
         Date start = DateUtils.parseIso(rental.startDate);
         Date end = DateUtils.parseIso(rental.endDate);
         String range = DateUtils.formatDisplay(start) + " - " + DateUtils.formatDisplay(end);
-        h.txtPeriod.setText(range.trim().equals("-") ? "Thời gian thuê: --" : "Thời gian thuê: " + range);
+        h.txtPeriod.setText(h.itemView.getContext().getString(R.string.rental_period_format,
+                range.trim().equals("-") ? "--" : range));
 
-        StatusUtils.Style style = StatusUtils.forRental(rental.status);
+        StatusUtils.Style style = StatusUtils.forRental(h.itemView.getContext(), rental.status);
         h.txtStatus.setText(style.label);
         h.txtStatus.setTextColor(h.itemView.getContext().getColor(style.colorRes));
         h.txtStatus.setBackgroundResource(style.chipBgRes);

@@ -152,14 +152,14 @@ public class HomeActivity extends BaseActivity
 
         btnCart.setOnClickListener(v -> {
             if (TokenManager.getToken(this) == null) {
-                showError("Vui lòng đăng nhập");
+                showError(getString(R.string.error_login_required));
                 return;
             }
             startActivity(new android.content.Intent(this, CartActivity.class));
         });
         btnFavorites.setOnClickListener(v -> {
             if (TokenManager.getToken(this) == null) {
-                showError("Vui lòng đăng nhập");
+                showError(getString(R.string.error_login_required));
                 return;
             }
             startActivity(new Intent(this, FavoritesActivity.class));
@@ -178,9 +178,9 @@ public class HomeActivity extends BaseActivity
         User user = UserManager.getUser(this);
         boolean loggedIn = TokenManager.getToken(this) != null;
         if (loggedIn && user != null && user.userName != null && !user.userName.isEmpty()) {
-            txtWelcome.setText("Welcome, " + user.userName + "!");
+            txtWelcome.setText(getString(R.string.home_welcome_user, user.userName));
         } else {
-            txtWelcome.setText("Welcome, Guest!");
+            txtWelcome.setText(R.string.home_welcome_guest);
         }
         btnSignIn.setText(loggedIn ? getString(R.string.tab_profile) : getString(R.string.auth_login));
     }
@@ -345,7 +345,7 @@ public class HomeActivity extends BaseActivity
     @Override
     public void onFavoriteClick(DisplayItem item) {
         if (TokenManager.getToken(this) == null) {
-            showError("Vui lòng đăng nhập");
+            showError(getString(R.string.error_login_required));
             return;
         }
         java.util.HashMap<String, String> body = new java.util.HashMap<>();
@@ -362,7 +362,7 @@ public class HomeActivity extends BaseActivity
                 productAdapter.setFavoriteIds(favoriteIds);
             }
             @Override public void onFailure(@NonNull Call<ApiResponse<Map<String, Object>>> call, @NonNull Throwable t) {
-                showError("Không thể cập nhật yêu thích");
+                showError(getString(R.string.error_update_favorite));
             }
         });
     }

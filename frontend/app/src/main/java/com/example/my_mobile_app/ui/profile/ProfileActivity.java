@@ -101,7 +101,7 @@ public class ProfileActivity extends BaseActivity {
         txtEmail.setText(valueOrDash(user.email));
         String score = String.valueOf((int) user.trustScore);
         txtTrustScore.setText(score);
-        txtTrustLabel.setText("Trust Score: " + score);
+        txtTrustLabel.setText(getString(R.string.profile_trust_score_format, score));
         String initial = name.equals("--") ? "?" : name.substring(0, 1).toUpperCase();
         txtInitial.setText(initial);
         if (user.avatarUrl != null && !user.avatarUrl.isEmpty()) {
@@ -124,7 +124,7 @@ public class ProfileActivity extends BaseActivity {
                 () -> startActivity(new Intent(this, FavoritesActivity.class)));
         addMenuRow(accountMenu, R.drawable.ic_box, getString(R.string.profile_my_equipment),
                 () -> startActivity(new Intent(this, MyEquipmentActivity.class)));
-        addMenuRow(accountMenu, R.drawable.ic_bell_outline, "Notifications",
+        addMenuRow(accountMenu, R.drawable.ic_bell_outline, getString(R.string.profile_notifications),
                 () -> startActivity(new Intent(this, NotificationsActivity.class)));
 
         addMenuRow(settingsMenu, R.drawable.ic_settings, getString(R.string.profile_settings),
@@ -145,7 +145,7 @@ public class ProfileActivity extends BaseActivity {
         }
         row.setOnClickListener(v -> {
             if (action != null) action.run();
-            else showError("Màn hình này đang được triển khai");
+            else showError(getString(R.string.profile_screen_coming_soon));
         });
         parent.addView(row);
     }

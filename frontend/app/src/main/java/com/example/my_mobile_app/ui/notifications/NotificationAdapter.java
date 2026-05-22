@@ -44,7 +44,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         h.txtIcon.setText(iconFor(n.type));
         h.txtTitle.setText(valueOrDash(n.title));
         h.txtMessage.setText(valueOrDash(n.message));
-        h.txtType.setText(labelFor(n.type));
+        h.txtType.setText(labelFor(h.itemView, n.type));
         Date date = DateUtils.parseIso(n.createdAt);
         String created = DateUtils.formatDisplay(date);
         h.txtTime.setText(created.isEmpty() ? "--" : created);
@@ -68,18 +68,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return "!";
     }
 
-    private static String labelFor(String type) {
+    private static String labelFor(View view, String type) {
         String t = type == null ? "" : type;
         switch (t) {
-            case "ORDER_UPDATE": return "Đơn hàng";
-            case "PAYMENT_SUCCESS": return "Thanh toán";
-            case "PAYMENT_FAILED": return "Thanh toán";
-            case "RENTAL_REMINDER": return "Thuê";
-            case "RENTAL_OVERDUE": return "Quá hạn";
-            case "SHIPPING_UPDATE": return "Giao hàng";
-            case "PROMOTION": return "Ưu đãi";
-            case "SYSTEM": return "Hệ thống";
-            default: return t.isEmpty() ? "Thông báo" : t;
+            case "ORDER_UPDATE": return view.getContext().getString(R.string.notif_label_order);
+            case "PAYMENT_SUCCESS":
+            case "PAYMENT_FAILED": return view.getContext().getString(R.string.notif_label_payment);
+            case "RENTAL_REMINDER": return view.getContext().getString(R.string.notif_label_rental);
+            case "RENTAL_OVERDUE": return view.getContext().getString(R.string.notif_label_overdue);
+            case "SHIPPING_UPDATE": return view.getContext().getString(R.string.notif_label_shipping);
+            case "PROMOTION": return view.getContext().getString(R.string.notif_label_promotion);
+            case "SYSTEM": return view.getContext().getString(R.string.notif_label_system);
+            default: return t.isEmpty() ? view.getContext().getString(R.string.notif_label_default) : t;
         }
     }
 

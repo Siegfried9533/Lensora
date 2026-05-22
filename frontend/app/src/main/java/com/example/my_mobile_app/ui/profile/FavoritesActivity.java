@@ -122,11 +122,12 @@ public class FavoritesActivity extends BaseActivity {
         public void onBindViewHolder(@NonNull VH h, int position) {
             Favorite f = items.get(position);
             boolean isAsset = "ASSET".equals(f.type);
-            h.txtType.setText(isAsset ? "Thiết bị thuê" : "Sản phẩm");
+            h.txtType.setText(isAsset ? R.string.favorites_type_asset : R.string.favorites_type_product);
             String name = f.productName != null ? f.productName : f.assetName;
             h.txtName.setText(name == null ? "--" : name);
             if (f.price != null) {
-                h.txtPrice.setText(PriceFormatter.format(f.price) + (isAsset ? "/ngày" : ""));
+                h.txtPrice.setText(PriceFormatter.format(f.price)
+                        + (isAsset ? getString(R.string.home_per_day) : ""));
                 h.txtPrice.setVisibility(View.VISIBLE);
             } else {
                 h.txtPrice.setVisibility(View.GONE);

@@ -1,5 +1,7 @@
 package com.example.my_mobile_app.util;
 
+import android.content.Context;
+
 import com.example.my_mobile_app.R;
 
 /** Maps order/rental status strings to label, color, and chip background. */
@@ -18,39 +20,49 @@ public final class StatusUtils {
 
     private StatusUtils() {}
 
-    public static Style forOrder(String status) {
+    public static Style forOrder(Context context, String status) {
         String s = status == null ? "" : status.toUpperCase();
         switch (s) {
             case "DELIVERED":
-                return new Style("Đã giao", R.color.green_500, R.drawable.bg_status_delivered);
+                return new Style(context.getString(R.string.status_delivered),
+                        R.color.green_500, R.drawable.bg_status_delivered);
             case "SHIPPING":
             case "SHIPPED":
-                return new Style("Đang vận chuyển", R.color.blue_500, R.drawable.bg_status_shipping);
+                return new Style(context.getString(R.string.status_in_transit),
+                        R.color.blue_500, R.drawable.bg_status_shipping);
             case "CONFIRMED":
-                return new Style("Đã xác nhận", R.color.blue_500, R.drawable.bg_status_shipping);
+                return new Style(context.getString(R.string.status_confirmed),
+                        R.color.blue_500, R.drawable.bg_status_shipping);
             case "PROCESSING":
-                return new Style("Đang xử lý", R.color.blue_500, R.drawable.bg_status_shipping);
+                return new Style(context.getString(R.string.status_processing),
+                        R.color.blue_500, R.drawable.bg_status_shipping);
             case "CANCELLED":
-                return new Style("Đã hủy", R.color.red_500, R.drawable.bg_status_cancelled);
+                return new Style(context.getString(R.string.status_cancelled),
+                        R.color.red_500, R.drawable.bg_status_cancelled);
             case "PENDING":
-                return new Style("Chờ xử lý", R.color.yellow_500, R.drawable.bg_status_pending);
+                return new Style(context.getString(R.string.status_pending),
+                        R.color.yellow_500, R.drawable.bg_status_pending);
             default:
                 return new Style(status == null ? "" : status,
                         R.color.text_muted, R.drawable.bg_status_pending);
         }
     }
 
-    public static Style forRental(String status) {
+    public static Style forRental(Context context, String status) {
         String s = status == null ? "" : status.toUpperCase();
         switch (s) {
             case "ACTIVE":
-                return new Style("Đang hoạt động", R.color.blue_500, R.drawable.bg_status_shipping);
+                return new Style(context.getString(R.string.status_active),
+                        R.color.blue_500, R.drawable.bg_status_shipping);
             case "COMPLETED":
-                return new Style("Hoàn thành", R.color.green_500, R.drawable.bg_status_delivered);
+                return new Style(context.getString(R.string.status_completed),
+                        R.color.green_500, R.drawable.bg_status_delivered);
             case "CANCELLED":
-                return new Style("Đã hủy", R.color.red_500, R.drawable.bg_status_cancelled);
+                return new Style(context.getString(R.string.status_cancelled),
+                        R.color.red_500, R.drawable.bg_status_cancelled);
             case "PENDING":
-                return new Style("Chờ xử lý", R.color.yellow_500, R.drawable.bg_status_pending);
+                return new Style(context.getString(R.string.status_pending),
+                        R.color.yellow_500, R.drawable.bg_status_pending);
             default:
                 return new Style(status == null ? "" : status,
                         R.color.text_muted, R.drawable.bg_status_pending);

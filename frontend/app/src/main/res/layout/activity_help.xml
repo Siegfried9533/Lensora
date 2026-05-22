@@ -57,7 +57,7 @@
                     style="@style/Text.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Làm sao để đặt hàng?"
+                    android:text="@string/help_order_question"
                     android:textStyle="bold" />
 
                 <TextView
@@ -65,7 +65,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Chọn sản phẩm, thêm vào giỏ hoặc Mua ngay, rồi hoàn tất 3 bước thanh toán." />
+                    android:text="@string/help_order_answer" />
 
                 <View
                     android:layout_width="match_parent"
@@ -77,7 +77,7 @@
                     style="@style/Text.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Chính sách đổi trả?"
+                    android:text="@string/help_return_question"
                     android:textStyle="bold" />
 
                 <TextView
@@ -85,7 +85,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Đổi trả miễn phí trong 7 ngày nếu sản phẩm còn nguyên vẹn." />
+                    android:text="@string/help_return_answer" />
 
                 <View
                     android:layout_width="match_parent"
@@ -97,7 +97,7 @@
                     style="@style/Text.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Phí vận chuyển?"
+                    android:text="@string/help_shipping_question"
                     android:textStyle="bold" />
 
                 <TextView
@@ -105,7 +105,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Miễn phí với Giao hàng tiêu chuẩn; Giao hàng nhanh ₫50.000." />
+                    android:text="@string/help_shipping_answer" />
             </LinearLayout>
 
             <TextView

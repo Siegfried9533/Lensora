@@ -1,5 +1,6 @@
 package com.example.my_mobile_app.ui.auth;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -77,7 +78,7 @@ public class LoginActivity extends BaseActivity {
                 } else {
                     setBusy(false);
                     String msg = (body != null) ? body.message : null;
-                    showError(translateError(msg));
+                    showError(translateError(LoginActivity.this, msg));
                 }
             }
 
@@ -85,7 +86,7 @@ public class LoginActivity extends BaseActivity {
             public void onFailure(@NonNull Call<ApiResponse<AuthResponse>> call,
                                   @NonNull Throwable t) {
                 setBusy(false);
-                showError("Không thể kết nối đến máy chủ");
+                showError(getString(R.string.error_server_connection));
             }
         });
     }
@@ -113,7 +114,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void goHome() {
-        showSuccess("Đăng nhập thành công");
+        showSuccess(getString(R.string.success_login));
         startActivity(new Intent(this, HomeActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finishAffinity();
@@ -124,17 +125,17 @@ public class LoginActivity extends BaseActivity {
         if (busy) showLoading(); else hideLoading();
     }
 
-    /** Translate backend error messages to Vietnamese (mirrors login.tsx). */
-    static String translateError(String msg) {
-        if (msg == null) return "Đăng nhập thất bại";
+    /** Translate backend error messages to app-localized copy. */
+    static String translateError(Context context, String msg) {
+        if (msg == null) return context.getString(R.string.error_login_failed);
         String lower = msg.toLowerCase();
         if (lower.contains("invalid email or password") || lower.contains("unauthorized")
                 || lower.contains("bad credentials")) {
-            return "Email hoặc mật khẩu không đúng";
+            return context.getString(R.string.error_invalid_credentials);
         }
-        if (lower.contains("user not found")) return "Không tìm thấy tài khoản";
+        if (lower.contains("user not found")) return context.getString(R.string.error_user_not_found);
         if (lower.contains("email") && lower.contains("exists")) {
-            return "Email đã được đăng ký";
+            return context.getString(R.string.error_email_registered);
         }
         return msg;
     }

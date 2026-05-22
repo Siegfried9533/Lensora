@@ -145,7 +145,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:letterSpacing="0.1"
-                        android:text="MÔ TẢ"
+                        android:text="@string/equipment_description"
                         android:textColor="@color/text_muted"
                         android:textSize="10sp"
                         android:textStyle="bold" />
@@ -194,7 +194,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Buyer protection"
+                            android:text="@string/equipment_buyer_protection"
                             android:textColor="@color/white"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -203,7 +203,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Secure checkout and verified equipment"
+                            android:text="@string/equipment_buyer_protection_desc"
                             android:textColor="@color/text_muted"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -223,7 +223,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:letterSpacing="0.1"
-                        android:text="THÔNG SỐ"
+                        android:text="@string/equipment_specs"
                         android:textColor="@color/text_muted"
                         android:textSize="10sp"
                         android:textStyle="bold" />
@@ -251,7 +251,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:letterSpacing="0.1"
-                        android:text="THỜI GIAN THUÊ"
+                        android:text="@string/equipment_rental_period"
                         android:textColor="@color/text_muted"
                         android:textSize="10sp"
                         android:textStyle="bold" />
@@ -269,7 +269,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="6dp"
                             android:layout_weight="1"
-                            android:text="Từ ngày" />
+                            android:text="@string/equipment_from_date" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_end_date"
@@ -278,7 +278,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
                             android:layout_weight="1"
-                            android:text="Đến ngày" />
+                            android:text="@string/equipment_to_date" />
                     </LinearLayout>
 
                     <TextView
@@ -318,7 +318,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:background="@drawable/bg_button_outline"
-                        android:contentDescription="Giảm"
+                        android:contentDescription="@string/action_decrease"
                         android:padding="8dp"
                         android:src="@drawable/ic_minus"
                         app:tint="@color/orange" />
@@ -339,7 +339,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:background="@drawable/bg_button_outline"
-                        android:contentDescription="Tăng"
+                        android:contentDescription="@string/action_increase"
                         android:padding="8dp"
                         android:src="@drawable/ic_plus"
                         app:tint="@color/orange" />

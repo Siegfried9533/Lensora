@@ -147,7 +147,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="ORDERS"
+                                android:text="@string/profile_orders_label"
                                 android:textColor="@color/white"
                                 android:textSize="9sp" />
                         </LinearLayout>
@@ -179,7 +179,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="RENTALS"
+                                android:text="@string/profile_rentals_label"
                                 android:textColor="@color/white"
                                 android:textSize="9sp" />
                         </LinearLayout>
@@ -211,7 +211,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="RATING"
+                                android:text="@string/profile_rating_label"
                                 android:textColor="@color/white"
                                 android:textSize="9sp" />
                         </LinearLayout>
@@ -224,7 +224,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="30dp"
                     android:layout_marginTop="20dp"
-                    android:text="ACCOUNT" />
+                    android:text="@string/profile_account_section" />
 
                 <LinearLayout
                     android:id="@+id/account_menu"
@@ -241,7 +241,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="30dp"
                     android:layout_marginTop="20dp"
-                    android:text="SETTINGS" />
+                    android:text="@string/profile_settings_section" />
 
                 <LinearLayout
                     android:id="@+id/settings_menu"
@@ -268,7 +268,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="You are not signed in" />
+                android:text="@string/profile_guest_title" />
 
             <TextView
                 style="@style/Text.Muted"
@@ -276,7 +276,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:text="Sign in to view your profile, orders, and manage your account." />
+                android:text="@string/profile_guest_subtitle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_guest_sign_in"

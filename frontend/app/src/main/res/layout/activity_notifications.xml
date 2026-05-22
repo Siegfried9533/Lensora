@@ -18,14 +18,14 @@
             style="@style/Text.Display"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="NOTIFICATIONS" />
+            android:text="@string/notif_title" />
 
         <TextView
             style="@style/Text.Muted"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Stay updated with your orders and rentals" />
+            android:text="@string/notif_subtitle" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_mark_all_read"

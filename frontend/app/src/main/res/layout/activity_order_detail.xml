@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_md"
                 android:layout_weight="1"
-                android:text="Chi tiết đơn hàng" />
+                android:text="@string/order_detail_title" />
         </LinearLayout>
 
         <androidx.cardview.widget.CardView
@@ -82,7 +82,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_md"
-                    android:text="Huỷ đơn"
+                    android:text="@string/order_detail_cancel"
                     android:visibility="gone" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -92,7 +92,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg"
-            android:text="Sản phẩm" />
+            android:text="@string/order_detail_products" />
 
         <LinearLayout
             android:id="@+id/items_container"
@@ -108,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg"
-            android:text="Giao hàng" />
+            android:text="@string/order_detail_shipping" />
 
         <TextView
             android:id="@+id/txt_shipping_address"
@@ -124,7 +124,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg"
-            android:text="Thanh toán" />
+            android:text="@string/order_detail_payment" />
 
         <TextView
             android:id="@+id/txt_payment_method"

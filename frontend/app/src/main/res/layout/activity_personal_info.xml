@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="22dp"
             android:layout_weight="1"
-            android:text="Personal Info"
+            android:text="@string/personal_info_title"
             android:textColor="@color/white"
             android:textSize="30sp"
             android:textStyle="bold" />
@@ -79,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="62dp"
-                android:text="Username"
+                android:text="@string/personal_info_username"
                 android:textColor="@color/text_muted"
                 android:textSize="20sp" />
 
@@ -100,7 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="36dp"
-                android:text="Email Address"
+                android:text="@string/personal_info_email_address"
                 android:textColor="@color/text_muted"
                 android:textSize="20sp" />
 
@@ -121,7 +121,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="36dp"
-                android:text="Role"
+                android:text="@string/personal_info_role"
                 android:textColor="@color/text_muted"
                 android:textSize="20sp" />
 
@@ -132,7 +132,7 @@
                 android:background="@drawable/bg_search"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="18dp"
-                android:text="USER"
+                android:text="@string/personal_info_role_user"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
 

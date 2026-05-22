@@ -49,14 +49,14 @@
                 style="@style/Text.Heading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Trợ lý ảo" />
+                android:text="@string/chatbot_title" />
 
             <TextView
                 style="@style/Text.Muted"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Luôn sẵn sàng hỗ trợ bạn" />
+                android:text="@string/chatbot_subtitle" />
         </LinearLayout>
     </LinearLayout>
 

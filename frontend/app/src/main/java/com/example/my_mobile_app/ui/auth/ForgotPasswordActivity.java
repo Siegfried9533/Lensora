@@ -60,18 +60,18 @@ public class ForgotPasswordActivity extends BaseActivity {
                 setBusy(false);
                 ApiResponse<Void> body = response.body();
                 if (response.isSuccessful() && body != null && body.success) {
-                    showSuccess("Email đã được gửi, vui lòng kiểm tra hộp thư");
+                    showSuccess(getString(R.string.success_email_sent));
                     finish();
                 } else {
                     String msg = body != null ? body.message : null;
-                    showError(msg != null ? msg : "Không tìm thấy tài khoản với email này");
+                    showError(msg != null ? msg : getString(R.string.error_forgot_account_not_found));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 setBusy(false);
-                showError("Không thể kết nối đến máy chủ");
+                showError(getString(R.string.error_server_connection));
             }
         });
     }

@@ -47,8 +47,12 @@
                 android:padding="@dimen/spacing_md">
 
                 <LinearLayout
+                    android:id="@+id/row_language"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -86,10 +90,11 @@
                         android:text="@string/settings_language" />
 
                     <TextView
+                        android:id="@+id/txt_language_value"
                         style="@style/Text.Muted"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tiếng Việt" />
+                        android:text="@string/settings_language_vietnamese" />
                 </LinearLayout>
 
                 <View

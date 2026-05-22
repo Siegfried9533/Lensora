@@ -1,5 +1,6 @@
 package com.example.my_mobile_app.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.Gravity;
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.my_mobile_app.R;
 import com.example.my_mobile_app.ui.auth.LoginActivity;
+import com.example.my_mobile_app.util.LocaleHelper;
 import com.example.my_mobile_app.util.TokenManager;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -19,6 +21,11 @@ import com.google.android.material.snackbar.Snackbar;
 public abstract class BaseActivity extends AppCompatActivity {
 
     private FrameLayout loadingOverlay;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.apply(newBase));
+    }
 
     /** Show a full-screen translucent overlay with a centered spinner. */
     protected void showLoading() {

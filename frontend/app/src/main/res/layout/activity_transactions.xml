@@ -73,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Chưa có đơn hàng"
+            android:text="@string/tx_empty_orders"
             android:textColor="@color/text_muted"
             android:textSize="@dimen/text_body"
             android:visibility="gone" />
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Chưa có đơn thuê"
+            android:text="@string/tx_empty_rentals"
             android:textColor="@color/text_muted"
             android:textSize="@dimen/text_body"
             android:visibility="gone" />

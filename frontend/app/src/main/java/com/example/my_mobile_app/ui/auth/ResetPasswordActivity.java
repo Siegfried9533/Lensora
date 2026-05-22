@@ -56,11 +56,11 @@ public class ResetPasswordActivity extends BaseActivity {
                 ? "" : inputNewPassword.getText().toString();
 
         if (TextUtils.isEmpty(token)) {
-            showError("Vui lòng nhập mã đặt lại từ email");
+            showError(getString(R.string.error_reset_token_required));
             return;
         }
         if (TextUtils.isEmpty(newPassword)) {
-            showError("Vui lòng nhập mật khẩu mới");
+            showError(getString(R.string.error_new_password_required));
             return;
         }
         if (newPassword.length() < 6) {
@@ -78,19 +78,19 @@ public class ResetPasswordActivity extends BaseActivity {
                 setBusy(false);
                 ApiResponse<Void> body = response.body();
                 if (response.isSuccessful() && body != null && body.success) {
-                    showSuccess("Mật khẩu của bạn đã được đặt lại thành công");
+                    showSuccess(getString(R.string.success_password_reset));
                     startActivity(new Intent(ResetPasswordActivity.this, LoginActivity.class));
                     finishAffinity();
                 } else {
                     String msg = body != null ? body.message : null;
-                    showError(msg != null ? msg : "Đặt lại mật khẩu thất bại");
+                    showError(msg != null ? msg : getString(R.string.error_reset_failed));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 setBusy(false);
-                showError("Không thể kết nối đến máy chủ");
+                showError(getString(R.string.error_server_connection));
             }
         });
     }

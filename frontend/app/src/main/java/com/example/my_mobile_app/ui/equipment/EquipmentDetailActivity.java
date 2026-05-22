@@ -90,7 +90,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         itemId = getIntent().getStringExtra(EXTRA_ID);
         itemType = getIntent().getStringExtra(EXTRA_TYPE);
         if (itemId == null || itemType == null) {
-            showError("Thiếu thông tin sản phẩm");
+            showError(getString(R.string.error_missing_item_info));
             finish();
             return;
         }
@@ -144,7 +144,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                             hideLoading();
                             ApiResponse<Product> body = response.body();
                             if (body == null || !body.success || body.data == null) {
-                                showError("Không tìm thấy sản phẩm");
+                                showError(getString(R.string.error_product_not_found));
                                 finish();
                                 return;
                             }
@@ -153,7 +153,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                         }
                         @Override public void onFailure(@NonNull Call<ApiResponse<Product>> call, @NonNull Throwable t) {
                             hideLoading();
-                            showError("Lỗi tải sản phẩm");
+                            showError(getString(R.string.error_load_product));
                             finish();
                         }
                     });
@@ -164,7 +164,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                             hideLoading();
                             ApiResponse<Asset> body = response.body();
                             if (body == null || !body.success || body.data == null) {
-                                showError("Không tìm thấy thiết bị");
+                                showError(getString(R.string.error_asset_not_found));
                                 finish();
                                 return;
                             }
@@ -173,7 +173,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                         }
                         @Override public void onFailure(@NonNull Call<ApiResponse<Asset>> call, @NonNull Throwable t) {
                             hideLoading();
-                            showError("Lỗi tải thiết bị");
+                            showError(getString(R.string.error_load_asset));
                             finish();
                         }
                     });
@@ -191,9 +191,9 @@ public class EquipmentDetailActivity extends BaseActivity {
         rentalSection.setVisibility(View.GONE);
         qtySection.setVisibility(View.VISIBLE);
         renderSpecs(new String[][]{
-                {"Thương hiệu", product.brand},
-                {"Danh mục", product.categoryName},
-                {"Số lượng còn", String.valueOf(product.stockQuantity)},
+                {getString(R.string.equipment_brand), product.brand},
+                {getString(R.string.equipment_category), product.categoryName},
+                {getString(R.string.equipment_stock), String.valueOf(product.stockQuantity)},
         });
         btnAddCart.setVisibility(View.VISIBLE);
         btnAction.setText(R.string.action_buy_now);
@@ -209,9 +209,9 @@ public class EquipmentDetailActivity extends BaseActivity {
         rentalSection.setVisibility(View.VISIBLE);
         qtySection.setVisibility(View.GONE);
         renderSpecs(new String[][]{
-                {"Thương hiệu", asset.brand},
-                {"Danh mục", asset.categoryName},
-                {"Trạng thái", asset.status},
+                {getString(R.string.equipment_brand), asset.brand},
+                {getString(R.string.equipment_category), asset.categoryName},
+                {getString(R.string.equipment_status), asset.status},
         });
         updateDateButtons();
         btnAddCart.setVisibility(View.VISIBLE);
@@ -219,7 +219,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         if (!"AVAILABLE".equals(asset.status)) {
             btnAction.setEnabled(false);
             btnAddCart.setEnabled(false);
-            btnAction.setText("Không khả dụng");
+            btnAction.setText(R.string.equipment_unavailable);
         }
     }
 
@@ -285,7 +285,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         int newQty = qty + delta;
         if (newQty < 1) return;
         if (product != null && product.stockQuantity > 0 && newQty > product.stockQuantity) {
-            showError("Vượt số lượng tồn kho");
+            showError(getString(R.string.error_out_of_stock));
             return;
         }
         qty = newQty;
@@ -301,7 +301,9 @@ public class EquipmentDetailActivity extends BaseActivity {
                 .build();
 
         MaterialDatePicker<Long> picker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText(isStart ? "Chọn ngày bắt đầu" : "Chọn ngày trả")
+                .setTitleText(isStart
+                        ? getString(R.string.equipment_select_start_date)
+                        : getString(R.string.equipment_select_return_date))
                 .setSelection(initial)
                 .setCalendarConstraints(constraints)
                 .build();
@@ -314,7 +316,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                 }
             } else {
                 if (selection <= startMillis) {
-                    showError("Ngày trả phải sau ngày bắt đầu");
+                    showError(getString(R.string.error_return_after_start));
                     return;
                 }
                 endMillis = selection;
@@ -331,12 +333,15 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     private void updateDateButtons() {
-        btnStartDate.setText("Từ: " + DISPLAY_FMT.format(new Date(startMillis)));
-        btnEndDate.setText("Đến: " + DISPLAY_FMT.format(new Date(endMillis)));
+        btnStartDate.setText(getString(R.string.equipment_start_date_format,
+                DISPLAY_FMT.format(new Date(startMillis))));
+        btnEndDate.setText(getString(R.string.equipment_end_date_format,
+                DISPLAY_FMT.format(new Date(endMillis))));
         if (asset != null) {
             long days = Math.max(1, (endMillis - startMillis) / (24L * 3600 * 1000));
             double total = asset.dailyRate * days;
-            txtRentalTotal.setText("Tổng tiền thuê (" + days + " ngày): " + PriceFormatter.format(total));
+            txtRentalTotal.setText(getString(R.string.equipment_rental_total_format,
+                    (int) days, PriceFormatter.format(total)));
         }
     }
 
@@ -358,7 +363,7 @@ public class EquipmentDetailActivity extends BaseActivity {
 
     private void toggleFavorite() {
         if (TokenManager.getToken(this) == null) {
-            showError("Vui lòng đăng nhập");
+            showError(getString(R.string.error_login_required));
             return;
         }
         Map<String, String> body = new HashMap<>();
@@ -373,14 +378,14 @@ public class EquipmentDetailActivity extends BaseActivity {
                         btnFavorite.setImageResource(isFavorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<Map<String, Object>>> call, @NonNull Throwable t) {
-                        showError("Không thể cập nhật yêu thích");
+                        showError(getString(R.string.error_update_favorite));
                     }
                 });
     }
 
     private void addToCart() {
         if (TokenManager.getToken(this) == null) {
-            showError("Vui lòng đăng nhập");
+            showError(getString(R.string.error_login_required));
             return;
         }
         AddToCartRequest req;
@@ -388,7 +393,7 @@ public class EquipmentDetailActivity extends BaseActivity {
             req = new AddToCartRequest(itemId, "PRODUCT", qty);
         } else {
             if (endMillis <= startMillis) {
-                showError("Ngày trả phải sau ngày bắt đầu");
+                showError(getString(R.string.error_return_after_start));
                 return;
             }
             req = new AddToCartRequest(itemId, "ASSET", 1,
@@ -404,16 +409,18 @@ public class EquipmentDetailActivity extends BaseActivity {
                         btnAddCart.setEnabled(true);
                         ApiResponse<com.example.my_mobile_app.model.CartItem> b = response.body();
                         if (b == null || !b.success) {
-                            showError(b != null && b.message != null ? b.message : "Không thể thêm vào giỏ");
+                            showError(b != null && b.message != null
+                                    ? b.message
+                                    : getString(R.string.error_add_to_cart));
                             return;
                         }
-                        showSuccess("Đã thêm vào giỏ");
+                        showSuccess(getString(R.string.success_added_to_cart));
                         finish();
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<com.example.my_mobile_app.model.CartItem>> call, @NonNull Throwable t) {
                         btnAction.setEnabled(true);
                         btnAddCart.setEnabled(true);
-                        showError("Lỗi kết nối");
+                        showError(getString(R.string.error_server_connection));
                     }
                 });
     }

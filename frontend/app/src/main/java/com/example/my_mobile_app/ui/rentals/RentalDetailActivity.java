@@ -52,7 +52,7 @@ public class RentalDetailActivity extends BaseActivity {
         btnBack.setOnClickListener(v -> finish());
         String rentalId = getIntent().getStringExtra(EXTRA_RENTAL_ID);
         if (rentalId == null || rentalId.isEmpty()) {
-            showError("Thiếu mã thuê thiết bị");
+            showError(getString(R.string.error_missing_rental_id));
             finish();
             return;
         }
@@ -68,7 +68,7 @@ public class RentalDetailActivity extends BaseActivity {
                         hideLoading();
                         ApiResponse<Rental> body = response.body();
                         if (body == null || !body.success || body.data == null) {
-                            showError("Không tìm thấy đơn thuê");
+                            showError(getString(R.string.error_rental_not_found));
                             return;
                         }
                         bind(body.data);
@@ -77,7 +77,7 @@ public class RentalDetailActivity extends BaseActivity {
                     @Override public void onFailure(@NonNull Call<ApiResponse<Rental>> call,
                                                     @NonNull Throwable t) {
                         hideLoading();
-                        showError("Không thể tải chi tiết đơn thuê");
+                        showError(getString(R.string.error_load_rental_detail));
                     }
                 });
     }
@@ -86,7 +86,7 @@ public class RentalDetailActivity extends BaseActivity {
         txtName.setText(valueOrDash(rental.assetName));
         txtBrand.setText(valueOrDash(rental.assetBrand));
 
-        StatusUtils.Style style = StatusUtils.forRental(rental.status);
+        StatusUtils.Style style = StatusUtils.forRental(this, rental.status);
         txtStatus.setText(style.label);
         txtStatus.setTextColor(getColor(style.colorRes));
         txtStatus.setBackgroundResource(style.chipBgRes);
@@ -95,10 +95,11 @@ public class RentalDetailActivity extends BaseActivity {
         String end = DateUtils.formatDisplay(DateUtils.parseIso(rental.endDate));
         txtPeriod.setText(valueOrDash(start) + " - " + valueOrDash(end));
         txtReturnDate.setText(valueOrDash(DateUtils.formatDisplay(DateUtils.parseIso(rental.returnDate))));
-        txtDeposit.setText("Tiền cọc: " + PriceFormatter.format(rental.depositFee));
-        txtRentTotal.setText("Tiền thuê: " + PriceFormatter.format(rental.totalRentFee));
-        txtPenalty.setText("Phí phạt: " + PriceFormatter.format(rental.penaltyFee));
-        txtGrandTotal.setText("Tổng cộng: " + PriceFormatter.format(rental.depositFee + rental.totalRentFee + rental.penaltyFee));
+        txtDeposit.setText(getString(R.string.rental_deposit_format, PriceFormatter.format(rental.depositFee)));
+        txtRentTotal.setText(getString(R.string.rental_fee_format, PriceFormatter.format(rental.totalRentFee)));
+        txtPenalty.setText(getString(R.string.rental_penalty_format, PriceFormatter.format(rental.penaltyFee)));
+        txtGrandTotal.setText(getString(R.string.rental_total_format,
+                PriceFormatter.format(rental.depositFee + rental.totalRentFee + rental.penaltyFee)));
 
         if (rental.primaryImageUrl != null && !rental.primaryImageUrl.isEmpty()) {
             Glide.with(this).load(rental.primaryImageUrl).into(imgAsset);

@@ -43,7 +43,7 @@ public class VerifyEmailActivity extends BaseActivity {
     private void attemptVerify() {
         String token = inputToken.getText() == null ? "" : inputToken.getText().toString().trim();
         if (TextUtils.isEmpty(token)) {
-            showError("Vui lòng nhập mã xác minh từ email của bạn");
+            showError(getString(R.string.error_verify_token_required));
             return;
         }
 
@@ -56,18 +56,18 @@ public class VerifyEmailActivity extends BaseActivity {
                 setBusy(false);
                 ApiResponse<Void> body = response.body();
                 if (response.isSuccessful() && body != null && body.success) {
-                    showSuccess("Xác minh email thành công!");
+                    showSuccess(getString(R.string.success_email_verified));
                     finish();
                 } else {
                     String msg = body != null ? body.message : null;
-                    showError(msg != null ? msg : "Mã xác minh không hợp lệ hoặc đã hết hạn");
+                    showError(msg != null ? msg : getString(R.string.error_verify_token_invalid));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 setBusy(false);
-                showError("Không thể kết nối đến máy chủ");
+                showError(getString(R.string.error_server_connection));
             }
         });
     }

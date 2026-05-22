@@ -63,11 +63,11 @@ public class SignupActivity extends BaseActivity {
 
         if (TextUtils.isEmpty(userName) || TextUtils.isEmpty(email)
                 || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirm)) {
-            showError("Vui lòng điền đầy đủ thông tin");
+            showError(getString(R.string.error_signup_missing_fields));
             return;
         }
         if (userName.length() < 2) {
-            showError("Tên người dùng phải có ít nhất 2 ký tự");
+            showError(getString(R.string.error_username_too_short));
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -96,7 +96,7 @@ public class SignupActivity extends BaseActivity {
                     fetchMeThenGoHome();
                 } else {
                     setBusy(false);
-                    showError(LoginActivity.translateError(body != null ? body.message : null));
+                    showError(LoginActivity.translateError(SignupActivity.this, body != null ? body.message : null));
                 }
             }
 
@@ -104,7 +104,7 @@ public class SignupActivity extends BaseActivity {
             public void onFailure(@NonNull Call<ApiResponse<AuthResponse>> call,
                                   @NonNull Throwable t) {
                 setBusy(false);
-                showError("Không thể kết nối đến máy chủ");
+                showError(getString(R.string.error_server_connection));
             }
         });
     }
@@ -132,7 +132,7 @@ public class SignupActivity extends BaseActivity {
     }
 
     private void goHome() {
-        showSuccess("Tài khoản đã được tạo");
+        showSuccess(getString(R.string.success_account_created));
         startActivity(new Intent(this, HomeActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finishAffinity();

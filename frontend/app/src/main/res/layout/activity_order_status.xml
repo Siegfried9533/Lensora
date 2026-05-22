@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="Vui lòng chờ trong giây lát. Bạn có thể quay lại app sau khi hoàn tất thanh toán."
+        android:text="@string/payment_processing_hint"
         android:textColor="@color/text_muted"
         android:textSize="13sp" />
 </LinearLayout>

@@ -43,17 +43,19 @@ public class OrderListAdapter extends RecyclerView.Adapter<OrderListAdapter.VH> 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         Order order = items.get(position);
-        h.txtCode.setText("Mã đơn: " + safe(order.orderId));
+        h.txtCode.setText(h.itemView.getContext().getString(R.string.order_code_format, safe(order.orderId)));
         h.txtTotal.setText(PriceFormatter.format(order.totalAmount));
 
         Date date = DateUtils.parseIso(order.orderDate);
         String dateText = DateUtils.formatDisplay(date);
-        h.txtDate.setText(dateText.isEmpty() ? "Ngày đặt: --" : "Ngày đặt: " + dateText);
+        h.txtDate.setText(h.itemView.getContext().getString(R.string.order_date_format,
+                dateText.isEmpty() ? "--" : dateText));
 
         int count = order.orderItems == null ? 0 : order.orderItems.size();
-        h.txtMeta.setText(count + " sản phẩm | " + safe(order.paymentMethod));
+        h.txtMeta.setText(h.itemView.getContext().getString(R.string.order_meta_format,
+                count, safe(order.paymentMethod)));
 
-        StatusUtils.Style style = StatusUtils.forOrder(order.status);
+        StatusUtils.Style style = StatusUtils.forOrder(h.itemView.getContext(), order.status);
         h.txtStatus.setText(style.label);
         h.txtStatus.setTextColor(h.itemView.getContext().getColor(style.colorRes));
         h.txtStatus.setBackgroundResource(style.chipBgRes);

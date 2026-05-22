@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:gravity="center"
-            android:text="Xóa giỏ hàng"
+            android:text="@string/cart_clear"
             android:textColor="@color/red_500"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="Bạn chưa thêm thiết bị nào vào giỏ hàng."
+            android:text="@string/cart_empty_desc"
             android:textColor="@color/text_muted"
             android:textSize="13sp" />
 
@@ -99,7 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
             android:layout_marginTop="24dp"
-            android:text="Tiếp tục mua sắm" />
+            android:text="@string/cart_continue_shopping" />
     </LinearLayout>
 
     <LinearLayout

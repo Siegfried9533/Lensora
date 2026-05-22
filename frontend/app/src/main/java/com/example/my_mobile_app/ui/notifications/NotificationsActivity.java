@@ -86,7 +86,7 @@ public class NotificationsActivity extends BaseActivity implements NotificationA
                     @Override public void onFailure(@NonNull Call<ApiResponse<PaginatedResponse<Notification>>> call,
                                                     @NonNull Throwable t) {
                         swipe.setRefreshing(false);
-                        showError("Không thể tải thông báo");
+                        showError(getString(R.string.error_load_notifications));
                         render();
                     }
                 });
@@ -127,13 +127,13 @@ public class NotificationsActivity extends BaseActivity implements NotificationA
                 .enqueue(new Callback<ApiResponse<Map<String, Integer>>>() {
                     @Override public void onResponse(@NonNull Call<ApiResponse<Map<String, Integer>>> call,
                                                       @NonNull Response<ApiResponse<Map<String, Integer>>> response) {
-                        showSuccess("Đã đánh dấu tất cả đã đọc");
+                        showSuccess(getString(R.string.success_marked_all_read));
                         load();
                     }
 
                     @Override public void onFailure(@NonNull Call<ApiResponse<Map<String, Integer>>> call,
                                                     @NonNull Throwable t) {
-                        showError("Không thể cập nhật thông báo");
+                        showError(getString(R.string.error_update_notifications));
                     }
                 });
     }
@@ -169,7 +169,7 @@ public class NotificationsActivity extends BaseActivity implements NotificationA
             startActivity(new Intent(this, RentalDetailActivity.class)
                     .putExtra(RentalDetailActivity.EXTRA_RENTAL_ID, id));
         } else {
-            showSuccess("Đã đọc thông báo");
+            showSuccess(getString(R.string.success_notification_read));
         }
     }
 }

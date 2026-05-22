@@ -32,7 +32,7 @@ public class CategoryChipAdapter extends RecyclerView.Adapter<CategoryChipAdapte
         this.listener = listener;
         Category all = new Category();
         all.categoryId = ALL_ID;
-        all.categoryName = "All";
+        all.categoryName = "";
         all.type = "ALL";
         categories.add(all);
     }
@@ -41,7 +41,7 @@ public class CategoryChipAdapter extends RecyclerView.Adapter<CategoryChipAdapte
         categories.clear();
         Category all = new Category();
         all.categoryId = ALL_ID;
-        all.categoryName = "All";
+        all.categoryName = "";
         all.type = "ALL";
         categories.add(all);
         if (cats != null) categories.addAll(cats);
@@ -69,7 +69,9 @@ public class CategoryChipAdapter extends RecyclerView.Adapter<CategoryChipAdapte
     public void onBindViewHolder(@NonNull VH h, int position) {
         Category c = categories.get(position);
         boolean selected = c.categoryId != null && c.categoryId.equals(selectedId);
-        h.text.setText(c.categoryName);
+        h.text.setText(ALL_ID.equals(c.categoryId)
+                ? h.text.getContext().getString(R.string.home_category_all)
+                : c.categoryName);
         h.text.setBackgroundResource(selected ? R.drawable.bg_chip_selected : R.drawable.bg_chip);
         h.text.setTextColor(ContextCompat.getColor(h.text.getContext(),
                 selected ? R.color.black : R.color.white));

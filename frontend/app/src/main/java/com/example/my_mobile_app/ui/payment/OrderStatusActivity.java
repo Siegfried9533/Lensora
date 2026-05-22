@@ -44,7 +44,7 @@ public class OrderStatusActivity extends BaseActivity {
         orderCode = getIntent().getStringExtra(EXTRA_ORDER_CODE);
         orderId = getIntent().getStringExtra(EXTRA_ORDER_ID);
         if (orderCode == null) {
-            failWith("Thiếu mã giao dịch");
+            failWith(getString(R.string.error_missing_transaction_code));
             return;
         }
         scheduleNext();
@@ -53,7 +53,7 @@ public class OrderStatusActivity extends BaseActivity {
     private void scheduleNext() {
         if (cancelled) return;
         if (attempts >= MAX_ATTEMPTS) {
-            failWith("Hết thời gian chờ thanh toán");
+            failWith(getString(R.string.error_payment_timeout));
             return;
         }
         handler.postDelayed(this::pollOnce, POLL_INTERVAL_MS);

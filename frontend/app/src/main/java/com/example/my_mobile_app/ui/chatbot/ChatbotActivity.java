@@ -70,7 +70,7 @@ public class ChatbotActivity extends BaseActivity {
         btnSend = findViewById(R.id.btn_send);
         ImageButton btnBack = findViewById(R.id.btn_back);
 
-        messages.add(new ChatMessage("assistant", "Xin chào! Tôi là trợ lý ảo của bạn. Tôi có thể giúp bạn tìm kiếm thiết bị, tư vấn sản phẩm, hoặc trả lời câu hỏi về dịch vụ. Bạn cần giúp gì?"));
+        messages.add(new ChatMessage("assistant", getString(R.string.chatbot_welcome)));
         adapter = new ChatMessageAdapter(messages);
         LinearLayoutManager lm = new LinearLayoutManager(this);
         lm.setStackFromEnd(true);
@@ -199,7 +199,7 @@ public class ChatbotActivity extends BaseActivity {
                         if (res != null && res.success && res.data != null) {
                             setLastBotMessage(res.data);
                         } else {
-                            setLastBotMessage("Xin lỗi, tôi chưa trả lời được lúc này.");
+                            setLastBotMessage(getString(R.string.chatbot_fallback));
                         }
                         setSending(false);
                     }
@@ -207,7 +207,7 @@ public class ChatbotActivity extends BaseActivity {
                     @Override
                     public void onFailure(@NonNull retrofit2.Call<ApiResponse<String>> call,
                                           @NonNull Throwable t) {
-                        setLastBotMessage("Không thể kết nối chatbot. Vui lòng thử lại.");
+                        setLastBotMessage(getString(R.string.error_chatbot_connection));
                         setSending(false);
                     }
                 });

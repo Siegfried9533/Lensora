@@ -57,10 +57,10 @@ public class OrderDetailActivity extends BaseActivity {
 
         btnBack.setOnClickListener(v -> finish());
         btnCancel.setOnClickListener(v ->
-                showError("Backend hiện chưa có endpoint huỷ đơn cho khách hàng"));
+                showError(getString(R.string.error_cancel_order_unavailable)));
         String orderId = getIntent().getStringExtra(EXTRA_ORDER_ID);
         if (orderId == null || orderId.isEmpty()) {
-            showError("Thiếu mã đơn hàng");
+            showError(getString(R.string.error_missing_order_id));
             finish();
             return;
         }
@@ -76,7 +76,7 @@ public class OrderDetailActivity extends BaseActivity {
                         hideLoading();
                         ApiResponse<Order> body = response.body();
                         if (body == null || !body.success || body.data == null) {
-                            showError("Không tìm thấy đơn hàng");
+                            showError(getString(R.string.error_order_not_found));
                             return;
                         }
                         bind(body.data);
@@ -85,34 +85,35 @@ public class OrderDetailActivity extends BaseActivity {
                     @Override public void onFailure(@NonNull Call<ApiResponse<Order>> call,
                                                     @NonNull Throwable t) {
                         hideLoading();
-                        showError("Không thể tải chi tiết đơn hàng");
+                        showError(getString(R.string.error_load_order_detail));
                     }
                 });
     }
 
     private void bind(Order order) {
-        txtCode.setText("Mã đơn: " + safe(order.orderId));
-        StatusUtils.Style style = StatusUtils.forOrder(order.status);
+        txtCode.setText(getString(R.string.order_code_format, safe(order.orderId)));
+        StatusUtils.Style style = StatusUtils.forOrder(this, order.status);
         txtStatus.setText(style.label);
         txtStatus.setTextColor(getColor(style.colorRes));
         txtStatus.setBackgroundResource(style.chipBgRes);
 
         Date date = DateUtils.parseIso(order.orderDate);
-        txtDate.setText("Ngày đặt: " + valueOrDash(DateUtils.formatDisplay(date)));
+        txtDate.setText(getString(R.string.order_date_format, valueOrDash(DateUtils.formatDisplay(date))));
         txtTimeline.setText(buildTimeline(order.status));
         btnCancel.setVisibility("PENDING".equalsIgnoreCase(order.status) ? View.VISIBLE : View.GONE);
         txtAddress.setText(valueOrDash(order.shippingAddress));
         txtPayment.setText(valueOrDash(order.paymentMethod) + " | " + valueOrDash(order.paymentStatus));
 
         double shipping = order.shippingFee == null ? 0 : order.shippingFee;
-        txtSubtotal.setText("Tạm tính: " + PriceFormatter.format(Math.max(0, order.totalAmount - shipping)));
-        txtShipping.setText("Phí vận chuyển: " + PriceFormatter.format(shipping));
-        txtTotal.setText("Tổng cộng: " + PriceFormatter.format(order.totalAmount));
+        txtSubtotal.setText(getString(R.string.subtotal_format,
+                PriceFormatter.format(Math.max(0, order.totalAmount - shipping))));
+        txtShipping.setText(getString(R.string.shipping_fee_format, PriceFormatter.format(shipping)));
+        txtTotal.setText(getString(R.string.total_format, PriceFormatter.format(order.totalAmount)));
 
         itemsContainer.removeAllViews();
         if (order.orderItems == null || order.orderItems.isEmpty()) {
             TextView empty = new TextView(this);
-            empty.setText("Không có sản phẩm");
+            empty.setText(R.string.order_detail_no_products);
             empty.setTextColor(getColor(R.color.text_muted));
             empty.setTextSize(14);
             itemsContainer.addView(empty);
@@ -147,16 +148,22 @@ public class OrderDetailActivity extends BaseActivity {
         return valueOrDash(value);
     }
 
-    private static String buildTimeline(String status) {
+    private String buildTimeline(String status) {
         String s = status == null ? "" : status.toUpperCase();
         String[] steps = {"PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"};
-        String[] labels = {"Chờ xử lý", "Đã xác nhận", "Đang xử lý", "Đang vận chuyển", "Đã giao"};
+        String[] labels = {
+                getString(R.string.status_pending),
+                getString(R.string.status_confirmed),
+                getString(R.string.status_processing),
+                getString(R.string.status_in_transit),
+                getString(R.string.status_delivered)
+        };
         int active = 0;
         for (int i = 0; i < steps.length; i++) {
             if (steps[i].equals(s)) active = i;
         }
-        if ("CANCELLED".equals(s)) return "Trạng thái: Đơn hàng đã huỷ";
-        StringBuilder sb = new StringBuilder("Theo dõi: ");
+        if ("CANCELLED".equals(s)) return getString(R.string.order_timeline_cancelled);
+        StringBuilder sb = new StringBuilder(getString(R.string.order_timeline_prefix));
         for (int i = 0; i < labels.length; i++) {
             if (i > 0) sb.append("  >  ");
             sb.append(i <= active ? "[x] " : "[ ] ").append(labels[i]);

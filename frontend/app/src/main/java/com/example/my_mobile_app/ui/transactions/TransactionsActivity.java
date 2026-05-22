@@ -104,7 +104,7 @@ public class TransactionsActivity extends BaseActivity
 
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<Order>>> call,
                                                     @NonNull Throwable t) {
-                        showError("Không thể tải đơn hàng");
+                        showError(getString(R.string.error_load_orders));
                         done.run();
                     }
                 });
@@ -123,7 +123,7 @@ public class TransactionsActivity extends BaseActivity
 
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<Rental>>> call,
                                                     @NonNull Throwable t) {
-                        showError("Không thể tải đơn thuê");
+                        showError(getString(R.string.error_load_rentals));
                         done.run();
                     }
                 });

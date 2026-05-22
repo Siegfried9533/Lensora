@@ -139,7 +139,7 @@ public class CheckoutActivity extends BaseActivity {
                         spProvince.setAdapter(buildSpinnerAdapter(names));
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<Province>>> call, @NonNull Throwable t) {
-                        showError("Lỗi tải tỉnh/thành");
+                        showError(getString(R.string.error_load_provinces));
                     }
                 });
     }
@@ -189,7 +189,7 @@ public class CheckoutActivity extends BaseActivity {
                         renderSummary();
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<CartItem>>> call, @NonNull Throwable t) {
-                        showError("Lỗi tải giỏ hàng");
+                        showError(getString(R.string.error_load_cart));
                     }
                 });
     }
@@ -224,7 +224,7 @@ public class CheckoutActivity extends BaseActivity {
         }
         if (summaryItems.getChildCount() == 0) {
             TextView empty = new TextView(this);
-            empty.setText("Giỏ hàng trống");
+            empty.setText(R.string.cart_empty);
             empty.setTextColor(getColor(R.color.text_muted));
             summaryItems.addView(empty);
         }
@@ -265,12 +265,12 @@ public class CheckoutActivity extends BaseActivity {
 
     private void placeOrder() {
         if (selProvince == null || selDistrict == null || selWard == null) {
-            showError("Vui lòng chọn đầy đủ địa chỉ");
+            showError(getString(R.string.error_select_full_address));
             return;
         }
         String street = etStreet.getText().toString().trim();
         if (TextUtils.isEmpty(street)) {
-            showError("Vui lòng nhập số nhà, tên đường");
+            showError(getString(R.string.error_enter_street));
             return;
         }
         // Filter PRODUCT items only — order endpoint cannot handle ASSET items.
@@ -281,7 +281,7 @@ public class CheckoutActivity extends BaseActivity {
             }
         }
         if (orderItems.isEmpty()) {
-            showError("Giỏ không có sản phẩm để đặt. Thiết bị thuê hãy đặt từ trang chi tiết.");
+            showError(getString(R.string.error_empty_order_cart));
             return;
         }
 
@@ -307,7 +307,9 @@ public class CheckoutActivity extends BaseActivity {
                         btnPlaceOrder.setEnabled(true);
                         ApiResponse<Order> b = response.body();
                         if (b == null || !b.success || b.data == null) {
-                            showError(b != null && b.message != null ? b.message : "Đặt hàng thất bại");
+                            showError(b != null && b.message != null
+                                    ? b.message
+                                    : getString(R.string.error_place_order_failed));
                             return;
                         }
                         Order order = b.data;
@@ -324,7 +326,7 @@ public class CheckoutActivity extends BaseActivity {
                     @Override public void onFailure(@NonNull Call<ApiResponse<Order>> call, @NonNull Throwable t) {
                         hideLoading();
                         btnPlaceOrder.setEnabled(true);
-                        showError("Lỗi kết nối khi đặt hàng");
+                        showError(getString(R.string.error_place_order_connection));
                     }
                 });
     }
@@ -332,7 +334,7 @@ public class CheckoutActivity extends BaseActivity {
     private void createMomoPayment(Order order) {
         double total = subtotal + shippingFee;
         CreateMoMoPaymentRequest req = new CreateMoMoPaymentRequest(
-                order.orderId, total, "Thanh toán đơn hàng: " + order.orderId);
+                order.orderId, total, getString(R.string.checkout_momo_order_info, order.orderId));
         req.requestType = "captureWallet";
         showLoading();
         ApiClient.get(this).create(PaymentService.class).createMoMoPayment(req)
@@ -341,7 +343,7 @@ public class CheckoutActivity extends BaseActivity {
                         hideLoading();
                         ApiResponse<Map<String, String>> b = response.body();
                         if (b == null || !b.success || b.data == null) {
-                            showError("Không tạo được thanh toán MoMo");
+                            showError(getString(R.string.error_create_momo));
                             return;
                         }
                         String payUrl = b.data.get("payUrl");
@@ -358,7 +360,7 @@ public class CheckoutActivity extends BaseActivity {
                     }
                     @Override public void onFailure(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Throwable t) {
                         hideLoading();
-                        showError("Lỗi kết nối khi tạo thanh toán MoMo");
+                        showError(getString(R.string.error_create_momo_connection));
                     }
                 });
     }
