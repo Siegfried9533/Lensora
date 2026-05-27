@@ -22,6 +22,7 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime orderDate = LocalDateTime.now();
 
@@ -31,14 +32,17 @@ public class Order {
     @Column(nullable = false, length = 500)
     private String shippingAddress;
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.PENDING;
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod = PaymentMethod.COD;
 
+    @Builder.Default
     private String paymentStatus = "PENDING";
 
     private String ghnOrderId; // GHN order ID for tracking
@@ -50,6 +54,7 @@ public class Order {
     private LocalDateTime deliveredDate;
     private LocalDateTime cancelledDate;
 
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentTransaction> paymentTransactions = new ArrayList<>();
 
@@ -57,6 +62,7 @@ public class Order {
         COD, VNPay, MoMo
     }
 
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 

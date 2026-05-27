@@ -17,14 +17,25 @@ public interface AssetRepository extends JpaRepository<Asset, String> {
 
     Page<Asset> findByStatus(AssetStatus status, Pageable pageable);
 
-    @Query("SELECT a FROM Asset a WHERE " +
-           "(:searchQuery IS NULL OR LOWER(a.modelName) LIKE LOWER(CONCAT('%', :searchQuery, '%'))) AND " +
-           "(:categoryId IS NULL OR a.category.categoryId = :categoryId) AND " +
-           "(:status IS NULL OR a.status = :status)")
-    Page<Asset> searchAssets(@Param("searchQuery") String searchQuery,
-                              @Param("categoryId") String categoryId,
-                              @Param("status") AssetStatus status,
-                              Pageable pageable);
+    Page<Asset> findByCategory_CategoryIdAndStatus(String categoryId, AssetStatus status, Pageable pageable);
+
+    Page<Asset> findByModelNameContainingIgnoreCase(String searchQuery, Pageable pageable);
+
+    Page<Asset> findByModelNameContainingIgnoreCaseAndCategory_CategoryId(
+            String searchQuery,
+            String categoryId,
+            Pageable pageable);
+
+    Page<Asset> findByModelNameContainingIgnoreCaseAndStatus(
+            String searchQuery,
+            AssetStatus status,
+            Pageable pageable);
+
+    Page<Asset> findByModelNameContainingIgnoreCaseAndCategory_CategoryIdAndStatus(
+            String searchQuery,
+            String categoryId,
+            AssetStatus status,
+            Pageable pageable);
 
     @Query("SELECT a FROM Asset a WHERE a.user.userId = :userId")
     List<Asset> findByUserId(@Param("userId") String userId);

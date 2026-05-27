@@ -14,12 +14,12 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Query("SELECT p FROM Product p WHERE p.category.categoryId = :categoryId")
     Page<Product> findByCategoryId(@Param("categoryId") String categoryId, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE " +
-           "(:searchQuery IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :searchQuery, '%'))) AND " +
-           "(:categoryId IS NULL OR p.category.categoryId = :categoryId)")
-    Page<Product> searchProducts(@Param("searchQuery") String searchQuery,
-                                  @Param("categoryId") String categoryId,
-                                  Pageable pageable);
+    Page<Product> findByProductNameContainingIgnoreCase(String searchQuery, Pageable pageable);
+
+    Page<Product> findByProductNameContainingIgnoreCaseAndCategory_CategoryId(
+            String searchQuery,
+            String categoryId,
+            Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.user.userId = :userId")
     List<Product> findByUserId(@Param("userId") String userId);

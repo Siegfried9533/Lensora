@@ -31,8 +31,51 @@ public class AssetService {
     }
 
     public Page<AssetDTO> searchAssets(String searchQuery, String categoryId, String status, Pageable pageable) {
-        Asset.AssetStatus assetStatus = status != null ? Asset.AssetStatus.valueOf(status) : null;
-        return assetRepository.searchAssets(searchQuery, categoryId, assetStatus, pageable).map(this::toDTO);
+        String normalizedSearch = normalizeFilter(searchQuery);
+        String normalizedCategoryId = normalizeFilter(categoryId);
+        String normalizedStatus = normalizeFilter(status);
+        Asset.AssetStatus assetStatus = normalizedStatus != null ? Asset.AssetStatus.valueOf(normalizedStatus) : null;
+
+        if (normalizedSearch == null && normalizedCategoryId == null && assetStatus == null) {
+            return assetRepository.findAll(pageable).map(this::toDTO);
+        }
+
+        if (normalizedSearch == null && normalizedCategoryId == null) {
+            return assetRepository.findByStatus(assetStatus, pageable).map(this::toDTO);
+        }
+
+        if (normalizedSearch == null && assetStatus == null) {
+            return assetRepository.findByCategoryId(normalizedCategoryId, pageable).map(this::toDTO);
+        }
+
+        if (normalizedSearch == null) {
+            return assetRepository.findByCategory_CategoryIdAndStatus(normalizedCategoryId, assetStatus, pageable)
+                    .map(this::toDTO);
+        }
+
+        if (normalizedCategoryId == null && assetStatus == null) {
+            return assetRepository.findByModelNameContainingIgnoreCase(normalizedSearch, pageable).map(this::toDTO);
+        }
+
+        if (normalizedCategoryId == null) {
+            return assetRepository.findByModelNameContainingIgnoreCaseAndStatus(
+                    normalizedSearch,
+                    assetStatus,
+                    pageable).map(this::toDTO);
+        }
+
+        if (assetStatus == null) {
+            return assetRepository.findByModelNameContainingIgnoreCaseAndCategory_CategoryId(
+                    normalizedSearch,
+                    normalizedCategoryId,
+                    pageable).map(this::toDTO);
+        }
+
+        return assetRepository.findByModelNameContainingIgnoreCaseAndCategory_CategoryIdAndStatus(
+                normalizedSearch,
+                normalizedCategoryId,
+                assetStatus,
+                pageable).map(this::toDTO);
     }
 
     public AssetDTO getAssetById(String id) {
@@ -45,6 +88,13 @@ public class AssetService {
         return assetRepository.findByUserId(userId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String normalizeFilter(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 
     private AssetDTO toDTO(Asset asset) {

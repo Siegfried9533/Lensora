@@ -31,7 +31,27 @@ public class ProductService {
     }
 
     public Page<ProductDTO> searchProducts(String searchQuery, String categoryId, Pageable pageable) {
-        return productRepository.searchProducts(searchQuery, categoryId, pageable).map(this::toDTO);
+        String normalizedSearch = normalizeFilter(searchQuery);
+        String normalizedCategoryId = normalizeFilter(categoryId);
+
+        if (normalizedSearch == null && normalizedCategoryId == null) {
+            return productRepository.findAll(pageable).map(this::toDTO);
+        }
+
+        if (normalizedSearch == null) {
+            return productRepository.findByCategoryId(normalizedCategoryId, pageable).map(this::toDTO);
+        }
+
+        if (normalizedCategoryId == null) {
+            return productRepository.findByProductNameContainingIgnoreCase(normalizedSearch, pageable).map(this::toDTO);
+        }
+
+        return productRepository
+                .findByProductNameContainingIgnoreCaseAndCategory_CategoryId(
+                        normalizedSearch,
+                        normalizedCategoryId,
+                        pageable)
+                .map(this::toDTO);
     }
 
     public ProductDTO getProductById(String id) {
@@ -44,6 +64,13 @@ public class ProductService {
         return productRepository.findByUserId(userId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String normalizeFilter(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 
     private ProductDTO toDTO(Product product) {
