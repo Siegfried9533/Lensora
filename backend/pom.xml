@@ -7,7 +7,7 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.2</version>
 		<relativePath/>
-		<!-- lookup parent from repository -->
+		<!-- tra cứu parent từ repository -->
 	</parent>
 	<groupId>com.camerashop</groupId>
 	<artifactId>backend</artifactId>
