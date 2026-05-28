@@ -16,16 +16,24 @@ import com.example.my_mobile_app.R;
 import com.example.my_mobile_app.api.ApiClient;
 import com.example.my_mobile_app.api.ApiResponse;
 import com.example.my_mobile_app.api.AuthService;
+import com.example.my_mobile_app.api.OrderService;
+import com.example.my_mobile_app.api.RentalService;
+import com.example.my_mobile_app.api.ReviewService;
+import com.example.my_mobile_app.model.Order;
+import com.example.my_mobile_app.model.Rental;
 import com.example.my_mobile_app.model.User;
 import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.ui.auth.LoginActivity;
 import com.example.my_mobile_app.ui.cart.CartActivity;
 import com.example.my_mobile_app.ui.notifications.NotificationsActivity;
+import com.example.my_mobile_app.ui.transactions.TransactionsActivity;
 import com.example.my_mobile_app.util.BottomNavHelper;
 import com.example.my_mobile_app.util.TokenManager;
 import com.example.my_mobile_app.util.UserManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,7 +43,8 @@ import retrofit2.Response;
 public class ProfileActivity extends BaseActivity {
 
     private ImageView imgAvatar;
-    private TextView txtInitial, txtName, txtEmail, txtTrustScore, txtTrustLabel;
+    private TextView txtInitial, txtName, txtEmail, txtTrustLabel;
+    private TextView txtOrderCount, txtRentalCount, txtReviewCount;
     private LinearLayout accountMenu, settingsMenu;
 
     @Override
@@ -58,14 +67,28 @@ public class ProfileActivity extends BaseActivity {
         txtInitial = findViewById(R.id.txt_avatar_initial);
         txtName = findViewById(R.id.txt_user_name);
         txtEmail = findViewById(R.id.txt_user_email);
-        txtTrustScore = findViewById(R.id.txt_trust_score);
         txtTrustLabel = findViewById(R.id.txt_trust_label);
+        txtOrderCount = findViewById(R.id.txt_order_count);
+        txtRentalCount = findViewById(R.id.txt_rental_count);
+        txtReviewCount = findViewById(R.id.txt_review_count);
         accountMenu = findViewById(R.id.account_menu);
         settingsMenu = findViewById(R.id.settings_menu);
+
+        findViewById(R.id.stat_orders).setOnClickListener(v -> openTransactions(0));
+        findViewById(R.id.stat_rentals).setOnClickListener(v -> openTransactions(1));
 
         bindUser(UserManager.getUser(this));
         buildMenus();
         refreshUser();
+        refreshStats();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (txtOrderCount != null && TokenManager.getToken(this) != null) {
+            refreshStats();
+        }
     }
 
     private void showGuestState() {
@@ -100,7 +123,6 @@ public class ProfileActivity extends BaseActivity {
         txtName.setText(name);
         txtEmail.setText(valueOrDash(user.email));
         String score = String.valueOf((int) user.trustScore);
-        txtTrustScore.setText(score);
         txtTrustLabel.setText(getString(R.string.profile_trust_score_format, score));
         String initial = name.equals("--") ? "?" : name.substring(0, 1).toUpperCase();
         txtInitial.setText(initial);
@@ -112,6 +134,69 @@ public class ProfileActivity extends BaseActivity {
             txtInitial.setVisibility(View.VISIBLE);
             imgAvatar.setVisibility(View.GONE);
         }
+    }
+
+    private void refreshStats() {
+        loadOrderCount();
+        loadRentalCount();
+        loadReviewCount();
+    }
+
+    private void loadOrderCount() {
+        ApiClient.get(this).create(OrderService.class).getOrders()
+                .enqueue(new Callback<ApiResponse<List<Order>>>() {
+                    @Override public void onResponse(@NonNull Call<ApiResponse<List<Order>>> call,
+                                                      @NonNull Response<ApiResponse<List<Order>>> response) {
+                        ApiResponse<List<Order>> body = response.body();
+                        int count = body != null && body.success && body.data != null ? body.data.size() : 0;
+                        txtOrderCount.setText(String.valueOf(count));
+                    }
+
+                    @Override public void onFailure(@NonNull Call<ApiResponse<List<Order>>> call,
+                                                    @NonNull Throwable t) {
+                        txtOrderCount.setText("0");
+                    }
+                });
+    }
+
+    private void loadRentalCount() {
+        ApiClient.get(this).create(RentalService.class).getRentals()
+                .enqueue(new Callback<ApiResponse<List<Rental>>>() {
+                    @Override public void onResponse(@NonNull Call<ApiResponse<List<Rental>>> call,
+                                                      @NonNull Response<ApiResponse<List<Rental>>> response) {
+                        ApiResponse<List<Rental>> body = response.body();
+                        int count = body != null && body.success && body.data != null ? body.data.size() : 0;
+                        txtRentalCount.setText(String.valueOf(count));
+                    }
+
+                    @Override public void onFailure(@NonNull Call<ApiResponse<List<Rental>>> call,
+                                                    @NonNull Throwable t) {
+                        txtRentalCount.setText("0");
+                    }
+                });
+    }
+
+    private void loadReviewCount() {
+        ApiClient.get(this).create(ReviewService.class).getMyReviewCount()
+                .enqueue(new Callback<ApiResponse<Integer>>() {
+                    @Override public void onResponse(@NonNull Call<ApiResponse<Integer>> call,
+                                                      @NonNull Response<ApiResponse<Integer>> response) {
+                        ApiResponse<Integer> body = response.body();
+                        int count = body != null && body.success && body.data != null ? body.data : 0;
+                        txtReviewCount.setText(String.valueOf(count));
+                    }
+
+                    @Override public void onFailure(@NonNull Call<ApiResponse<Integer>> call,
+                                                    @NonNull Throwable t) {
+                        txtReviewCount.setText("0");
+                    }
+                });
+    }
+
+    private void openTransactions(int tab) {
+        Intent intent = new Intent(this, TransactionsActivity.class);
+        intent.putExtra(TransactionsActivity.EXTRA_INITIAL_TAB, tab);
+        startActivity(intent);
     }
 
     private void buildMenus() {

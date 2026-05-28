@@ -122,10 +122,14 @@
                         android:orientation="horizontal">
 
                         <LinearLayout
+                            android:id="@+id/stat_orders"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:background="@drawable/bg_stat_card"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground"
                             android:gravity="center"
                             android:orientation="vertical">
 
@@ -136,6 +140,7 @@
                                 app:tint="@color/white" />
 
                             <TextView
+                                android:id="@+id/txt_order_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -153,11 +158,15 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/stat_rentals"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_marginStart="10dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_stat_card"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground"
                             android:gravity="center"
                             android:orientation="vertical">
 
@@ -168,10 +177,11 @@
                                 app:tint="@color/white" />
 
                             <TextView
+                                android:id="@+id/txt_rental_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="1"
+                                android:text="0"
                                 android:textColor="@color/white"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
@@ -185,6 +195,7 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/stat_reviews"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_marginStart="10dp"
@@ -200,10 +211,11 @@
                                 app:tint="@color/white" />
 
                             <TextView
-                                android:id="@+id/txt_trust_score"
+                                android:id="@+id/txt_review_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:text="0"
                                 android:textColor="@color/white"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />

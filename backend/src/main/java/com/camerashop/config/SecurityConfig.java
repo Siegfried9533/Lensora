@@ -49,7 +49,8 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setContentType("application/json;charset=UTF-8");
                     response.setStatus(401);
                     response.getWriter().write("{\"success\": false, \"message\": \"Chưa xác thực - vui lòng đăng nhập\"}");
                 })

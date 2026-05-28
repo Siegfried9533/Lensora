@@ -1,204 +1,220 @@
-# Camera Shop Backend
+# Lensora
 
-A full-featured e-commerce backend for a camera equipment marketplace built with Spring Boot.
+Lensora là project ứng dụng mua, bán và thuê thiết bị máy ảnh, gồm 2 phần chính:
 
-## Table of Contents
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Database Setup](#database-setup)
-  - [Running the Application](#running-the-application)
-- [API Endpoints](#api-endpoints)
-- [Authentication](#authentication)
-- [Testing](#testing)
-- [Deployment](#deployment)
-
-## Overview
-
-This is the backend service for a camera equipment marketplace that allows users to browse, rent, and purchase photography equipment. The backend provides RESTful APIs for user authentication, product management, shopping cart, order processing, rental services, and payment integration.
-
-## Tech Stack
-
-- **Java 17**
-- **Spring Boot 3.2.4**
-- **Spring Security + JWT**
-- **Spring Data JPA**
-- **MySQL**
-- **Maven**
-
-## Features
-
-- 🔐 JWT Authentication & Authorization
-- 👤 User Registration & Login
-- 🛍️ Product Catalog Management
-- 🛒 Shopping Cart Functionality
-- 📦 Order Processing
-- 📱 Rental Services
-- 💰 Payment Integration (MoMo, VNPay)
-- 🚚 Shipping Integration (GHN)
-- ❤️ Favorites/Wishlist
-- 📧 Email Verification
-- 🔔 Notification System
-- 📊 Admin Dashboard APIs
-
-## Project Structure
-
-```
-src/main/java/com/camerashop/
-├── CameraShopApplication.java
-├── config/
-│   ├── DataInitializer.java
-│   ├── NotificationScheduler.java
-│   ├── OAuth2SuccessHandler.java
-│   └── SecurityConfig.java
-├── controller/
-│   ├── AssetController.java
-│   ├── AuthController.java
-│   ├── CartController.java
-│   ├── CategoryController.java
-│   ├── FavoriteController.java
-│   ├── NotificationController.java
-│   ├── OrderController.java
-│   ├── PaymentController.java
-│   ├── ProductController.java
-│   ├── RentalController.java
-│   └── ShippingController.java
-├── dto/
-├── entity/
-├── filter/
-│   └── JwtAuthFilter.java
-├── repository/
-├── service/
-└── util/
-    └── JwtUtil.java
+```text
+Lensora/
+├── backend/
+└── frontend/
 ```
 
-## Getting Started
+- `backend/`: Spring Boot REST API, PostgreSQL, JWT authentication, Flyway migration.
+- `frontend/`: Android app Java/XML dùng Retrofit để gọi API backend.
 
-### Prerequisites
+## Yêu cầu môi trường
 
-- Java 17
-- Maven 3.8+
-- MySQL 8.0+
+- Java 21
+- Docker và Docker Compose
+- Android Studio hoặc Android SDK/Gradle
+- Android Emulator hoặc thiết bị Android thật
 
-### Installation
+## Chạy Backend
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/minhphuong150505/Mobile-App_Backend.git
-   cd Mobile-App_Backend/Backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   mvn clean compile
-   ```
-
-### Database Setup
-
-1. Start MySQL server
-
-2. Create database:
-   ```sql
-   mysql -u root -p
-   CREATE DATABASE camera_shop;
-   ```
-
-### Running the Application
+Backend và PostgreSQL được cấu hình trong [backend/docker-compose.yml](backend/docker-compose.yml).
 
 ```bash
-mvn spring-boot:run
+cd backend
+docker compose up -d --build
 ```
 
-The server will start on port 8080.
+Backend chạy tại:
 
-## API Endpoints
+```text
+http://localhost:8080
+```
 
-Base URL: `http://localhost:8080/api`
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh token
-
-### Products
-- `GET /api/products` - Get all products
-- `GET /api/products/{id}` - Get product by ID
-- `POST /api/products` - Create new product (ADMIN)
-- `PUT /api/products/{id}` - Update product (ADMIN)
-- `DELETE /api/products/{id}` - Delete product (ADMIN)
-
-### Assets
-- `GET /api/assets` - Get all assets
-- `GET /api/assets/{id}` - Get asset by ID
-- `POST /api/assets` - Create new asset (ADMIN)
-- `PUT /api/assets/{id}` - Update asset (ADMIN)
-
-### Cart
-- `GET /api/cart` - Get user's cart
-- `POST /api/cart` - Add item to cart
-- `PUT /api/cart/{id}` - Update cart item
-- `DELETE /api/cart/{id}` - Remove item from cart
-
-### Orders
-- `GET /api/orders` - Get user's orders
-- `GET /api/orders/{id}` - Get order by ID
-- `POST /api/orders` - Create new order
-- `PUT /api/orders/{id}/cancel` - Cancel order
-
-### Rentals
-- `GET /api/rentals` - Get user's rentals
-- `POST /api/rentals` - Create new rental
-- `PUT /api/rentals/{id}/return` - Return rented item
-
-### Favorites
-- `GET /api/favorites` - Get user's favorites
-- `POST /api/favorites` - Add item to favorites
-- `DELETE /api/favorites/{id}` - Remove item from favorites
-
-## Authentication
-
-This application uses JWT (JSON Web Token) for authentication:
-
-1. Register or login to get a JWT token
-2. Include the token in the Authorization header:
-   ```
-   Authorization: Bearer <your-token-here>
-   ```
-
-## Testing
-
-Run tests with Maven:
+Health check:
 
 ```bash
-mvn test
+curl http://localhost:8080/api/health
 ```
 
-## Deployment
+Nếu port PostgreSQL mặc định `5433` bị trùng, chạy bằng port khác:
 
-For production deployment:
+```bash
+cd backend
+DB_PORT=5434 docker compose up -d --build
+```
 
-1. Update `application.properties` with production database credentials
-2. Build the JAR file:
-   ```bash
-   mvn clean package
-   ```
-3. Run the JAR:
-   ```bash
-   java -jar target/camera-shop-backend-*.jar
-   ```
+Thông tin DB mặc định trong Docker:
 
-## Test Users
+```text
+Database: LensoraDB
+Username: postgres
+Password: Hoalt@2005
+Host port: 5433
+Container port: 5432
+```
 
-After first run, the database will be seeded with test users:
+## Chạy Backend Local Bằng Maven
 
-- **User**: testuser / password123
-- **Admin**: johndoe / password123
+Nếu chỉ chạy DB bằng Docker và chạy Spring Boot ngoài Docker:
 
----
+```bash
+cd backend
+DB_PORT=5434 docker compose up -d db
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5434/LensoraDB \
+SPRING_DATASOURCE_USERNAME=postgres \
+SPRING_DATASOURCE_PASSWORD='Hoalt@2005' \
+bash ./mvnw spring-boot:run
+```
 
-Built with ❤️ using Spring Boot
+Chạy test backend:
+
+```bash
+cd backend
+bash ./mvnw test
+```
+
+## Chạy Frontend Android
+
+Build debug APK:
+
+```bash
+cd frontend
+./gradlew assembleDebug
+```
+
+API base URL của Android app nằm tại:
+
+```text
+frontend/app/src/main/java/com/example/my_mobile_app/api/ApiConstants.java
+```
+
+Mặc định:
+
+```java
+public static final String BASE_URL = "http://10.0.2.2:8080/api/";
+```
+
+Giá trị này đúng khi chạy Android Emulator và backend ở cùng máy.
+
+Nếu chạy trên điện thoại thật hoặc backend nằm ở máy khác, đổi `10.0.2.2` thành IP LAN của máy chạy backend, ví dụ:
+
+```java
+public static final String BASE_URL = "http://192.168.1.25:8080/api/";
+```
+
+Điều kiện khi dùng điện thoại thật:
+
+- Điện thoại và máy backend phải cùng mạng Wi-Fi/LAN.
+- Firewall của máy backend phải mở port `8080`.
+- Backend đã cấu hình `server.address=0.0.0.0`, nên có thể nhận request từ máy khác.
+
+## Tài Khoản Test
+
+Sau khi backend khởi động và seed dữ liệu, có thể dùng:
+
+```text
+User:  test@example.com / password123
+Admin: john@example.com / password123
+```
+
+## API Chính
+
+Base URL:
+
+```text
+http://localhost:8080/api
+```
+
+Một số endpoint thường dùng:
+
+```text
+GET  /api/health
+POST /api/auth/login
+POST /api/auth/register
+GET  /api/auth/me
+GET  /api/products
+GET  /api/categories
+GET  /api/cart
+GET  /api/favorites
+GET  /api/orders
+GET  /api/rentals
+POST /api/chatbot/chat-sync
+```
+
+Các API cần đăng nhập dùng header:
+
+```text
+Authorization: Bearer <jwt-token>
+```
+
+## Cấu Hình Dịch Vụ Ngoài
+
+Các biến môi trường backend có thể cấu hình khi cần:
+
+```text
+SPRING_DATASOURCE_URL
+SPRING_DATASOURCE_USERNAME
+SPRING_DATASOURCE_PASSWORD
+APP_JWT_SECRET
+SPRING_MAIL_HOST
+SPRING_MAIL_PORT
+APP_GHN_TOKEN
+APP_GHN_SHOP_ID
+APP_MOMO_PARTNER_CODE
+APP_MOMO_ACCESS_KEY
+APP_MOMO_SECRET_KEY
+OLLAMA_BASE_URL
+OLLAMA_MODEL
+OLLAMA_API_KEY
+```
+
+Các giá trị mặc định nằm trong:
+
+```text
+backend/src/main/resources/application.properties
+```
+
+## Cấu Trúc Thư Mục
+
+```text
+backend/
+├── src/main/java/com/camerashop/
+│   ├── config/
+│   ├── controller/
+│   ├── dto/
+│   ├── entity/
+│   ├── filter/
+│   ├── repository/
+│   ├── service/
+│   └── util/
+├── src/main/resources/
+│   ├── application.properties
+│   └── db/migration/
+├── docker-compose.yml
+├── Dockerfile
+└── pom.xml
+
+frontend/
+├── app/src/main/java/com/example/my_mobile_app/
+│   ├── api/
+│   ├── model/
+│   ├── ui/
+│   └── util/
+├── app/src/main/res/
+│   ├── layout/
+│   ├── drawable/
+│   ├── menu/
+│   └── values/
+├── app/build.gradle.kts
+└── settings.gradle.kts
+```
+
+## Lệnh Dừng Docker Backend
+
+```bash
+cd backend
+docker compose down
+```

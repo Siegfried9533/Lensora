@@ -10,4 +10,5 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByEntityIdAndType(Long entityId, String type);
     List<Review> findByUserUserId(String userId);
+    long countByUserUserId(String userId);
 }

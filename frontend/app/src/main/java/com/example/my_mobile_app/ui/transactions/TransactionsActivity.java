@@ -35,6 +35,8 @@ import retrofit2.Response;
 public class TransactionsActivity extends BaseActivity
         implements OrderListAdapter.OnClick, RentalListAdapter.OnClick {
 
+    public static final String EXTRA_INITIAL_TAB = "initial_tab";
+
     private final List<Order> orders = new ArrayList<>();
     private final List<Rental> rentals = new ArrayList<>();
 
@@ -70,7 +72,7 @@ public class TransactionsActivity extends BaseActivity
         btnOrders.setOnClickListener(v -> showTab(0));
         btnRentals.setOnClickListener(v -> showTab(1));
 
-        showTab(0);
+        showTab(getIntent().getIntExtra(EXTRA_INITIAL_TAB, 0));
         load();
     }
 

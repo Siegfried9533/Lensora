@@ -76,6 +76,26 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/verify-email")
+    public ResponseEntity<ApiResponse> verifyEmail(@RequestParam String token) {
+        try {
+            authService.verifyEmail(token);
+            return ResponseEntity.ok(ApiResponse.success(null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse> resendVerificationEmail(@RequestBody Map<String, String> body) {
+        try {
+            authService.resendVerificationEmail(body.get("email"));
+            return ResponseEntity.ok(ApiResponse.success(null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse> forgotPassword(@RequestBody Map<String, String> body) {
         try {

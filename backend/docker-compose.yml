@@ -1,3 +1,5 @@
+name: lensora
+
 services:
   db:
     image: postgres:15
@@ -14,7 +16,7 @@ services:
       - lensora_db_data:/var/lib/postgresql/data # Đảm bảo rằng dữ liệu được lưu trữ bền vững ngay cả khi container bị xóa
 
   backend:
-    build: backend
+    build: .
     container_name: java_backend
     ports:
       - "8080:8080"
