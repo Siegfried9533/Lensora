@@ -3,6 +3,7 @@ package com.camerashop.service;
 import com.camerashop.dto.ProductDTO;
 import com.camerashop.entity.Product;
 import com.camerashop.entity.ProductImage;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.ProductRepository;
 import com.camerashop.repository.ProductImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class ProductService {
 
     public ProductDTO getProductById(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
         return toDTO(product);
     }
 

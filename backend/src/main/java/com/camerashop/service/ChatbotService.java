@@ -3,7 +3,6 @@ package com.camerashop.service;
 import com.camerashop.dto.chatbot.*;
 import com.camerashop.dto.CategoryDTO;
 import com.camerashop.dto.ProductDTO;
-import com.camerashop.dto.AssetDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,14 +21,14 @@ import java.util.stream.Collectors;
 @Service
 public class ChatbotService {
 
-    @Value("${ollama.base-url:https://api.ollama.com}")
-    private String ollamaBaseUrl;
+    @Value("${deepseek.base-url:https://api.deepseek.com}")
+    private String deepseekBaseUrl;
 
-    @Value("${ollama.model:llama3.2}")
-    private String ollamaModel;
+    @Value("${deepseek.model:deepseek-chat}")
+    private String deepseekModel;
 
-    @Value("${ollama.api-key:}")
-    private String ollamaApiKey;
+    @Value("${deepseek.api-key:}")
+    private String deepseekApiKey;
 
     @Autowired
     private CategoryService categoryService;
@@ -37,19 +36,14 @@ public class ChatbotService {
     @Autowired
     private ProductService productService;
 
-    // Thông tin tài sản có thể được thêm vào system prompt nếu cần
-    // @Autowired private AssetService assetService;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private HttpURLConnection openOllamaConnection(String path, int connectTimeout, int readTimeout) throws Exception {
-        URL url = new URL(ollamaBaseUrl + path);
+    private HttpURLConnection openDeepSeekConnection(int connectTimeout, int readTimeout) throws Exception {
+        URL url = new URL(deepseekBaseUrl + "/chat/completions");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
-        if (ollamaApiKey != null && !ollamaApiKey.isBlank()) {
-            conn.setRequestProperty("Authorization", "Bearer " + ollamaApiKey);
-        }
+        conn.setRequestProperty("Authorization", "Bearer " + deepseekApiKey);
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setConnectTimeout(connectTimeout);
@@ -59,7 +53,7 @@ public class ChatbotService {
 
     private String cachedSystemPrompt = null;
     private long lastPromptUpdate = 0;
-    private static final long CACHE_TTL_MS = 60000; // 1 phút
+    private static final long CACHE_TTL_MS = 60000;
 
     public String buildSystemPrompt() {
         long now = System.currentTimeMillis();
@@ -70,21 +64,18 @@ public class ChatbotService {
         try {
             List<CategoryDTO> categories = categoryService.getAllCategories();
             List<ProductDTO> products = productService.getAllProducts(PageRequest.of(0, 10)).getContent();
-            // Ghi chú: getAllAssets cũng trả về Page nếu cần; nhưng assetService.getAllAssets(Pageable) có thể tồn tại
 
             StringBuilder sb = new StringBuilder();
             sb.append("Bạn là trợ lý ảo của CameraShop - cửa hàng thiết bị camera hàng đầu. Nhiệm vụ của bạn là tư vấn nhanh, gọn, lẹ cho khách hàng bằng tiếng Việt đơn giản, dễ hiểu.\n\n");
 
             sb.append("THÔNG TIN HỆ THỐNG:\n");
 
-            // Danh mục
             sb.append("- Danh mục: ");
             sb.append(categories.stream()
                     .map(CategoryDTO::getCategoryName)
                     .collect(Collectors.joining(", ")));
             sb.append("\n");
 
-            // Sản phẩm
             sb.append("- Sản phẩm nổi bật:\n");
             for (ProductDTO p : products) {
                 sb.append(String.format("  + %s (%s) - %,dđ - còn %d chiếc\n",
@@ -123,35 +114,39 @@ public class ChatbotService {
                "Thanh toán: MoMo, COD, trả góp 0% đơn >10tr.";
     }
 
-    public void streamChat(ChatRequest request, OutputStream outputStream) throws Exception {
+    private List<DeepSeekMessage> buildMessages(ChatRequest request) {
         String systemPrompt = buildSystemPrompt();
 
-        List<OllamaMessage> ollamaMessages = new ArrayList<>();
-        ollamaMessages.add(OllamaMessage.builder().role("system").content(systemPrompt).build());
+        List<DeepSeekMessage> messages = new ArrayList<>();
+        messages.add(DeepSeekMessage.builder().role("system").content(systemPrompt).build());
 
         if (request.getMessages() != null) {
             for (ChatMessageDTO msg : request.getMessages()) {
-                ollamaMessages.add(OllamaMessage.builder()
+                messages.add(DeepSeekMessage.builder()
                         .role(msg.getRole())
                         .content(msg.getContent())
                         .build());
             }
         }
 
-        OllamaChatRequest ollamaRequest = OllamaChatRequest.builder()
-                .model(ollamaModel)
-                .messages(ollamaMessages)
+        return messages;
+    }
+
+    public void streamChat(ChatRequest request, OutputStream outputStream) throws Exception {
+        List<DeepSeekMessage> messages = buildMessages(request);
+
+        DeepSeekChatRequest deepseekRequest = DeepSeekChatRequest.builder()
+                .model(deepseekModel)
+                .messages(messages)
                 .stream(true)
-                .options(Map.of(
-                        "temperature", 0.7,
-                        "num_predict", 256
-                ))
+                .temperature(0.7)
+                .max_tokens(1024)
                 .build();
 
-        HttpURLConnection conn = openOllamaConnection("/api/chat", 10000, 60000);
+        HttpURLConnection conn = openDeepSeekConnection(10000, 120000);
 
         try (OutputStream os = conn.getOutputStream()) {
-            os.write(objectMapper.writeValueAsBytes(ollamaRequest));
+            os.write(objectMapper.writeValueAsBytes(deepseekRequest));
             os.flush();
         }
 
@@ -159,7 +154,7 @@ public class ChatbotService {
         if (status >= 400) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
                 String err = br.lines().collect(Collectors.joining("\n"));
-                throw new RuntimeException("Lỗi Ollama (" + status + "): " + err);
+                throw new RuntimeException("Lỗi DeepSeek (" + status + "): " + err);
             }
         }
 
@@ -170,53 +165,42 @@ public class ChatbotService {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
+                if (!line.startsWith("data: ")) continue;
+
+                String data = line.substring(6).trim();
+                if ("[DONE]".equals(data)) break;
+
                 try {
-                    OllamaChatResponse chunk = objectMapper.readValue(line, OllamaChatResponse.class);
-                    if (chunk.getMessage() != null && chunk.getMessage().getContent() != null) {
-                        // Chuyển tiếp cùng định dạng tới frontend
-                        out.write(line.getBytes(StandardCharsets.UTF_8));
-                        out.write("\n".getBytes(StandardCharsets.UTF_8));
-                        out.flush();
-                    }
-                    if (chunk.isDone()) {
-                        break;
+                    DeepSeekChatResponse chunk = objectMapper.readValue(data, DeepSeekChatResponse.class);
+                    if (chunk.getChoices() != null && !chunk.getChoices().isEmpty()) {
+                        DeepSeekChoice choice = chunk.getChoices().get(0);
+                        if (choice.getDelta() != null && choice.getDelta().getContent() != null) {
+                            out.write(choice.getDelta().getContent().getBytes(StandardCharsets.UTF_8));
+                            out.flush();
+                        }
                     }
                 } catch (Exception e) {
-                    // Bỏ qua các dòng bị lỗi định dạng
+                    // Bo qua dong bi loi dinh dang
                 }
             }
         }
     }
 
     public String chatNonStream(ChatRequest request) throws Exception {
-        String systemPrompt = buildSystemPrompt();
+        List<DeepSeekMessage> messages = buildMessages(request);
 
-        List<OllamaMessage> ollamaMessages = new ArrayList<>();
-        ollamaMessages.add(OllamaMessage.builder().role("system").content(systemPrompt).build());
-
-        if (request.getMessages() != null) {
-            for (ChatMessageDTO msg : request.getMessages()) {
-                ollamaMessages.add(OllamaMessage.builder()
-                        .role(msg.getRole())
-                        .content(msg.getContent())
-                        .build());
-            }
-        }
-
-        OllamaChatRequest ollamaRequest = OllamaChatRequest.builder()
-                .model(ollamaModel)
-                .messages(ollamaMessages)
+        DeepSeekChatRequest deepseekRequest = DeepSeekChatRequest.builder()
+                .model(deepseekModel)
+                .messages(messages)
                 .stream(false)
-                .options(Map.of(
-                        "temperature", 0.7,
-                        "num_predict", 256
-                ))
+                .temperature(0.7)
+                .max_tokens(1024)
                 .build();
 
-        HttpURLConnection conn = openOllamaConnection("/api/chat", 10000, 30000);
+        HttpURLConnection conn = openDeepSeekConnection(10000, 60000);
 
         try (OutputStream os = conn.getOutputStream()) {
-            os.write(objectMapper.writeValueAsBytes(ollamaRequest));
+            os.write(objectMapper.writeValueAsBytes(deepseekRequest));
             os.flush();
         }
 
@@ -224,15 +208,19 @@ public class ChatbotService {
         if (status >= 400) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
                 String err = br.lines().collect(Collectors.joining("\n"));
-                throw new RuntimeException("Lỗi Ollama (" + status + "): " + err);
+                throw new RuntimeException("Lỗi DeepSeek (" + status + "): " + err);
             }
         }
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
             String responseBody = reader.lines().collect(Collectors.joining("\n"));
-            OllamaChatResponse response = objectMapper.readValue(responseBody, OllamaChatResponse.class);
-            return response.getMessage() != null ? response.getMessage().getContent() : "";
+            DeepSeekChatResponse response = objectMapper.readValue(responseBody, DeepSeekChatResponse.class);
+            if (response.getChoices() != null && !response.getChoices().isEmpty()) {
+                DeepSeekMessage message = response.getChoices().get(0).getMessage();
+                return message != null ? message.getContent() : "";
+            }
+            return "";
         }
     }
 }

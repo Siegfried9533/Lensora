@@ -2,6 +2,7 @@ package com.camerashop.service;
 
 import com.camerashop.dto.RentalDTO;
 import com.camerashop.entity.*;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,10 +65,10 @@ public class RentalService {
     public RentalDTO createRental(String email, String assetId, LocalDate startDate, LocalDate endDate,
                                    String shippingAddress, String paymentMethod, Long shippingFee) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
 
         if (asset.getStatus() != Asset.AssetStatus.AVAILABLE) {
             throw new RuntimeException("Thiết bị không có sẵn để thuê");
@@ -114,7 +115,7 @@ public class RentalService {
     @Transactional
     public RentalDTO extendRental(String rentalId, LocalDate newEndDate) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
 
         if (rental.getStatus() != Rental.RentalStatus.ACTIVE &&
             rental.getStatus() != Rental.RentalStatus.PENDING) {
@@ -142,7 +143,7 @@ public class RentalService {
     @Transactional
     public RentalDTO returnRental(String rentalId, LocalDate returnDate) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
 
         if (rental.getStatus() == Rental.RentalStatus.COMPLETED) {
             throw new RuntimeException("Đơn thuê đã hoàn thành");
@@ -181,7 +182,7 @@ public class RentalService {
      */
     public Map<String, Object> calculateRentalPrice(String assetId, LocalDate startDate, LocalDate endDate) {
         Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
 
         long days = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
         if (days <= 0) {
@@ -202,7 +203,7 @@ public class RentalService {
 
     public List<RentalDTO> getRentalsByUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         return rentalRepository.findByUserId(user.getUserId(), org.springframework.data.domain.PageRequest.of(0, 100))
                 .stream()
                 .map(this::toDTO)
@@ -211,7 +212,7 @@ public class RentalService {
 
     public RentalDTO getRentalById(String rentalId) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
         return toDTO(rental);
     }
 

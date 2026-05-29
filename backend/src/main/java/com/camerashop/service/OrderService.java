@@ -2,6 +2,7 @@ package com.camerashop.service;
 
 import com.camerashop.dto.OrderDTO;
 import com.camerashop.entity.*;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,11 @@ public class OrderService {
     public OrderDTO createOrder(String email, String shippingAddress, String paymentMethod,
                                  Long shippingFee, List<Map<String, Object>> items) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+
+        if (items == null || items.isEmpty()) {
+            throw new RuntimeException("Đơn hàng phải có ít nhất 1 sản phẩm");
+        }
 
         Order.PaymentMethod orderPaymentMethod = Order.PaymentMethod.valueOf(paymentMethod);
 
@@ -63,7 +68,7 @@ public class OrderService {
             int quantity = ((Number) item.get("quantity")).intValue();
 
             Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm: " + productId));
 
             long itemTotal = product.getPrice() * quantity;
             totalAmount += itemTotal;
@@ -98,7 +103,7 @@ public class OrderService {
 
     public List<OrderDTO> getOrdersByUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         return orderRepository.findByUserId(user.getUserId(), org.springframework.data.domain.PageRequest.of(0, 100))
                 .stream()
                 .map(this::toDTO)
@@ -107,7 +112,7 @@ public class OrderService {
 
     public OrderDTO getOrderById(String orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
         return toDTO(order);
     }
 
@@ -117,7 +122,7 @@ public class OrderService {
     @Transactional
     public OrderDTO updateOrderStatus(String orderId, Order.OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
 
         Order.OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);

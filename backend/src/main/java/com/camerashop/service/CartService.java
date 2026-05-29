@@ -2,6 +2,7 @@ package com.camerashop.service;
 
 import com.camerashop.dto.CartItemDTO;
 import com.camerashop.entity.*;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,14 +35,14 @@ public class CartService {
 
     public List<CartItemDTO> getCartItems(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + email));
         List<CartItem> cartItems = cartItemRepository.findByUserId(user.getUserId());
         return cartItems.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public CartItemDTO addToCart(String email, String itemId, String type, Integer quantity) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + email));
 
         CartItem cartItem = new CartItem();
         cartItem.setUser(user);
@@ -50,11 +51,11 @@ public class CartService {
 
         if ("PRODUCT".equalsIgnoreCase(type)) {
             Product product = productRepository.findById(itemId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
             cartItem.setProduct(product);
         } else {
             Asset asset = assetRepository.findById(itemId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
             cartItem.setAsset(asset);
         }
 
@@ -68,13 +69,16 @@ public class CartService {
 
     public void clearCart(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + email));
         cartItemRepository.deleteByUserId(user.getUserId());
     }
 
     public CartItemDTO updateQuantity(String cartItemId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new RuntimeException("Số lượng phải lớn hơn 0");
+        }
         CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm trong giỏ hàng"));
         cartItem.setQuantity(quantity);
         cartItemRepository.save(cartItem);
         return toDTO(cartItem);

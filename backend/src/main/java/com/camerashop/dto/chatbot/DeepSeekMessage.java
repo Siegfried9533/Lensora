@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OllamaMessage {
+public class DeepSeekMessage {
     private String role;
     private String content;
 }

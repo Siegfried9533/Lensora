@@ -4,6 +4,7 @@ import com.camerashop.dto.ApiResponse;
 import com.camerashop.entity.Order;
 import com.camerashop.entity.PaymentTransaction;
 import com.camerashop.entity.Rental;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.OrderRepository;
 import com.camerashop.repository.PaymentTransactionRepository;
 import com.camerashop.repository.RentalRepository;
@@ -63,8 +64,7 @@ public class PaymentController {
             // Kiểm tra đơn hàng tồn tại
             Optional<Order> orderOpt = orderRepository.findById(orderId);
             if (orderOpt.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Không tìm thấy đơn hàng: " + orderId));
+                throw new ResourceNotFoundException("Không tìm thấy đơn hàng: " + orderId);
             }
 
             Order order = orderOpt.get();
@@ -115,8 +115,7 @@ public class PaymentController {
             // Kiểm tra đơn thuê tồn tại
             Optional<Rental> rentalOpt = rentalRepository.findById(rentalId);
             if (rentalOpt.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Không tìm thấy đơn thuê: " + rentalId));
+                throw new ResourceNotFoundException("Không tìm thấy đơn thuê: " + rentalId);
             }
 
             Rental rental = rentalOpt.get();
@@ -320,7 +319,7 @@ public class PaymentController {
             result.put("success", false);
             result.put("message", "Không tìm thấy thanh toán");
             result.put("orderCode", orderCode);
-            return ResponseEntity.ok(ApiResponse.success(result));
+            return ResponseEntity.status(404).body(ApiResponse.error("Không tìm thấy thanh toán"));
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError()

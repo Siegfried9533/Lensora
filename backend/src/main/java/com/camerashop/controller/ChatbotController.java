@@ -3,6 +3,7 @@ package com.camerashop.controller;
 import com.camerashop.dto.ApiResponse;
 import com.camerashop.dto.chatbot.ChatRequest;
 import com.camerashop.service.ChatbotService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class ChatbotController {
     private ChatbotService chatbotService;
 
     @PostMapping(value = "/chat", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<StreamingResponseBody> chatStream(@RequestBody ChatRequest request) {
+    public ResponseEntity<StreamingResponseBody> chatStream(@Valid @RequestBody ChatRequest request) {
         StreamingResponseBody stream = outputStream -> {
             try {
                 chatbotService.streamChat(request, outputStream);
@@ -36,7 +37,7 @@ public class ChatbotController {
     }
 
     @PostMapping("/chat-sync")
-    public ResponseEntity<ApiResponse> chatSync(@RequestBody ChatRequest request) {
+    public ResponseEntity<ApiResponse> chatSync(@Valid @RequestBody ChatRequest request) {
         try {
             String response = chatbotService.chatNonStream(request);
             return ResponseEntity.ok(ApiResponse.success(response));

@@ -3,6 +3,7 @@ package com.camerashop.service;
 import com.camerashop.dto.AssetDTO;
 import com.camerashop.entity.Asset;
 import com.camerashop.entity.AssetImage;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.AssetRepository;
 import com.camerashop.repository.AssetImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +81,7 @@ public class AssetService {
 
     public AssetDTO getAssetById(String id) {
         Asset asset = assetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
         return toDTO(asset);
     }
 

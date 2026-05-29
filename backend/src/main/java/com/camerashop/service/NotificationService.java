@@ -5,6 +5,7 @@ import com.camerashop.entity.Notification;
 import com.camerashop.entity.Order;
 import com.camerashop.entity.Rental;
 import com.camerashop.entity.User;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.NotificationRepository;
 import com.camerashop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class NotificationService {
             String actionUrl
     ) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + userId));
 
         Notification notification = Notification.builder()
                 .notificationId(UUID.randomUUID().toString())
@@ -175,7 +176,7 @@ public class NotificationService {
             int size
     ) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Notification> notifications = notificationRepository.findByUserUserId(user.getUserId(), pageRequest);
 
@@ -188,7 +189,7 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationDTO.NotificationResponse> getUnreadNotifications(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         List<Notification> notifications = notificationRepository.findByUserUserIdAndIsReadFalse(user.getUserId());
         return notifications.stream().map(this::toResponse).collect(Collectors.toList());
     }
@@ -199,7 +200,7 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public long getUnreadCount(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         return notificationRepository.countByUserUserIdAndIsReadFalse(user.getUserId());
     }
 
@@ -209,9 +210,9 @@ public class NotificationService {
     @Transactional
     public NotificationDTO.NotificationResponse markAsRead(String notificationId, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo: " + notificationId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo: " + notificationId));
 
         if (!notification.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Thông báo không thuộc về người dùng này");
@@ -229,7 +230,7 @@ public class NotificationService {
     @Transactional
     public int markAllAsRead(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         return notificationRepository.markAllAsRead(user.getUserId(), LocalDateTime.now());
     }
 
@@ -239,9 +240,9 @@ public class NotificationService {
     @Transactional
     public void deleteNotification(String notificationId, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo: " + notificationId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo: " + notificationId));
 
         if (!notification.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Thông báo không thuộc về người dùng này");
@@ -294,7 +295,7 @@ public class NotificationService {
             String actionUrl
     ) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         return createNotification(
                 user.getUserId(),
                 title,

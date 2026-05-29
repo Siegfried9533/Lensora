@@ -4,6 +4,7 @@ import com.camerashop.dto.ApiResponse;
 import com.camerashop.dto.RentalDTO;
 import com.camerashop.entity.Rental;
 import com.camerashop.entity.User;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.RentalRepository;
 import com.camerashop.repository.UserRepository;
 import com.camerashop.service.RentalService;
@@ -66,9 +67,9 @@ public class RentalController {
             @PathVariable String id) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             Rental rental = rentalRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
@@ -127,9 +128,9 @@ public class RentalController {
             @RequestBody Map<String, String> body) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             Rental rental = rentalRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
@@ -151,9 +152,9 @@ public class RentalController {
             @RequestBody Map<String, String> body) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             Rental rental = rentalRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }

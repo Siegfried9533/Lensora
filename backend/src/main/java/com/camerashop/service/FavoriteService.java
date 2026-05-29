@@ -2,14 +2,17 @@ package com.camerashop.service;
 
 import com.camerashop.dto.FavoriteDTO;
 import com.camerashop.entity.*;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class FavoriteService {
 
     @Autowired
@@ -32,14 +35,14 @@ public class FavoriteService {
 
     public List<FavoriteDTO> getFavorites(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         List<Favorite> favorites = favoriteRepository.findByUserId(user.getUserId());
         return favorites.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public FavoriteDTO toggleFavorite(String email, String itemId, String type) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         String userId = user.getUserId();
 
         if ("PRODUCT".equalsIgnoreCase(type)) {
@@ -47,7 +50,7 @@ public class FavoriteService {
                 favoriteRepository.deleteByUserIdAndProductId(userId, itemId);
                 return null; // Da xoa
             } else {
-                Product product = productRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+                Product product = productRepository.findById(itemId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
 
                 Favorite favorite = Favorite.builder()
                         .user(user)
@@ -62,7 +65,7 @@ public class FavoriteService {
                 favoriteRepository.deleteByUserIdAndAssetId(userId, itemId);
                 return null; // Da xoa
             } else {
-                Asset asset = assetRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
+                Asset asset = assetRepository.findById(itemId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
 
                 Favorite favorite = Favorite.builder()
                         .user(user)
@@ -77,7 +80,7 @@ public class FavoriteService {
 
     public boolean isFavorite(String email, String itemId, String type) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         String userId = user.getUserId();
         if ("PRODUCT".equalsIgnoreCase(type)) {
             return favoriteRepository.existsByUserIdAndProductId(userId, itemId);
