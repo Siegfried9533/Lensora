@@ -12,7 +12,7 @@
         <item name="android:statusBarColor">@color/ms_bg</item>
         <item name="android:navigationBarColor">@color/ms_bg</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:fontFamily">sans</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/text_muted</item>
     </style>

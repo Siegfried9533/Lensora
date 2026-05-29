@@ -78,7 +78,8 @@ public class CheckoutActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!requireLogin()) return;
+        if (!requireLogin())
+            return;
         setContentView(R.layout.activity_checkout);
 
         spProvince = findViewById(R.id.sp_province);
@@ -97,30 +98,46 @@ public class CheckoutActivity extends BaseActivity {
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
 
         spProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= provinces.size()) return;
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position < 0 || position >= provinces.size())
+                    return;
                 selProvince = provinces.get(position);
-                selDistrict = null; selWard = null;
+                selDistrict = null;
+                selWard = null;
                 loadDistricts(selProvince.provinceId);
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
         spDistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= districts.size()) return;
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position < 0 || position >= districts.size())
+                    return;
                 selDistrict = districts.get(position);
                 selWard = null;
                 loadWards(selDistrict.districtId);
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
         spWard.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= wards.size()) return;
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position < 0 || position >= wards.size())
+                    return;
                 selWard = wards.get(position);
                 recalculateShipping();
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         loadProvinces();
@@ -130,16 +147,23 @@ public class CheckoutActivity extends BaseActivity {
     private void loadProvinces() {
         ApiClient.get(this).create(PaymentService.class).getProvinces()
                 .enqueue(new Callback<ApiResponse<List<Province>>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<List<Province>>> call, @NonNull Response<ApiResponse<List<Province>>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<List<Province>>> call,
+                            @NonNull Response<ApiResponse<List<Province>>> response) {
                         ApiResponse<List<Province>> b = response.body();
-                        if (b == null || !b.success || b.data == null) return;
+                        if (b == null || !b.success || b.data == null) {
+                            showError("Backend error: cannot load provinces");
+                            return;
+                        }
                         provinces = b.data;
                         List<String> names = new ArrayList<>();
-                        for (Province p : provinces) names.add(p.provinceName);
+                        for (Province p : provinces)
+                            names.add(p.provinceName);
                         spProvince.setAdapter(buildSpinnerAdapter(names));
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<List<Province>>> call, @NonNull Throwable t) {
-                        showError(getString(R.string.error_load_provinces));
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<List<Province>>> call, @NonNull Throwable t) {
                     }
                 });
     }
@@ -149,16 +173,25 @@ public class CheckoutActivity extends BaseActivity {
         spWard.setEnabled(false);
         ApiClient.get(this).create(PaymentService.class).getDistricts(provinceId)
                 .enqueue(new Callback<ApiResponse<List<District>>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<List<District>>> call, @NonNull Response<ApiResponse<List<District>>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<List<District>>> call,
+                            @NonNull Response<ApiResponse<List<District>>> response) {
                         ApiResponse<List<District>> b = response.body();
-                        if (b == null || !b.success || b.data == null) return;
+                        if (b == null || !b.success || b.data == null) {
+                            showError("Backend error: cannot load districts");
+                            return;
+                        }
                         districts = b.data;
                         List<String> names = new ArrayList<>();
-                        for (District d : districts) names.add(d.districtName);
+                        for (District d : districts)
+                            names.add(d.districtName);
                         spDistrict.setAdapter(buildSpinnerAdapter(names));
                         spDistrict.setEnabled(true);
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<List<District>>> call, @NonNull Throwable t) {}
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<List<District>>> call, @NonNull Throwable t) {
+                    }
                 });
     }
 
@@ -166,29 +199,43 @@ public class CheckoutActivity extends BaseActivity {
         spWard.setEnabled(false);
         ApiClient.get(this).create(PaymentService.class).getWards(districtId)
                 .enqueue(new Callback<ApiResponse<List<Ward>>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<List<Ward>>> call, @NonNull Response<ApiResponse<List<Ward>>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<List<Ward>>> call,
+                            @NonNull Response<ApiResponse<List<Ward>>> response) {
                         ApiResponse<List<Ward>> b = response.body();
-                        if (b == null || !b.success || b.data == null) return;
+                        if (b == null || !b.success || b.data == null) {
+                            showError("Backend error: cannot load wards");
+                            return;
+                        }
                         wards = b.data;
                         List<String> names = new ArrayList<>();
-                        for (Ward w : wards) names.add(w.wardName);
+                        for (Ward w : wards)
+                            names.add(w.wardName);
                         spWard.setAdapter(buildSpinnerAdapter(names));
                         spWard.setEnabled(true);
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<List<Ward>>> call, @NonNull Throwable t) {}
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<List<Ward>>> call, @NonNull Throwable t) {
+                    }
                 });
     }
 
     private void loadCart() {
         ApiClient.get(this).create(CartService.class).getCartItems()
                 .enqueue(new Callback<ApiResponse<List<CartItem>>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<List<CartItem>>> call, @NonNull Response<ApiResponse<List<CartItem>>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<List<CartItem>>> call,
+                            @NonNull Response<ApiResponse<List<CartItem>>> response) {
                         cartItems.clear();
                         ApiResponse<List<CartItem>> b = response.body();
-                        if (b != null && b.success && b.data != null) cartItems.addAll(b.data);
+                        if (b != null && b.success && b.data != null)
+                            cartItems.addAll(b.data);
                         renderSummary();
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<List<CartItem>>> call, @NonNull Throwable t) {
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<List<CartItem>>> call, @NonNull Throwable t) {
                         showError(getString(R.string.error_load_cart));
                     }
                 });
@@ -238,7 +285,8 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void recalculateShipping() {
-        if (selDistrict == null || selWard == null) return;
+        if (selDistrict == null || selWard == null)
+            return;
         Map<String, Object> body = new HashMap<>();
         body.put("toDistrict", selDistrict.districtId);
         body.put("toWard", selWard.wardCode);
@@ -246,14 +294,19 @@ public class CheckoutActivity extends BaseActivity {
         body.put("insuranceValue", subtotal);
         ApiClient.get(this).create(PaymentService.class).calculateShippingFee(body)
                 .enqueue(new Callback<ApiResponse<ShippingFee>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<ShippingFee>> call, @NonNull Response<ApiResponse<ShippingFee>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<ShippingFee>> call,
+                            @NonNull Response<ApiResponse<ShippingFee>> response) {
                         ApiResponse<ShippingFee> b = response.body();
                         if (b != null && b.success && b.data != null) {
                             shippingFee = b.data.shippingFee;
                             updateTotals();
                         }
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<ShippingFee>> call, @NonNull Throwable t) {}
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<ShippingFee>> call, @NonNull Throwable t) {
+                    }
                 });
     }
 
@@ -290,7 +343,8 @@ public class CheckoutActivity extends BaseActivity {
         addr.append(street).append(", ").append(selWard.wardName)
                 .append(", ").append(selDistrict.districtName)
                 .append(", ").append(selProvince.provinceName);
-        if (!note.isEmpty()) addr.append(" (").append(note).append(")");
+        if (!note.isEmpty())
+            addr.append(" (").append(note).append(")");
 
         boolean useMomo = rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
         String paymentMethod = useMomo ? "MoMo" : "COD";
@@ -302,7 +356,9 @@ public class CheckoutActivity extends BaseActivity {
         showLoading();
         ApiClient.get(this).create(OrderService.class).createOrder(req)
                 .enqueue(new Callback<ApiResponse<Order>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call, @NonNull Response<ApiResponse<Order>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Order>> call,
+                            @NonNull Response<ApiResponse<Order>> response) {
                         hideLoading();
                         btnPlaceOrder.setEnabled(true);
                         ApiResponse<Order> b = response.body();
@@ -323,7 +379,9 @@ public class CheckoutActivity extends BaseActivity {
                             finish();
                         }
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<Order>> call, @NonNull Throwable t) {
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Order>> call, @NonNull Throwable t) {
                         hideLoading();
                         btnPlaceOrder.setEnabled(true);
                         showError(getString(R.string.error_place_order_connection));
@@ -339,7 +397,9 @@ public class CheckoutActivity extends BaseActivity {
         showLoading();
         ApiClient.get(this).create(PaymentService.class).createMoMoPayment(req)
                 .enqueue(new Callback<ApiResponse<Map<String, String>>>() {
-                    @Override public void onResponse(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Response<ApiResponse<Map<String, String>>> response) {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Map<String, String>>> call,
+                            @NonNull Response<ApiResponse<Map<String, String>>> response) {
                         hideLoading();
                         ApiResponse<Map<String, String>> b = response.body();
                         if (b == null || !b.success || b.data == null) {
@@ -348,7 +408,8 @@ public class CheckoutActivity extends BaseActivity {
                         }
                         String payUrl = b.data.get("payUrl");
                         String orderCode = b.data.get("orderId");
-                        if (orderCode == null) orderCode = order.orderId;
+                        if (orderCode == null)
+                            orderCode = order.orderId;
                         if (payUrl != null && !payUrl.isEmpty()) {
                             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(payUrl)));
                         }
@@ -358,7 +419,9 @@ public class CheckoutActivity extends BaseActivity {
                         startActivity(i);
                         finish();
                     }
-                    @Override public void onFailure(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Throwable t) {
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Throwable t) {
                         hideLoading();
                         showError(getString(R.string.error_create_momo_connection));
                     }

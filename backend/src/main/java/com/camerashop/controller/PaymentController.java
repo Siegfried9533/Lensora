@@ -56,7 +56,8 @@ public class PaymentController {
         try {
             String orderId = (String) body.get("orderId");
             Long amount = ((Number) body.get("amount")).longValue();
-            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo") : "Thanh toan don hang: " + orderId;
+            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo")
+                    : "Thanh toan don hang: " + orderId;
             String requestType = body.get("requestType") != null ? (String) body.get("requestType") : "captureWallet";
 
             // Kiểm tra đơn hàng tồn tại
@@ -108,7 +109,8 @@ public class PaymentController {
     public ResponseEntity<ApiResponse> createMoMoPaymentRental(@RequestBody Map<String, Object> body) {
         try {
             String rentalId = (String) body.get("rentalId");
-            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo") : "Thanh toan thue: " + rentalId;
+            String orderInfo = body.get("orderInfo") != null ? (String) body.get("orderInfo")
+                    : "Thanh toan thue: " + rentalId;
 
             // Kiểm tra đơn thuê tồn tại
             Optional<Rental> rentalOpt = rentalRepository.findById(rentalId);
@@ -149,14 +151,13 @@ public class PaymentController {
             // Xác thực chữ ký
             if (!momoService.validateIPNCallback(params)) {
                 System.err.println("Invalid MoMo IPN signature");
-                response.put("errorCode", "99");
                 response.put("message", "Chữ ký không hợp lệ");
                 return ResponseEntity.badRequest().body(response);
             }
 
             String orderId = params.get("orderId");
             String transId = params.get("transId");
-            String errorCode = params.get("errorCode");
+            String resultCode = params.getOrDefault("resultCode", params.getOrDefault("errorCode", ""));
             String amount = params.get("amount");
             String message = params.get("message");
 
@@ -167,7 +168,7 @@ public class PaymentController {
             }
 
             // Kiểm tra kết quả thanh toán
-            boolean isSuccess = "0".equals(errorCode);
+            boolean isSuccess = "0".equals(resultCode);
 
             // Lưu giao dịch thanh toán
             PaymentTransaction transaction = PaymentTransaction.builder()
@@ -175,9 +176,10 @@ public class PaymentController {
                     .orderCode(orderId)
                     .amount((double) paymentAmount)
                     .paymentMethod("MoMo")
-                    .responseCode(errorCode)
+                    .responseCode(resultCode)
                     .responseMessage(message)
-                    .status(isSuccess ? PaymentTransaction.PaymentStatus.SUCCESS : PaymentTransaction.PaymentStatus.FAILED)
+                    .status(isSuccess ? PaymentTransaction.PaymentStatus.SUCCESS
+                            : PaymentTransaction.PaymentStatus.FAILED)
                     .build();
 
             // Kiểm tra xem là đơn hàng hay đơn thuê
@@ -377,7 +379,6 @@ public class PaymentController {
                 order.getOrderId(),
                 orderDetails.toString(),
                 (double) order.getTotalAmount(),
-                order.getPaymentStatus()
-        );
+                order.getPaymentStatus());
     }
 }

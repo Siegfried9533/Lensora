@@ -64,14 +64,16 @@ public class MoMoService {
     /**
      * Tao URL thanh toan MoMo
      *
-     * @param orderId Ma don hang duy nhat tu he thong cua ban
-     * @param amount So tien VND
-     * @param orderInfo Mo ta don hang
+     * @param orderId     Ma don hang duy nhat tu he thong cua ban
+     * @param amount      So tien VND
+     * @param orderInfo   Mo ta don hang
      * @param requestType Loai phuong thuc thanh toan
      * @return URL thanh toan MoMo
      */
     public String createPaymentUrl(String orderId, long amount, String orderInfo, RequestType requestType) {
         try {
+            validateMerchantConfig();
+
             // Tao ma yeu cau duy nhat
             String requestId = orderId + "_" + System.currentTimeMillis();
 
@@ -105,11 +107,22 @@ public class MoMoService {
                     momoUrl + "/v2/gateway/api/create",
                     HttpMethod.POST,
                     request,
-                    String.class
-            );
+                    String.class);
 
             // Phan tich phan hoi
             JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+
+            if (jsonResponse.has("resultCode") && jsonResponse.get("resultCode").asInt() != 0) {
+                int resultCode = jsonResponse.get("resultCode").asInt();
+                String message = jsonResponse.has("message") ? jsonResponse.get("message").asText() : "Unknown error";
+                System.err.println("LENSORA_MOMO_CREATE_FAILED: resultCode=" + resultCode
+                        + ", message=" + message
+                        + ", partnerCode=" + partnerCode
+                        + ", requestType=" + requestType.getValue()
+                        + ", redirectUrl=" + redirectUrl
+                        + ", ipnUrl=" + ipnUrl);
+                throw new RuntimeException("MoMo trả về resultCode=" + resultCode + ": " + message);
+            }
 
             // Kiem tra thanh cong
             if (jsonResponse.has("payUrl")) {
@@ -137,42 +150,105 @@ public class MoMoService {
      * @param params Tham so tu goi lai IPN cua MoMo
      * @return true neu chu ky hop le
      */
+    // public boolean validateIPNCallback(Map<String, String> params) {
+    // try {
+    // String receivedSignature = params.get("signature");
+
+    // // Xay dung du lieu xac thuc chu ky (DUNG thu tu theo tai lieu MoMo)
+    // Map<String, String> signatureData = new HashMap<>();
+    // signatureData.put("partnerCode", params.get("partnerCode"));
+    // signatureData.put("orderId", params.get("orderId"));
+    // signatureData.put("requestId", params.get("requestId"));
+    // signatureData.put("amount", params.get("amount"));
+    // signatureData.put("orderInfo", params.get("orderInfo"));
+    // signatureData.put("orderType", params.get("orderType"));
+    // signatureData.put("transId", params.get("transId"));
+    // signatureData.put("message", params.get("message"));
+    // signatureData.put("responseTime", params.get("responseTime"));
+    // signatureData.put("errorCode", params.get("errorCode"));
+    // signatureData.put("localMessage", params.get("localMessage"));
+
+    // // Xay dung chuoi chu ky tho
+    // StringBuilder rawData = new StringBuilder();
+    // rawData.append("partnerCode=").append(params.get("partnerCode"));
+    // rawData.append("&orderId=").append(params.get("orderId"));
+    // rawData.append("&requestId=").append(params.get("requestId"));
+    // rawData.append("&amount=").append(params.get("amount"));
+    // rawData.append("&orderInfo=").append(params.get("orderInfo"));
+    // rawData.append("&orderType=").append(params.get("orderType"));
+    // rawData.append("&transId=").append(params.get("transId"));
+    // rawData.append("&message=").append(params.get("message"));
+    // rawData.append("&responseTime=").append(params.get("responseTime"));
+    // rawData.append("&errorCode=").append(params.get("errorCode"));
+    // rawData.append("&localMessage=").append(params.get("localMessage"));
+
+    // // Tinh chu ky mong doi
+    // String expectedSignature = hmacSHA256(secretKey, rawData.toString());
+
+    // return expectedSignature.equals(receivedSignature);
+
+    // } catch (Exception e) {
+    // System.err.println("Error validating MoMo IPN: " + e.getMessage());
+    // return false;
+    // }
+    // }
+
     public boolean validateIPNCallback(Map<String, String> params) {
         try {
             String receivedSignature = params.get("signature");
+            if (receivedSignature == null || receivedSignature.isEmpty()) {
+                System.err.println("LENSORA_IPN_ERROR: Không tìm thấy signature trong callback của MoMo");
+                return false;
+            }
 
-            // Xay dung du lieu xac thuc chu ky (DUNG thu tu theo tai lieu MoMo)
-            Map<String, String> signatureData = new HashMap<>();
-            signatureData.put("partnerCode", params.get("partnerCode"));
-            signatureData.put("orderId", params.get("orderId"));
-            signatureData.put("requestId", params.get("requestId"));
-            signatureData.put("amount", params.get("amount"));
-            signatureData.put("orderInfo", params.get("orderInfo"));
-            signatureData.put("orderType", params.get("orderType"));
-            signatureData.put("transId", params.get("transId"));
-            signatureData.put("message", params.get("message"));
-            signatureData.put("responseTime", params.get("responseTime"));
-            signatureData.put("errorCode", params.get("errorCode"));
-            signatureData.put("localMessage", params.get("localMessage"));
+            // Dùng getOrDefault để tránh tối đa lỗi NullPointerException nếu MoMo trả thiếu
+            // trường
+            String amount = params.getOrDefault("amount", "");
+            String extraData = params.getOrDefault("extraData", "");
+            String message = params.getOrDefault("message", "");
+            String orderId = params.getOrDefault("orderId", "");
+            String orderInfo = params.getOrDefault("orderInfo", "");
+            String orderType = params.getOrDefault("orderType", "");
+            String partnerCode = params.getOrDefault("partnerCode", "");
+            String payType = params.getOrDefault("payType", "");
+            String requestId = params.getOrDefault("requestId", "");
+            String responseTime = params.getOrDefault("responseTime", "");
+            String resultCode = params.getOrDefault("resultCode", "");
+            String transId = params.getOrDefault("transId", "");
 
-            // Xay dung chuoi chu ky tho
-            StringBuilder rawData = new StringBuilder();
-            rawData.append("partnerCode=").append(params.get("partnerCode"));
-            rawData.append("&orderId=").append(params.get("orderId"));
-            rawData.append("&requestId=").append(params.get("requestId"));
-            rawData.append("&amount=").append(params.get("amount"));
-            rawData.append("&orderInfo=").append(params.get("orderInfo"));
-            rawData.append("&orderType=").append(params.get("orderType"));
-            rawData.append("&transId=").append(params.get("transId"));
-            rawData.append("&message=").append(params.get("message"));
-            rawData.append("&responseTime=").append(params.get("responseTime"));
-            rawData.append("&errorCode=").append(params.get("errorCode"));
-            rawData.append("&localMessage=").append(params.get("localMessage"));
+            // ĐÚNG QUY TẮC: Ghép chuỗi theo đúng thứ tự bảng chữ cái Alphabet từ A đến Z
+            // của Key
+            String rawData = "accessKey=" + accessKey +
+                    "&amount=" + amount +
+                    "&extraData=" + extraData +
+                    "&message=" + message +
+                    "&orderId=" + orderId +
+                    "&orderInfo=" + orderInfo +
+                    "&orderType=" + orderType +
+                    "&partnerCode=" + partnerCode +
+                    "&payType=" + payType +
+                    "&requestId=" + requestId +
+                    "&responseTime=" + responseTime +
+                    "&resultCode=" + resultCode +
+                    "&transId=" + transId;
 
-            // Tinh chu ky mong doi
-            String expectedSignature = hmacSHA256(secretKey, rawData.toString());
+            // In ra Console để bác dễ so sánh chuỗi thô khi debug dòng tiền
+            System.out.println("LENSORA_IPN_RAW_DATA: " + rawData);
 
-            return expectedSignature.equals(receivedSignature);
+            // Tính toán chữ ký mong đợi dựa trên SecretKey chung của hệ thống
+            String expectedSignature = hmacSHA256(secretKey, rawData);
+
+            // So sánh khớp chữ ký
+            boolean isValid = expectedSignature.equalsIgnoreCase(receivedSignature.trim());
+
+            // Log chi tiết khi không khớp chữ ký để dễ debug
+            if (!isValid) {
+                System.err.println("LENSORA SIGNATURE MISMATCH (IPN) -> \n" +
+                        "Raw Data: " + rawData + "\n" +
+                        "Expected : " + expectedSignature + "\n" +
+                        "Received : " + receivedSignature);
+            }
+            return isValid;
 
         } catch (Exception e) {
             System.err.println("Error validating MoMo IPN: " + e.getMessage());
@@ -189,25 +265,37 @@ public class MoMoService {
     public boolean validateRedirectCallback(Map<String, String> params) {
         try {
             String receivedSignature = params.get("signature");
+            if (receivedSignature == null || receivedSignature.isBlank()) {
+                System.err.println("LENSORA_REDIRECT_ERROR: Không tìm thấy signature trong callback của MoMo");
+                return false;
+            }
 
             // Xay dung chuoi chu ky tho cho chuyen huong (khac voi IPN)
             StringBuilder rawData = new StringBuilder();
-            rawData.append("partnerCode=").append(params.get("partnerCode"));
-            rawData.append("&orderId=").append(params.get("orderId"));
-            rawData.append("&requestId=").append(params.get("requestId"));
-            rawData.append("&amount=").append(params.get("amount"));
-            rawData.append("&orderInfo=").append(params.get("orderInfo"));
-            rawData.append("&orderType=").append(params.get("orderType"));
-            rawData.append("&transId=").append(params.get("transId"));
-            rawData.append("&message=").append(params.get("message"));
-            rawData.append("&responseTime=").append(params.get("responseTime"));
-            rawData.append("&errorCode=").append(params.get("errorCode"));
-            rawData.append("&localMessage=").append(params.get("localMessage"));
+            rawData.append("partnerCode=").append(params.getOrDefault("partnerCode", ""));
+            rawData.append("&orderId=").append(params.getOrDefault("orderId", ""));
+            rawData.append("&requestId=").append(params.getOrDefault("requestId", ""));
+            rawData.append("&amount=").append(params.getOrDefault("amount", ""));
+            rawData.append("&orderInfo=").append(params.getOrDefault("orderInfo", ""));
+            rawData.append("&orderType=").append(params.getOrDefault("orderType", ""));
+            rawData.append("&transId=").append(params.getOrDefault("transId", ""));
+            rawData.append("&message=").append(params.getOrDefault("message", ""));
+            rawData.append("&responseTime=").append(params.getOrDefault("responseTime", ""));
+            rawData.append("&errorCode=")
+                    .append(params.getOrDefault("errorCode", params.getOrDefault("resultCode", "")));
+            rawData.append("&localMessage=").append(params.getOrDefault("localMessage", ""));
 
             // Tinh chu ky mong doi
             String expectedSignature = hmacSHA256(secretKey, rawData.toString());
 
-            return expectedSignature.equals(receivedSignature);
+            boolean isValid = expectedSignature.equalsIgnoreCase(receivedSignature.trim());
+            if (!isValid) {
+                System.err.println("LENSORA SIGNATURE MISMATCH (REDIRECT) -> \n"
+                        + "Raw Data: " + rawData + "\n"
+                        + "Expected : " + expectedSignature + "\n"
+                        + "Received : " + receivedSignature);
+            }
+            return isValid;
 
         } catch (Exception e) {
             System.err.println("Error validating MoMo redirect: " + e.getMessage());
@@ -218,7 +306,7 @@ public class MoMoService {
     /**
      * Truy van trang thai giao dich MoMo
      *
-     * @param orderId Ma don hang can truy van
+     * @param orderId   Ma don hang can truy van
      * @param requestId Ma yeu cau duy nhat
      * @return Phan hoi trang thai giao dich
      */
@@ -234,9 +322,9 @@ public class MoMoService {
 
             // Tao chu ky
             String rawData = "partnerCode=" + partnerCode +
-                           "&accessKey=" + accessKey +
-                           "&requestId=" + requestId +
-                           "&orderId=" + orderId;
+                    "&accessKey=" + accessKey +
+                    "&requestId=" + requestId +
+                    "&orderId=" + orderId;
             String signature = hmacSHA256(secretKey, rawData);
             requestBody.put("signature", signature);
 
@@ -250,8 +338,7 @@ public class MoMoService {
                     momoUrl + "/v2/gateway/api/query",
                     HttpMethod.POST,
                     request,
-                    String.class
-            );
+                    String.class);
 
             // Phan tich phan hoi
             JsonNode jsonResponse = objectMapper.readTree(response.getBody());
@@ -279,16 +366,17 @@ public class MoMoService {
     private String generateSignature(Map<String, Object> requestBody, String secretKey) {
         try {
             // Xay dung chuoi chu ky tho theo DUNG thu tu MoMo
-            // Thu tu: partnerCode|accessKey|requestId|amount|orderId|orderInfo|redirectUrl|ipnUrl|extraData
+            // Thu tu:
+            // partnerCode|accessKey|requestId|amount|orderId|orderInfo|redirectUrl|ipnUrl|extraData
             String rawData = "partnerCode=" + requestBody.get("partnerCode") +
-                           "&accessKey=" + requestBody.get("accessKey") +
-                           "&requestId=" + requestBody.get("requestId") +
-                           "&amount=" + requestBody.get("amount") +
-                           "&orderId=" + requestBody.get("orderId") +
-                           "&orderInfo=" + requestBody.get("orderInfo") +
-                           "&redirectUrl=" + requestBody.get("redirectUrl") +
-                           "&ipnUrl=" + requestBody.get("ipnUrl") +
-                           "&extraData=" + requestBody.get("extraData");
+                    "&accessKey=" + requestBody.get("accessKey") +
+                    "&requestId=" + requestBody.get("requestId") +
+                    "&amount=" + requestBody.get("amount") +
+                    "&orderId=" + requestBody.get("orderId") +
+                    "&orderInfo=" + requestBody.get("orderInfo") +
+                    "&redirectUrl=" + requestBody.get("redirectUrl") +
+                    "&ipnUrl=" + requestBody.get("ipnUrl") +
+                    "&extraData=" + requestBody.get("extraData");
 
             return hmacSHA256(secretKey, rawData);
 
@@ -311,13 +399,29 @@ public class MoMoService {
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1)
+                    hexString.append('0');
                 hexString.append(hex);
             }
             return hexString.toString();
 
         } catch (Exception e) {
             throw new RuntimeException("Lỗi tính HMAC SHA256", e);
+        }
+    }
+
+    private void validateMerchantConfig() {
+        if (partnerCode == null || partnerCode.isBlank()) {
+            throw new IllegalStateException("MoMo partnerCode is missing");
+        }
+        if (accessKey == null || accessKey.isBlank()) {
+            throw new IllegalStateException("MoMo accessKey is missing");
+        }
+        if (secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException("MoMo secretKey is missing");
+        }
+        if (momoUrl == null || momoUrl.isBlank()) {
+            throw new IllegalStateException("MoMo url is missing");
         }
     }
 }
