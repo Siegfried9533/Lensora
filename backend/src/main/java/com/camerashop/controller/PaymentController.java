@@ -233,9 +233,17 @@ public class PaymentController {
                     paymentTransactionRepository.save(transaction);
 
                     if (isSuccess) {
-                        // Pay-first satisfied: the hold becomes an active rental only now.
-                        rental.setStatus(Rental.RentalStatus.ACTIVE);
-                        rental.setPaymentStatus("SUCCESS");
+                        // Only a still-held (PENDING) rental may be activated. If the hold was
+                        // already cancelled/expired, another booking may now occupy these dates —
+                        // activating here would double-book. A still-PENDING hold provably has no
+                        // overlapping booking (PENDING blocks overlaps in createRental), so this is
+                        // the authoritative pay-first gate. Late payments are flagged for refund.
+                        if (rental.getStatus() == Rental.RentalStatus.PENDING) {
+                            rental.setStatus(Rental.RentalStatus.ACTIVE);
+                            rental.setPaymentStatus("SUCCESS");
+                        } else {
+                            rental.setPaymentStatus("SUCCESS_LATE");
+                        }
                         rentalRepository.save(rental);
                     } else {
                         // Payment failed — release the hold so the asset's dates free up.
