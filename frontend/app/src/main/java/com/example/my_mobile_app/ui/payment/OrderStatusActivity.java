@@ -26,6 +26,7 @@ public class OrderStatusActivity extends BaseActivity {
 
     public static final String EXTRA_ORDER_CODE = "order_code";
     public static final String EXTRA_ORDER_ID = "order_id";
+    public static final String EXTRA_RENTAL_ID = "rental_id";
 
     private static final int POLL_INTERVAL_MS = 3000;
     private static final int MAX_ATTEMPTS = 30;
@@ -33,6 +34,7 @@ public class OrderStatusActivity extends BaseActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private String orderCode;
     private String orderId;
+    private String rentalId;
     private int attempts;
     private boolean cancelled;
 
@@ -43,6 +45,7 @@ public class OrderStatusActivity extends BaseActivity {
 
         orderCode = getIntent().getStringExtra(EXTRA_ORDER_CODE);
         orderId = getIntent().getStringExtra(EXTRA_ORDER_ID);
+        rentalId = getIntent().getStringExtra(EXTRA_RENTAL_ID);
         if (orderCode == null) {
             failWith(getString(R.string.error_missing_transaction_code));
             return;
@@ -91,6 +94,7 @@ public class OrderStatusActivity extends BaseActivity {
     private void succeed() {
         Intent i = new Intent(this, PaymentSuccessActivity.class);
         if (orderId != null) i.putExtra(PaymentSuccessActivity.EXTRA_ORDER_ID, orderId);
+        if (rentalId != null) i.putExtra(PaymentSuccessActivity.EXTRA_RENTAL_ID, rentalId);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
         finish();

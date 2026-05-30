@@ -7,7 +7,7 @@ public class CreateRentalRequest {
     public String shippingAddress;
     /** COD | MoMo. */
     public String paymentMethod;
-    public Double shippingFee;
+    public Long shippingFee;
 
     public CreateRentalRequest() {}
 

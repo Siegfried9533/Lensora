@@ -36,14 +36,17 @@ public class RentalController {
     @PostMapping
     public ResponseEntity<ApiResponse> createRental(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody Map<String, String> body) {
+            @RequestBody Map<String, Object> body) {
         try {
-            String assetId = body.get("assetId");
-            LocalDate startDate = LocalDate.parse(body.get("startDate"));
-            LocalDate endDate = LocalDate.parse(body.get("endDate"));
-            String shippingAddress = body.get("shippingAddress");
-            String paymentMethod = body.get("paymentMethod");
-            Long shippingFee = Long.parseLong(body.getOrDefault("shippingFee", "0"));
+            String assetId = String.valueOf(body.get("assetId"));
+            LocalDate startDate = LocalDate.parse(String.valueOf(body.get("startDate")));
+            LocalDate endDate = LocalDate.parse(String.valueOf(body.get("endDate")));
+            String shippingAddress = body.get("shippingAddress") == null ? "" : String.valueOf(body.get("shippingAddress"));
+            String paymentMethod = body.get("paymentMethod") == null ? "COD" : String.valueOf(body.get("paymentMethod"));
+            Object shippingFeeValue = body.get("shippingFee");
+            Long shippingFee = shippingFeeValue instanceof Number
+                    ? ((Number) shippingFeeValue).longValue()
+                    : Long.parseLong(shippingFeeValue == null ? "0" : String.valueOf(shippingFeeValue));
 
             RentalDTO rental = rentalService.createRental(
                 userDetails.getUsername(), assetId, startDate, endDate,

@@ -40,7 +40,7 @@ public class OrderService {
     @SuppressWarnings("unchecked")
     @Transactional
     public OrderDTO createOrder(String email, String shippingAddress, String paymentMethod,
-                                 Long shippingFee, List<Map<String, Object>> items) {
+                                 Long shippingFee, List<Map<String, Object>> items, boolean clearCart) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
@@ -95,8 +95,9 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         orderRepository.save(order);
 
-        // Xoa gio hang cua nguoi dung
-        cartItemRepository.deleteByUserId(user.getUserId());
+        if (clearCart) {
+            cartItemRepository.deleteByUserId(user.getUserId());
+        }
 
         return toDTO(order);
     }

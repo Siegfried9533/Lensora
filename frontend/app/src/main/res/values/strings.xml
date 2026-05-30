@@ -117,7 +117,12 @@
     <string name="checkout_payment_momo">MoMo Wallet</string>
     <string name="checkout_shipping_fee">Shipping fee</string>
     <string name="checkout_place_order">Place order</string>
+    <string name="checkout_place_rental">Place rental</string>
     <string name="checkout_order_summary">Order summary</string>
+    <string name="checkout_rental_period">Rental period</string>
+    <string name="checkout_rental_days_format">Rental fee (%1$d days): %2$s</string>
+    <string name="checkout_rental_deposit">Deposit</string>
+    <string name="checkout_days_suffix">days</string>
 
     <!-- Status -->
     <string name="status_pending">Pending</string>
@@ -149,6 +154,7 @@
     <string name="payment_failed_title">Payment Failed</string>
     <string name="payment_processing">Processing payment...</string>
     <string name="payment_view_order">View order</string>
+    <string name="payment_view_rental">View rental</string>
     <string name="payment_success_body">Your order has been received. Thank you for shopping with us!</string>
     <string name="payment_failed_body">The transaction was not successful. Please try again.</string>
     <string name="payment_processing_hint">Please wait a moment. You can return to the app after completing payment.</string>
@@ -246,6 +252,9 @@
     <string name="error_empty_order_cart">Your cart has no products to order. Rental equipment must be booked from the detail page.</string>
     <string name="error_place_order_failed">Order failed</string>
     <string name="error_place_order_connection">Connection error while placing order</string>
+    <string name="error_place_rental_failed">Rental booking failed</string>
+    <string name="error_place_rental_connection">Connection error while booking rental</string>
+    <string name="error_rental_start_in_past">Start date cannot be in the past</string>
     <string name="error_create_momo">Unable to create MoMo payment</string>
     <string name="error_create_momo_connection">Connection error while creating MoMo payment</string>
     <string name="error_clear_cart">Unable to clear cart</string>
@@ -260,6 +269,7 @@
     <string name="success_notification_read">Notification marked as read</string>
     <string name="success_added_to_cart">Added to cart</string>
     <string name="checkout_momo_order_info">Order payment: %1$s</string>
+    <string name="checkout_momo_rental_info">Rental payment: %1$s</string>
 
     <!-- Profile sub-screens -->
     <string name="personal_info_save">Save changes</string>

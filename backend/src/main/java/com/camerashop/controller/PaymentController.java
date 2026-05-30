@@ -123,6 +123,9 @@ public class PaymentController {
 
             Rental rental = rentalOpt.get();
             long totalAmount = rental.getTotalRentFee() + rental.getDepositFee();
+            if (rental.getShippingFee() != null) {
+                totalAmount += rental.getShippingFee();
+            }
 
             // Tạo URL thanh toán MoMo
             String payUrl = momoService.createPaymentUrl(rentalId, totalAmount, orderInfo);

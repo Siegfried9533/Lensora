@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 public final class DateUtils {
 
     private static final String ISO_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String API_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DISPLAY_PATTERN = "dd/MM/yyyy";
 
     private DateUtils() {}
@@ -27,7 +28,11 @@ public final class DateUtils {
         try {
             return sdf.parse(trimmed);
         } catch (ParseException e) {
-            return null;
+            try {
+                return new SimpleDateFormat(API_DATE_PATTERN, Locale.US).parse(trimmed);
+            } catch (ParseException ignored) {
+                return null;
+            }
         }
     }
 
