@@ -233,10 +233,14 @@ public class PaymentController {
                     paymentTransactionRepository.save(transaction);
 
                     if (isSuccess) {
+                        // Pay-first satisfied: the hold becomes an active rental only now.
                         rental.setStatus(Rental.RentalStatus.ACTIVE);
+                        rental.setPaymentStatus("SUCCESS");
                         rentalRepository.save(rental);
                     } else {
+                        // Payment failed — release the hold so the asset's dates free up.
                         rental.setStatus(Rental.RentalStatus.CANCELLED);
+                        rental.setPaymentStatus("FAILED");
                         rentalRepository.save(rental);
                     }
                 }

@@ -25,4 +25,5 @@ public class RentalDTO {
     private String shippingAddress;
     private String paymentMethod;
     private Long shippingFee;
+    private String paymentStatus;
 }
