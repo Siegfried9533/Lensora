@@ -92,6 +92,9 @@ public class PaymentController {
 
             return ResponseEntity.ok(ApiResponse.success(response));
 
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Yêu cầu không hợp lệ: " + e.getMessage()));
@@ -130,6 +133,9 @@ public class PaymentController {
 
             return ResponseEntity.ok(ApiResponse.success(response));
 
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Tạo thanh toán thất bại: " + e.getMessage()));
@@ -319,7 +325,7 @@ public class PaymentController {
             result.put("success", false);
             result.put("message", "Không tìm thấy thanh toán");
             result.put("orderCode", orderCode);
-            return ResponseEntity.status(404).body(ApiResponse.error("Không tìm thấy thanh toán"));
+            return ResponseEntity.ok(ApiResponse.success(result));
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError()

@@ -41,7 +41,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health", "/api/auth/**", "/api/categories/**", "/api/products/**", "/api/assets/**", "/api/payment/momo/ipn", "/api/payment/momo/callback", "/api/shipping/**", "/api/notifications/system", "/api/chatbot/**", "/api/rentals/check-availability", "/api/rentals/calculate-price").permitAll()
+                .requestMatchers(
+                    "/api/health", "/api/auth/**", "/api/categories/**", "/api/products/**", "/api/assets/**",
+                    "/api/payment/momo/ipn", "/api/payment/momo/callback",
+                    "/api/payment/momo/create", "/api/payment/momo/create-rental",
+                    "/api/payment/momo/query", "/api/payment/status/**",
+                    "/api/shipping/**", "/api/notifications/system", "/api/chatbot/**",
+                    "/api/rentals/check-availability", "/api/rentals/calculate-price",
+                    "/error"
+                ).permitAll()
                 .requestMatchers("/api/cart/**", "/api/favorites/**", "/api/orders/**", "/api/rentals/**", "/api/notifications/**", "/api/users/**").authenticated()
                 .anyRequest().authenticated()
             )

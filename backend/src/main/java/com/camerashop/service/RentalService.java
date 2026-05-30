@@ -88,7 +88,7 @@ public class RentalService {
         long totalRentFee = asset.getDailyRate() * days;
         long depositFee = asset.getDailyRate() * 3; // Dat coc 3 ngay
 
-        Rental.PaymentMethod paymentMethodEnum = Rental.PaymentMethod.valueOf(paymentMethod);
+        Rental.PaymentMethod paymentMethodEnum = Rental.PaymentMethod.valueOf(paymentMethod.toUpperCase());
 
         Rental rental = Rental.builder()
                 .user(user)

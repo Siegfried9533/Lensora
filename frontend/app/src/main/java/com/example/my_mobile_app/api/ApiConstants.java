@@ -1,13 +1,14 @@
 package com.example.my_mobile_app.api;
 
+import com.example.my_mobile_app.BuildConfig;
+
 /**
- * Network constants. {@code BASE_URL} is hard-coded to the Android emulator
- * loopback alias. When testing on a physical device, replace 10.0.2.2 with
- * the host machine's LAN IP (see frontend/services/api/config.ts comments).
+ * Network constants. BASE_URL is injected at build time from local.properties
+ * (api.base.url). Falls back to the Android emulator loopback (10.0.2.2:8080).
+ * Physical device: set api.base.url=http://<host-lan-ip>:8080/api/ in local.properties.
  */
 public final class ApiConstants {
-    //public static final String BASE_URL = "http://10.0.2.2:8080/api/";
-    public static final String BASE_URL = "http://192.168.110.242:8080/api/";
+    public static final String BASE_URL = BuildConfig.BASE_URL;
 
     private ApiConstants() {}
 }

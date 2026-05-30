@@ -57,6 +57,6 @@ public class Rental {
     }
 
     public enum PaymentMethod {
-        COD, MoMo
+        COD, MOMO
     }
 }

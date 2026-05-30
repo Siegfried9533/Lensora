@@ -149,7 +149,7 @@ public class RentalController {
     public ResponseEntity<ApiResponse> returnRental(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String id,
-            @RequestBody Map<String, String> body) {
+            @RequestBody(required = false) Map<String, String> body) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
@@ -158,7 +158,9 @@ public class RentalController {
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
-            LocalDate returnDate = LocalDate.parse(body.get("returnDate"));
+            LocalDate returnDate = (body != null && body.get("returnDate") != null)
+                    ? LocalDate.parse(body.get("returnDate"))
+                    : LocalDate.now();
             RentalDTO result = rentalService.returnRental(id, returnDate);
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (RuntimeException e) {

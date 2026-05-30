@@ -48,7 +48,7 @@ public class OrderService {
             throw new RuntimeException("Đơn hàng phải có ít nhất 1 sản phẩm");
         }
 
-        Order.PaymentMethod orderPaymentMethod = Order.PaymentMethod.valueOf(paymentMethod);
+        Order.PaymentMethod orderPaymentMethod = Order.PaymentMethod.valueOf(paymentMethod.toUpperCase());
 
         Order order = Order.builder()
                 .user(user)

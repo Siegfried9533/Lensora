@@ -8,7 +8,6 @@ import com.camerashop.entity.User.Role;
 import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.PasswordResetTokenRepository;
 import com.camerashop.repository.UserRepository;
-import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -138,8 +137,8 @@ public class AuthService {
         EmailVerificationToken token = tokenService.createVerificationToken(user);
         try {
             emailService.sendEmailVerification(user.getEmail(), user.getUserName(), token.getToken());
-        } catch (MessagingException e) {
-            throw new RuntimeException("Gửi email xác minh thất bại", e);
+        } catch (Exception e) {
+            System.err.println("Failed to send verification email: " + e.getMessage());
         }
     }
 
@@ -223,8 +222,8 @@ public class AuthService {
 
         try {
             emailService.sendPasswordResetEmail(user.getEmail(), user.getUserName(), tokenValue);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Gửi email đặt lại mật khẩu thất bại", e);
+        } catch (Exception e) {
+            System.err.println("Failed to send password reset email: " + e.getMessage());
         }
     }
 

@@ -7,13 +7,13 @@ services:
     restart: always
     command: ["postgres", "-c", "listen_addresses=*"]
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Hoalt@2005
-      POSTGRES_DB: LensoraDB
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-LensoraDB}
     ports:
-      - "0.0.0.0:${DB_PORT:-5433}:5432" # Publish cho mọi interface của máy host
+      - "0.0.0.0:${DB_PORT:-5433}:5432"
     volumes:
-      - lensora_db_data:/var/lib/postgresql/data # Đảm bảo rằng dữ liệu được lưu trữ bền vững ngay cả khi container bị xóa
+      - lensora_db_data:/var/lib/postgresql/data
 
   backend:
     build: .
@@ -23,9 +23,25 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/LensoraDB
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=Hoalt@2005
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-LensoraDB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+      - APP_FRONTEND_URL=${APP_FRONTEND_URL:-http://localhost:8081}
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST:-smtp.gmail.com}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT:-587}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME:-}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD:-}
+      - SPRING_MAIL_SMTP_AUTH=${SPRING_MAIL_SMTP_AUTH:-true}
+      - SPRING_MAIL_SMTP_STARTTLS=${SPRING_MAIL_SMTP_STARTTLS:-true}
+      - APP_GHN_TOKEN=${APP_GHN_TOKEN:-}
+      - APP_GHN_SHOP_ID=${APP_GHN_SHOP_ID:-0}
+      - APP_GHN_DISTRICT_ID=${APP_GHN_DISTRICT_ID:-0}
+      - APP_MOMO_PARTNER_CODE=${APP_MOMO_PARTNER_CODE:-}
+      - APP_MOMO_ACCESS_KEY=${APP_MOMO_ACCESS_KEY:-}
+      - APP_MOMO_SECRET_KEY=${APP_MOMO_SECRET_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
 
 volumes:
   lensora_db_data:
