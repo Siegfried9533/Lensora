@@ -25,11 +25,14 @@ public class SettingsActivity extends BaseActivity {
 
         ImageButton btnBack = findViewById(R.id.btn_back);
         LinearLayout rowLanguage = findViewById(R.id.row_language);
+        LinearLayout rowPaymentMethods = findViewById(R.id.row_payment_methods);
         txtLanguageValue = findViewById(R.id.txt_language_value);
         TextView txtVersion = findViewById(R.id.txt_version);
 
         btnBack.setOnClickListener(v -> finish());
         rowLanguage.setOnClickListener(v -> showLanguageDialog());
+        rowPaymentMethods.setOnClickListener(v ->
+                startActivity(new Intent(this, PaymentMethodsActivity.class)));
         updateLanguageValue();
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);

@@ -19,6 +19,8 @@ public class Rental {
     public String shippingAddress;
     public String paymentMethod;
     public Long shippingFee;
+    /** PENDING | SUCCESS | FAILED | EXPIRED. */
+    public String paymentStatus;
 
     public Rental() {}
 }

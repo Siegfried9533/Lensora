@@ -152,6 +152,7 @@ public class CheckoutActivity extends BaseActivity {
         btnPlaceOrder.setText(isRentalCheckout()
                 ? R.string.checkout_place_rental
                 : R.string.checkout_place_order);
+        configurePaymentOptions();
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
@@ -735,6 +736,34 @@ public class CheckoutActivity extends BaseActivity {
         tv.setPadding(12, 0, 12, 0);
     }
 
+    /**
+     * Buying offers COD + online; renting is pay-first, so COD is hidden and online
+     * payment is preselected with an explanatory note.
+     */
+    private void configurePaymentOptions() {
+        if (!isRentalCheckout()) {
+            return;
+        }
+        View codOption = findViewById(R.id.rb_cod);
+        if (codOption != null) {
+            codOption.setVisibility(View.GONE);
+        }
+        android.widget.RadioButton momoOption = findViewById(R.id.rb_momo);
+        if (momoOption != null) {
+            momoOption.setChecked(true);
+        }
+        if (rgPayment.getParent() instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) rgPayment.getParent();
+            int idx = parent.indexOfChild(rgPayment) + 1;
+            TextView note = new TextView(this);
+            note.setText(R.string.checkout_rental_prepay_note);
+            note.setTextColor(getColor(R.color.orange));
+            note.setTextSize(13);
+            note.setPadding(0, 8, 0, 0);
+            parent.addView(note, idx);
+        }
+    }
+
     private void placeOrder() {
         if (selProvince == null || selDistrict == null || selWard == null) {
             showError(getString(R.string.error_select_full_address));
@@ -746,11 +775,13 @@ public class CheckoutActivity extends BaseActivity {
             return;
         }
         String address = buildAddress(street);
-        boolean useMomo = rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
+        // Rentals are pay-first: COD is not offered, so always pay online.
+        boolean useMomo = isRentalCheckout()
+                || rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
         String paymentMethod = useMomo ? "MoMo" : "COD";
 
         if (isRentalCheckout()) {
-            createRental(address, paymentMethod, useMomo);
+            createRental(address, "MoMo", true);
             return;
         }
 

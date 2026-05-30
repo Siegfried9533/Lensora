@@ -368,4 +368,28 @@
     <!-- Misc -->
     <string name="loading">Đang tải...</string>
     <string name="currency_symbol">₫</string>
+
+    <!-- Payment methods (settings) -->
+    <string name="settings_payment_methods">Phương thức thanh toán</string>
+    <string name="payment_methods_title">Phương thức thanh toán</string>
+    <string name="payment_methods_subtitle">Thêm tài khoản ngân hàng hoặc ví MoMo để thanh toán nhanh hơn khi mua hàng.</string>
+    <string name="payment_methods_empty">Bạn chưa lưu phương thức thanh toán nào.</string>
+    <string name="payment_methods_add">Thêm phương thức thanh toán</string>
+    <string name="payment_methods_type">Loại</string>
+    <string name="payment_methods_type_momo">Ví MoMo</string>
+    <string name="payment_methods_type_bank">Tài khoản ngân hàng</string>
+    <string name="payment_methods_label_hint">Tên (vd: Vietcombank, Ví MoMo)</string>
+    <string name="payment_methods_holder_hint">Tên chủ tài khoản</string>
+    <string name="payment_methods_account_hint">Số tài khoản / số điện thoại</string>
+    <string name="payment_methods_set_default">Đặt làm mặc định</string>
+    <string name="payment_methods_default_badge">Mặc định</string>
+    <string name="payment_methods_added">Đã thêm phương thức thanh toán</string>
+    <string name="payment_methods_deleted">Đã xóa phương thức thanh toán</string>
+    <string name="payment_methods_default_done">Đã cập nhật phương thức mặc định</string>
+    <string name="payment_methods_load_error">Không tải được phương thức thanh toán. Vui lòng kiểm tra kết nối.</string>
+    <string name="payment_methods_label_required">Vui lòng nhập tên cho phương thức thanh toán</string>
+    <string name="payment_methods_delete_confirm">Xóa phương thức thanh toán này?</string>
+
+    <!-- Rental checkout (pay-first) -->
+    <string name="checkout_rental_prepay_note">Thuê thiết bị yêu cầu thanh toán trước. Hãy thanh toán trực tuyến ngay để xác nhận đơn thuê và nhận máy ảnh.</string>
 </resources>

@@ -368,4 +368,28 @@
     <!-- Misc -->
     <string name="loading">Loading...</string>
     <string name="currency_symbol">₫</string>
+
+    <!-- Payment methods (settings) -->
+    <string name="settings_payment_methods">Payment methods</string>
+    <string name="payment_methods_title">Payment methods</string>
+    <string name="payment_methods_subtitle">Add a bank account or MoMo wallet to pay faster at checkout.</string>
+    <string name="payment_methods_empty">You have no saved payment methods yet.</string>
+    <string name="payment_methods_add">Add payment method</string>
+    <string name="payment_methods_type">Type</string>
+    <string name="payment_methods_type_momo">MoMo wallet</string>
+    <string name="payment_methods_type_bank">Bank account</string>
+    <string name="payment_methods_label_hint">Name (e.g. Vietcombank, My MoMo)</string>
+    <string name="payment_methods_holder_hint">Account holder name</string>
+    <string name="payment_methods_account_hint">Account / phone number</string>
+    <string name="payment_methods_set_default">Set as default</string>
+    <string name="payment_methods_default_badge">Default</string>
+    <string name="payment_methods_added">Payment method added</string>
+    <string name="payment_methods_deleted">Payment method removed</string>
+    <string name="payment_methods_default_done">Default payment method updated</string>
+    <string name="payment_methods_load_error">Could not load payment methods. Check your connection.</string>
+    <string name="payment_methods_label_required">Please enter a name for this payment method</string>
+    <string name="payment_methods_delete_confirm">Remove this payment method?</string>
+
+    <!-- Rental checkout (pay-first) -->
+    <string name="checkout_rental_prepay_note">Rentals require prepayment. Pay online now to confirm your booking and receive the camera.</string>
 </resources>
