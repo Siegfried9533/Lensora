@@ -60,6 +60,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:text="@string/checkout_saved_address"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+
+            <Spinner
+                android:id="@+id/sp_saved_address"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_input"
+                android:popupBackground="@color/bg_dark_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="@string/checkout_province"
                 android:textColor="@color/text_muted"
                 android:textSize="12sp" />

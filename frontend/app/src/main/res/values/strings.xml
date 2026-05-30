@@ -107,9 +107,16 @@
     <string name="cart_checkout">Checkout</string>
     <string name="checkout_title">Checkout</string>
     <string name="checkout_shipping_address">Shipping Address</string>
+    <string name="checkout_saved_address">Saved address</string>
+    <string name="checkout_select_saved_address">Choose a saved address</string>
+    <string name="checkout_no_saved_address">No saved addresses yet</string>
+    <string name="checkout_saved_address_number">Address %1$d: %2$s</string>
     <string name="checkout_province">Province / City</string>
+    <string name="checkout_select_province">Choose Province / City</string>
     <string name="checkout_district">District</string>
+    <string name="checkout_select_district">Choose District</string>
     <string name="checkout_ward">Ward</string>
+    <string name="checkout_select_ward">Choose Ward</string>
     <string name="checkout_street">Street address</string>
     <string name="checkout_note">Note</string>
     <string name="checkout_payment_method">Payment Method</string>
@@ -246,6 +253,7 @@
     <string name="error_return_after_start">Return date must be after start date</string>
     <string name="error_add_to_cart">Unable to add to cart</string>
     <string name="error_load_provinces">Unable to load provinces</string>
+    <string name="error_load_address_connection">Could not reach the server to load the address list. Make sure the backend is running, then tap a field to retry.</string>
     <string name="error_load_cart">Unable to load cart</string>
     <string name="error_select_full_address">Please select the full address</string>
     <string name="error_enter_street">Please enter your street address</string>

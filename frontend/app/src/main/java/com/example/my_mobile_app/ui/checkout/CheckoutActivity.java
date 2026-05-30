@@ -1,9 +1,11 @@
 package com.example.my_mobile_app.ui.checkout;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -51,6 +53,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -82,8 +88,11 @@ public class CheckoutActivity extends BaseActivity {
             new SimpleDateFormat("dd/MM/yyyy", Locale.US);
     private static final SimpleDateFormat API_DATE_FMT =
             new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static final String PREFS_ADDRESSES = "checkout_addresses";
+    private static final String KEY_SAVED_ADDRESSES = "saved_addresses";
+    private static final int MAX_SAVED_ADDRESSES = 5;
 
-    private Spinner spProvince, spDistrict, spWard;
+    private Spinner spSavedAddress, spProvince, spDistrict, spWard;
     private EditText etStreet, etNote;
     private RadioGroup rgPayment;
     private TextView txtSubtotal, txtShippingFee, txtTotal, txtRentalDays, txtRentalDeposit;
@@ -93,6 +102,7 @@ public class CheckoutActivity extends BaseActivity {
     private List<Province> provinces = new ArrayList<>();
     private List<District> districts = new ArrayList<>();
     private List<Ward> wards = new ArrayList<>();
+    private final List<SavedAddress> savedAddresses = new ArrayList<>();
 
     private Province selProvince;
     private District selDistrict;
@@ -108,6 +118,8 @@ public class CheckoutActivity extends BaseActivity {
     private int directItemQuantity = 1;
     private long rentalStartMillis;
     private long rentalEndMillis;
+    private SavedAddress pendingSavedAddress;
+    private boolean loadingProvinces;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +128,7 @@ public class CheckoutActivity extends BaseActivity {
             return;
         setContentView(R.layout.activity_checkout);
 
+        spSavedAddress = findViewById(R.id.sp_saved_address);
         spProvince = findViewById(R.id.sp_province);
         spDistrict = findViewById(R.id.sp_district);
         spWard = findViewById(R.id.sp_ward);
@@ -145,12 +158,32 @@ public class CheckoutActivity extends BaseActivity {
         btnRentalStartDate.setOnClickListener(v -> pickRentalDate(true));
         btnRentalEndDate.setOnClickListener(v -> pickRentalDate(false));
 
+        loadSavedAddresses();
+        spSavedAddress.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position <= 0 || position - 1 >= savedAddresses.size())
+                    return;
+                applySavedAddress(savedAddresses.get(position - 1));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
         spProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= provinces.size())
+                if (position <= 0 || position - 1 >= provinces.size()) {
+                    selProvince = null;
+                    selDistrict = null;
+                    selWard = null;
+                    setDistrictOptions(new ArrayList<>());
+                    setWardOptions(new ArrayList<>());
                     return;
-                selProvince = provinces.get(position);
+                }
+                selProvince = provinces.get(position - 1);
                 selDistrict = null;
                 selWard = null;
                 loadDistricts(selProvince.provinceId);
@@ -163,9 +196,13 @@ public class CheckoutActivity extends BaseActivity {
         spDistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= districts.size())
+                if (position <= 0 || position - 1 >= districts.size()) {
+                    selDistrict = null;
+                    selWard = null;
+                    setWardOptions(new ArrayList<>());
                     return;
-                selDistrict = districts.get(position);
+                }
+                selDistrict = districts.get(position - 1);
                 selWard = null;
                 loadWards(selDistrict.districtId);
             }
@@ -177,15 +214,30 @@ public class CheckoutActivity extends BaseActivity {
         spWard.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= wards.size())
+                if (position <= 0 || position - 1 >= wards.size()) {
+                    selWard = null;
                     return;
-                selWard = wards.get(position);
+                }
+                selWard = wards.get(position - 1);
                 recalculateShipping();
+                pendingSavedAddress = null;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
+        });
+
+        // Show placeholders immediately so the address fields aren't blank before
+        // the API responds (or if it fails). Tapping province retries the load.
+        setProvinceOptions();
+        setDistrictOptions(new ArrayList<>());
+        setWardOptions(new ArrayList<>());
+        spProvince.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && provinces.isEmpty()) {
+                loadProvinces();
+            }
+            return false;
         });
 
         loadProvinces();
@@ -229,26 +281,109 @@ public class CheckoutActivity extends BaseActivity {
         return MODE_RENTAL.equals(checkoutMode);
     }
 
+    private void loadSavedAddresses() {
+        savedAddresses.clear();
+        SharedPreferences prefs = getSharedPreferences(PREFS_ADDRESSES, MODE_PRIVATE);
+        String raw = prefs.getString(KEY_SAVED_ADDRESSES, "[]");
+        try {
+            JSONArray arr = new JSONArray(raw);
+            for (int i = 0; i < arr.length(); i++) {
+                savedAddresses.add(SavedAddress.fromJson(arr.getJSONObject(i)));
+            }
+        } catch (JSONException ignored) {
+            savedAddresses.clear();
+        }
+        renderSavedAddressOptions();
+    }
+
+    private void renderSavedAddressOptions() {
+        List<String> names = new ArrayList<>();
+        names.add(savedAddresses.isEmpty()
+                ? getString(R.string.checkout_no_saved_address)
+                : getString(R.string.checkout_select_saved_address));
+        for (int i = 0; i < savedAddresses.size(); i++) {
+            names.add(getString(R.string.checkout_saved_address_number,
+                    i + 1, savedAddresses.get(i).label()));
+        }
+        spSavedAddress.setAdapter(buildSpinnerAdapter(names));
+        spSavedAddress.setEnabled(!savedAddresses.isEmpty());
+    }
+
+    private void applySavedAddress(SavedAddress address) {
+        pendingSavedAddress = address;
+        etStreet.setText(address.street);
+        etNote.setText(address.note);
+        if (provinces.isEmpty()) {
+            return;
+        }
+        selectProvince(address.provinceId);
+    }
+
+    private void saveCurrentAddress() {
+        if (selProvince == null || selDistrict == null || selWard == null)
+            return;
+        String street = etStreet.getText().toString().trim();
+        if (TextUtils.isEmpty(street))
+            return;
+
+        SavedAddress address = new SavedAddress(
+                selProvince.provinceId,
+                selProvince.provinceName,
+                selDistrict.districtId,
+                selDistrict.districtName,
+                selWard.wardCode,
+                selWard.wardName,
+                street,
+                etNote.getText().toString().trim());
+
+        for (int i = savedAddresses.size() - 1; i >= 0; i--) {
+            if (address.samePlaceAndStreet(savedAddresses.get(i))) {
+                savedAddresses.remove(i);
+            }
+        }
+        savedAddresses.add(0, address);
+        while (savedAddresses.size() > MAX_SAVED_ADDRESSES) {
+            savedAddresses.remove(savedAddresses.size() - 1);
+        }
+
+        JSONArray arr = new JSONArray();
+        for (SavedAddress saved : savedAddresses) {
+            arr.put(saved.toJson());
+        }
+        getSharedPreferences(PREFS_ADDRESSES, MODE_PRIVATE)
+                .edit()
+                .putString(KEY_SAVED_ADDRESSES, arr.toString())
+                .apply();
+        renderSavedAddressOptions();
+    }
+
     private void loadProvinces() {
+        if (loadingProvinces) {
+            return;
+        }
+        loadingProvinces = true;
         ApiClient.get(this).create(PaymentService.class).getProvinces()
                 .enqueue(new Callback<ApiResponse<List<Province>>>() {
                     @Override
                     public void onResponse(@NonNull Call<ApiResponse<List<Province>>> call,
                             @NonNull Response<ApiResponse<List<Province>>> response) {
+                        loadingProvinces = false;
                         ApiResponse<List<Province>> b = response.body();
                         if (b == null || !b.success || b.data == null) {
-                            showError("Backend error: cannot load provinces");
+                            showError(getString(R.string.error_load_provinces));
                             return;
                         }
                         provinces = b.data;
-                        List<String> names = new ArrayList<>();
-                        for (Province p : provinces)
-                            names.add(p.provinceName);
-                        spProvince.setAdapter(buildSpinnerAdapter(names));
+                        setProvinceOptions();
+                        if (pendingSavedAddress != null) {
+                            selectProvince(pendingSavedAddress.provinceId);
+                        }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ApiResponse<List<Province>>> call, @NonNull Throwable t) {
+                        loadingProvinces = false;
+                        showError(getString(R.string.error_load_address_connection));
                     }
                 });
     }
@@ -256,6 +391,8 @@ public class CheckoutActivity extends BaseActivity {
     private void loadDistricts(String provinceId) {
         spDistrict.setEnabled(false);
         spWard.setEnabled(false);
+        setDistrictOptions(new ArrayList<>());
+        setWardOptions(new ArrayList<>());
         ApiClient.get(this).create(PaymentService.class).getDistricts(provinceId)
                 .enqueue(new Callback<ApiResponse<List<District>>>() {
                     @Override
@@ -267,21 +404,22 @@ public class CheckoutActivity extends BaseActivity {
                             return;
                         }
                         districts = b.data;
-                        List<String> names = new ArrayList<>();
-                        for (District d : districts)
-                            names.add(d.districtName);
-                        spDistrict.setAdapter(buildSpinnerAdapter(names));
-                        spDistrict.setEnabled(true);
+                        setDistrictOptions(districts);
+                        if (pendingSavedAddress != null) {
+                            selectDistrict(pendingSavedAddress.districtId);
+                        }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ApiResponse<List<District>>> call, @NonNull Throwable t) {
+                        showError(getString(R.string.error_load_address_connection));
                     }
                 });
     }
 
     private void loadWards(String districtId) {
         spWard.setEnabled(false);
+        setWardOptions(new ArrayList<>());
         ApiClient.get(this).create(PaymentService.class).getWards(districtId)
                 .enqueue(new Callback<ApiResponse<List<Ward>>>() {
                     @Override
@@ -293,17 +431,91 @@ public class CheckoutActivity extends BaseActivity {
                             return;
                         }
                         wards = b.data;
-                        List<String> names = new ArrayList<>();
-                        for (Ward w : wards)
-                            names.add(w.wardName);
-                        spWard.setAdapter(buildSpinnerAdapter(names));
-                        spWard.setEnabled(true);
+                        setWardOptions(wards);
+                        if (pendingSavedAddress != null) {
+                            selectWard(pendingSavedAddress.wardCode);
+                        }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ApiResponse<List<Ward>>> call, @NonNull Throwable t) {
+                        showError(getString(R.string.error_load_address_connection));
                     }
                 });
+    }
+
+    private void setProvinceOptions() {
+        List<String> names = new ArrayList<>();
+        names.add(getString(R.string.checkout_select_province));
+        for (Province p : provinces)
+            names.add(p.provinceName);
+        spProvince.setAdapter(buildSpinnerAdapter(names));
+    }
+
+    private void setDistrictOptions(List<District> values) {
+        districts = values;
+        List<String> names = new ArrayList<>();
+        names.add(getString(R.string.checkout_select_district));
+        for (District d : districts)
+            names.add(d.districtName);
+        spDistrict.setAdapter(buildSpinnerAdapter(names));
+        spDistrict.setEnabled(!districts.isEmpty());
+    }
+
+    private void setWardOptions(List<Ward> values) {
+        wards = values;
+        List<String> names = new ArrayList<>();
+        names.add(getString(R.string.checkout_select_ward));
+        for (Ward w : wards)
+            names.add(w.wardName);
+        spWard.setAdapter(buildSpinnerAdapter(names));
+        spWard.setEnabled(!wards.isEmpty());
+    }
+
+    private void selectProvince(String provinceId) {
+        if (provinceId == null) return;
+        for (int i = 0; i < provinces.size(); i++) {
+            if (provinceId.equals(provinces.get(i).provinceId)) {
+                if (spProvince.getSelectedItemPosition() == i + 1) {
+                    selProvince = provinces.get(i);
+                    loadDistricts(selProvince.provinceId);
+                } else {
+                    spProvince.setSelection(i + 1);
+                }
+                return;
+            }
+        }
+    }
+
+    private void selectDistrict(String districtId) {
+        if (districtId == null) return;
+        for (int i = 0; i < districts.size(); i++) {
+            if (districtId.equals(districts.get(i).districtId)) {
+                if (spDistrict.getSelectedItemPosition() == i + 1) {
+                    selDistrict = districts.get(i);
+                    loadWards(selDistrict.districtId);
+                } else {
+                    spDistrict.setSelection(i + 1);
+                }
+                return;
+            }
+        }
+    }
+
+    private void selectWard(String wardCode) {
+        if (wardCode == null) return;
+        for (int i = 0; i < wards.size(); i++) {
+            if (wardCode.equals(wards.get(i).wardCode)) {
+                if (spWard.getSelectedItemPosition() == i + 1) {
+                    selWard = wards.get(i);
+                    recalculateShipping();
+                    pendingSavedAddress = null;
+                } else {
+                    spWard.setSelection(i + 1);
+                }
+                return;
+            }
+        }
     }
 
     private void loadCart() {
@@ -495,9 +707,32 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private ArrayAdapter<String> buildSpinnerAdapter(List<String> names) {
-        ArrayAdapter<String> a = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, names);
+        ArrayAdapter<String> a = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, names) {
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                TextView tv = (TextView) super.getView(position, convertView, parent);
+                styleSpinnerText(tv, position);
+                return tv;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
+                TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
+                styleSpinnerText(tv, position);
+                tv.setBackgroundColor(getColor(R.color.bg_dark_secondary));
+                return tv;
+            }
+        };
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         return a;
+    }
+
+    private void styleSpinnerText(TextView tv, int position) {
+        tv.setTextColor(position == 0 ? getColor(R.color.text_muted) : getColor(R.color.white));
+        tv.setTextSize(14);
+        tv.setSingleLine(false);
+        tv.setPadding(12, 0, 12, 0);
     }
 
     private void placeOrder() {
@@ -560,6 +795,7 @@ public class CheckoutActivity extends BaseActivity {
                             return;
                         }
                         Order order = b.data;
+                        saveCurrentAddress();
                         if (useMomo) {
                             createMomoPayment(order);
                         } else {
@@ -625,6 +861,7 @@ public class CheckoutActivity extends BaseActivity {
                             return;
                         }
                         Rental rental = b.data;
+                        saveCurrentAddress();
                         if (useMomo) {
                             createMomoPaymentRental(rental);
                         } else {
@@ -721,5 +958,67 @@ public class CheckoutActivity extends BaseActivity {
                         showError(getString(R.string.error_create_momo_connection));
                     }
                 });
+    }
+
+    private static class SavedAddress {
+        final String provinceId;
+        final String provinceName;
+        final String districtId;
+        final String districtName;
+        final String wardCode;
+        final String wardName;
+        final String street;
+        final String note;
+
+        SavedAddress(String provinceId, String provinceName, String districtId, String districtName,
+                     String wardCode, String wardName, String street, String note) {
+            this.provinceId = provinceId;
+            this.provinceName = provinceName;
+            this.districtId = districtId;
+            this.districtName = districtName;
+            this.wardCode = wardCode;
+            this.wardName = wardName;
+            this.street = street;
+            this.note = note;
+        }
+
+        static SavedAddress fromJson(JSONObject obj) {
+            return new SavedAddress(
+                    obj.optString("provinceId"),
+                    obj.optString("provinceName"),
+                    obj.optString("districtId"),
+                    obj.optString("districtName"),
+                    obj.optString("wardCode"),
+                    obj.optString("wardName"),
+                    obj.optString("street"),
+                    obj.optString("note"));
+        }
+
+        JSONObject toJson() {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("provinceId", provinceId);
+                obj.put("provinceName", provinceName);
+                obj.put("districtId", districtId);
+                obj.put("districtName", districtName);
+                obj.put("wardCode", wardCode);
+                obj.put("wardName", wardName);
+                obj.put("street", street);
+                obj.put("note", note);
+            } catch (JSONException ignored) {
+            }
+            return obj;
+        }
+
+        String label() {
+            return street + ", " + wardName + ", " + districtName + ", " + provinceName;
+        }
+
+        boolean samePlaceAndStreet(SavedAddress other) {
+            return provinceId.equals(other.provinceId)
+                    && districtId.equals(other.districtId)
+                    && wardCode.equals(other.wardCode)
+                    && street.equalsIgnoreCase(other.street);
+        }
     }
 }

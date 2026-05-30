@@ -24,3 +24,6 @@ Thumbs.db
 # Nhật ký
 *.log
 logs/
+# Local backend auto-restart hook artifacts
+backend-run.log
+.backend.pid

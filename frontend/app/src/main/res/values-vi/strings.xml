@@ -107,9 +107,16 @@
     <string name="cart_checkout">Thanh toán</string>
     <string name="checkout_title">Thanh toán</string>
     <string name="checkout_shipping_address">Địa chỉ giao hàng</string>
+    <string name="checkout_saved_address">Địa chỉ đã lưu</string>
+    <string name="checkout_select_saved_address">Chọn địa chỉ đã lưu</string>
+    <string name="checkout_no_saved_address">Chưa có địa chỉ đã lưu</string>
+    <string name="checkout_saved_address_number">Địa chỉ %1$d: %2$s</string>
     <string name="checkout_province">Tỉnh / Thành phố</string>
+    <string name="checkout_select_province">Chọn Tỉnh / Thành phố</string>
     <string name="checkout_district">Quận / Huyện</string>
+    <string name="checkout_select_district">Chọn Quận / Huyện</string>
     <string name="checkout_ward">Phường / Xã</string>
+    <string name="checkout_select_ward">Chọn Phường / Xã</string>
     <string name="checkout_street">Số nhà, tên đường</string>
     <string name="checkout_note">Ghi chú</string>
     <string name="checkout_payment_method">Phương thức thanh toán</string>
@@ -246,6 +253,7 @@
     <string name="error_return_after_start">Ngày trả phải sau ngày bắt đầu</string>
     <string name="error_add_to_cart">Không thể thêm vào giỏ</string>
     <string name="error_load_provinces">Lỗi tải tỉnh/thành</string>
+    <string name="error_load_address_connection">Không kết nối được máy chủ để tải danh sách địa chỉ. Hãy đảm bảo backend đang chạy, rồi chạm vào ô để thử lại.</string>
     <string name="error_load_cart">Lỗi tải giỏ hàng</string>
     <string name="error_select_full_address">Vui lòng chọn đầy đủ địa chỉ</string>
     <string name="error_enter_street">Vui lòng nhập số nhà, tên đường</string>

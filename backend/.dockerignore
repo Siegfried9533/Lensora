@@ -1,0 +1,7 @@
+src/
+pom.xml
+*.md
+.env
+.env.example
+dev.sh
+test_requests/

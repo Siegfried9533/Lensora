@@ -26,4 +26,10 @@ public interface AssetService {
 
     @GET("assets/{id}")
     Call<ApiResponse<Asset>> getAssetById(@Path("id") String id);
+
+    @GET("assets/category/{categoryId}")
+    Call<ApiResponse<PaginatedResponse<Asset>>> getAssetsByCategory(
+            @Path("categoryId") String categoryId,
+            @Query("page") int page,
+            @Query("size") int size);
 }

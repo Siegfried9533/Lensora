@@ -16,6 +16,9 @@ public class Rental {
     public double penaltyFee;
     /** PENDING | ACTIVE | COMPLETED | CANCELLED. */
     public String status;
+    public String shippingAddress;
+    public String paymentMethod;
+    public Long shippingFee;
 
     public Rental() {}
 }

@@ -1,342 +1,185 @@
-# Camera Shop Backend
+# Lensora Backend
 
-A full-featured e-commerce backend for a camera equipment marketplace built with Spring Boot.
+REST API for the Lensora camera-equipment marketplace (buy / sell / rent), built with Spring Boot.
 
-## Table of Contents
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Database Setup](#database-setup)
-  - [Running the Application](#running-the-application)
-- [API Endpoints](#api-endpoints)
-- [Authentication](#authentication)
-- [Testing](#testing)
-- [Deployment](#deployment)
-  - [Docker Deployment](#docker-deployment)
-  - [Local Deployment](#local-deployment)
-
-## Overview
-
-This is the backend service for a camera equipment marketplace that allows users to browse, rent, and purchase photography equipment. The backend provides RESTful APIs for user authentication, product management, shopping cart, order processing, rental services, and payment integration.
+> The Java package and Maven artifact are `com.camerashop` (legacy "Camera Shop" name); the product is **Lensora**. The repo root `README.md` covers running the full stack — this file documents the backend in detail.
 
 ## Tech Stack
 
-- **Java 17**
-- **Spring Boot 3.2.4**
-- **Spring Security + JWT**
-- **Spring Data JPA**
-- **MySQL**
-- **Maven**
-- **Docker**
+- **Java 21**
+- **Spring Boot 3.4.2** (Web, Data JPA, Security, Validation, Mail, OAuth2 Client)
+- **PostgreSQL** + **Flyway** (versioned migrations)
+- **JWT** (`io.jsonwebtoken` jjwt 0.12.5)
+- **spring-dotenv** (loads `backend/.env` on local runs)
+- **Maven** (wrapper `./mvnw`), **Docker**
 
 ## Features
 
-- 🔐 JWT Authentication & Authorization
-- 👤 User Registration & Login (with Email Verification)
-- 🛍️ Product Catalog Management
-- 🛒 Shopping Cart Functionality
-- 📦 Order Processing
-- 📱 Rental Services
-- 💰 Payment Integration (MoMo, VNPay)
-- 🚚 Shipping Integration (GHN)
-- ❤️ Favorites/Wishlist
-- 📧 Email Verification & Notifications
-- 🔔 Notification System
-- 📊 Admin Dashboard APIs
-- ⭐ Rating & Review System
+- 🔐 JWT authentication & authorization (+ Google OAuth2 login)
+- 👤 Registration / login with email verification
+- 🛍️ Product & asset (rental equipment) catalog
+- 🛒 Cart, ❤️ favorites, ⭐ reviews
+- 📦 Order processing and 📱 rentals
+- 💰 Payment integration: **MoMo** (sandbox)
+- 🚚 Shipping integration: **GHN**, with a `provinces.open-api.vn` fallback for province/district/ward lookups
+- 🔔 Notifications + scheduled jobs
+- 🤖 Chatbot powered by **DeepSeek**
 
 ## Project Structure
 
 ```
 src/main/java/com/camerashop/
-├── CameraShopApplication.java
-├── config/
-│   ├── DataInitializer.java
-│   ├── NotificationScheduler.java
-│   ├── OAuth2SuccessHandler.java
-│   └── SecurityConfig.java
-├── controller/
-│   ├── AssetController.java
-│   ├── AuthController.java
-│   ├── CartController.java
-│   ├── CategoryController.java
-│   ├── FavoriteController.java
-│   ├── NotificationController.java
-│   ├── OrderController.java
-│   ├── PaymentController.java
-│   ├── ProductController.java
-│   ├── RentalController.java
-│   └── ShippingController.java
-├── dto/
-├── entity/
-│   ├── BaseEntity.java
-│   ├── Cart.java
-│   ├── Review.java
-│   ├── Image.java
-│   └── ...
-├── exception/
-│   └── GlobalExceptionHandler.java
-├── filter/
-│   └── JwtAuthFilter.java
-├── repository/
-├── service/
-│   ├── JwtService.java
-│   └── ...
+├── CameraShopApplication.java     # entry point
+├── config/                        # SecurityConfig, schedulers, OAuth2 success handler, data init
+├── controller/                    # REST controllers (one per feature)
+├── dto/                           # request/response DTOs (+ dto/chatbot)
+├── entity/                        # JPA entities
+├── exception/                     # GlobalExceptionHandler
+├── filter/                        # JwtAuthFilter
+├── repository/                    # Spring Data JPA repositories
+├── service/                       # business logic + integrations (GHNService, MoMoService, ChatbotService, ...)
 └── util/
-    └── JwtUtil.java
+src/main/resources/
+├── application.properties         # all config via ${ENV:default}
+└── db/migration/                  # Flyway: V1__Baseline.sql, V2__Create_application_schema.sql
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 17
-- Maven 3.8+
-- MySQL 8.0+ (or use Docker)
-- Docker & Docker Compose (optional)
+- Java 21
+- Docker & Docker Compose (recommended for PostgreSQL)
+- Maven is not required globally — use the bundled `./mvnw`
 
-### Installation
+### Configuration
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/minhphuong150505/Mobile-App_Backend.git
-   cd Mobile-App_Backend/Backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   mvn clean compile
-   ```
-
-### Database Setup
-
-#### Option 1: Using Docker (Recommended)
+Secrets are **env-driven, never hardcoded**. Copy the template and fill real values:
 
 ```bash
-docker-compose up -d
+cp .env.example .env
 ```
 
-MySQL will start on `localhost:3306` with:
-- Database: `camera_shop`
-- Username: `root`
-- Password: `admin123`
+`spring-dotenv` loads `backend/.env` automatically on local runs. Key variables (see `application.properties` for the full list and defaults):
 
-#### Option 2: Local MySQL
+| Variable | Description |
+|----------|-------------|
+| `SPRING_DATASOURCE_URL` | JDBC URL (default `jdbc:postgresql://localhost:5433/LensoraDB`) |
+| `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | DB credentials |
+| `APP_JWT_SECRET` | JWT signing secret (≥ 32 chars) |
+| `APP_JWT_EXPIRATION_MS` | Token lifetime (default `86400000` = 24h) |
+| `APP_FRONTEND_URL` | Frontend URL used in email links |
+| `SPRING_MAIL_*` | SMTP host/port/credentials for email verification |
+| `APP_GHN_TOKEN` / `APP_GHN_SHOP_ID` / `APP_GHN_DISTRICT_ID` | GHN shipping credentials |
+| `APP_MOMO_PARTNER_CODE` / `APP_MOMO_ACCESS_KEY` / `APP_MOMO_SECRET_KEY` | MoMo payment credentials |
+| `DEEPSEEK_BASE_URL` / `DEEPSEEK_MODEL` / `DEEPSEEK_API_KEY` | Chatbot LLM config |
 
-1. Start MySQL server:
-   ```bash
-   sudo systemctl start mysql
-   ```
+### Database
 
-2. Create database:
-   ```sql
-   mysql -u root -p
-   CREATE DATABASE camera_shop;
-   ```
+Default Docker Postgres (from `docker-compose.yml`):
 
-### Running the Application
+```
+Database: LensoraDB
+User/Pass: postgres / Hoalt@2005
+Host port: 5433  (override with DB_PORT)  →  container 5432
+```
 
-#### Local Development
+Schema is managed by **Flyway**, not Hibernate: `spring.jpa.hibernate.ddl-auto=validate`. Hibernate validates the schema at boot and will **fail to start** if an entity doesn't match the migrated tables. Any schema change requires a new `src/main/resources/db/migration/V*__*.sql` migration.
+
+### Running
 
 ```bash
-mvn spring-boot:run
+# Full stack (API + Postgres) in Docker, from the repo root or backend/
+docker compose up -d --build
+# Port 5433 already in use? pick another:
+DB_PORT=5434 docker compose up -d --build
+
+# Local dev: Postgres in Docker, Spring Boot on the host (loads backend/.env)
+docker compose up -d db
+./mvnw spring-boot:run
 ```
 
-Server runs on: http://localhost:8080
-
-#### Using Docker
+Server runs on `http://localhost:8080` (bound to `0.0.0.0`, so other devices on the LAN can reach it).
 
 ```bash
-# Build and start
-docker-compose up -d
-
-# Check logs
-docker-compose logs -f
-
-# Stop
-docker-compose down
+curl http://localhost:8080/api/health
 ```
 
-## API Endpoints
+## API
 
-Base URL: `http://localhost:8080/api`
+Base URL: `http://localhost:8080/api`. Authenticated endpoints require:
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | User login |
-| POST | `/api/auth/oauth2/google` | Google OAuth2 login |
-| GET | `/api/auth/me` | Get current user |
-| PUT | `/api/auth/avatar` | Update avatar |
-| PUT | `/api/auth/password` | Change password |
+```
+Authorization: Bearer <jwt-token>
+```
 
-### Products
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/products` | Get all products |
-| GET | `/api/products/{id}` | Get product by ID |
-| POST | `/api/products` | Create new product (ADMIN) |
-| PUT | `/api/products/{id}` | Update product (ADMIN) |
-| DELETE | `/api/products/{id}` | Delete product (ADMIN) |
+Controllers (each under `/api/<feature>`): `auth`, `products`, `categories`, `assets`, `cart`, `favorites`, `orders`, `rentals`, `reviews`, `notifications`, `payment`, `shipping`, `chatbot`, `health`.
 
-### Assets
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/assets` | Get all assets |
-| GET | `/api/assets/{id}` | Get asset by ID |
-| POST | `/api/assets` | Create new asset (ADMIN) |
-| PUT | `/api/assets/{id}` | Update asset (ADMIN) |
+Commonly used endpoints:
 
-### Cart
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/cart` | Get user's cart |
-| POST | `/api/cart` | Add item to cart |
-| PUT | `/api/cart/{id}` | Update cart item |
-| DELETE | `/api/cart/{id}` | Remove item from cart |
+```
+GET  /api/health
+POST /api/auth/login
+POST /api/auth/register
+GET  /api/auth/me
+GET  /api/products
+GET  /api/categories
+GET  /api/cart
+GET  /api/favorites
+GET  /api/orders
+GET  /api/rentals
 
-### Orders
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/orders` | Get user's orders |
-| GET | `/api/orders/{id}` | Get order by ID |
-| POST | `/api/orders` | Create new order |
-| POST | `/api/orders/{id}/cancel` | Cancel order |
+# Shipping (GHN + open-api fallback)
+GET  /api/shipping/provinces
+GET  /api/shipping/districts/{provinceId}
+GET  /api/shipping/wards/{districtId}
+POST /api/shipping/calculate
+GET  /api/shipping/track/{orderCode}
 
-### Rentals
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/rentals` | Get user's rentals |
-| GET | `/api/rentals/{id}` | Get rental by ID |
-| POST | `/api/rentals` | Create new rental |
-| PUT | `/api/rentals/{id}/return` | Return rented item |
+# Payment (MoMo)
+POST /api/payment/momo/create
+POST /api/payment/momo/create-rental
+GET  /api/payment/status/{orderCode}
 
-### Favorites
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/favorites` | Get user's favorites |
-| POST | `/api/favorites` | Add item to favorites |
-| DELETE | `/api/favorites/{id}` | Remove item from favorites |
-
-### Notifications
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/notifications` | Get user's notifications |
-| GET | `/api/notifications/unread` | Get unread notifications |
-| POST | `/api/notifications/{id}/read` | Mark as read |
-| POST | `/api/notifications/read-all` | Mark all as read |
-
-### Payment
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/payment/momo/create` | Create MoMo payment |
-| GET | `/api/payment/momo/callback` | MoMo redirect callback |
-| GET | `/api/payment/momo/ipn` | MoMomom IPN (server-to-server) |
-
-### Shipping
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/shipping/locations` | Get shipping locations |
-| POST | `/api/shipping/calculate` | Calculate shipping fee |
+# Chatbot (DeepSeek)
+POST /api/chatbot/chat-sync
+```
 
 ## Authentication
 
-This application uses JWT (JSON Web Token) for authentication:
-
-1. Register or login to get a JWT token
-2. Include the token in the Authorization header:
-   ```
-   Authorization: Bearer <your-token-here>
-   ```
-
-### Token Structure
-
-- **Subject**: userId (UUID)
-- **Claims**: username, email, role
-- **Expiration**: 24 hours
-- **Signature**: HMAC-SHA256
+JWT (HMAC-SHA256). Subject = userId (UUID); claims include username, email, role; default expiry 24h. Local registration requires email verification; OAuth2 (Google) logins are auto-verified.
 
 ## Testing
 
-Run tests with Maven:
-
 ```bash
-mvn test
+./mvnw test
 ```
 
-## Deployment
+> There are no test classes yet, so this currently compiles and runs nothing. H2 is wired as a test-scope dependency for when tests are added.
 
-### Docker Deployment
+## Test Accounts
 
-```bash
-# Build images
-docker-compose build
-
-# Start services
-docker-compose up -d
-
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-
-# Stop with data volume
-docker-compose down -v
-```
-
-### Local Deployment
-
-1. Update `src/main/resources/application.properties` with production database credentials
-2. Build the JAR file:
-   ```bash
-   mvn clean package
-   ```
-3. Run the JAR:
-   ```bash
-   java -jar target/camera-shop-backend-1.0.0.jar
-   ```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPRING_DATASOURCE_URL` | MySQL connection string | `jdbc:mysql://localhost:3306/camera_shop` |
-| `SPRING_DATASOURCE_USERNAME` | MySQL username | `root` |
-| `SPRING_DATASOURCE_PASSWORD` | MySQL password | `admin123` |
-| `APP_JWT_SECRET` | JWT signing secret | - |
-| `APP_JWT_EXPIRATION_MS` | Token expiration (ms) | `86400000` (24h) |
-| `APP_FRONTEND_URL` | Frontend URL for redirects | `http://localhost:8081` |
-
-## Test Users
-
-After first run, the database will be seeded with test users:
+Seeded on first run:
 
 | Email | Password | Role |
 |-------|----------|------|
 | test@example.com | password123 | USER |
 | john@example.com | password123 | ADMIN |
 
+## Deployment
+
+```bash
+# Docker
+docker compose up -d --build
+docker compose logs -f
+docker compose down            # add -v to drop the data volume
+
+# Jar
+./mvnw clean package
+java -jar target/backend-0.0.1-SNAPSHOT.jar
+```
+
 ## Notes
 
-- JWT tokens expire in 24 hours
-- Email verification is required for local registration
-- OAuth2 emails are auto-verified
-- MoMomom IPN requires public IP (use ngrok for local testing)
-- GHN shipping requires shop registration
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
----
-
-Built with ❤️ using Spring Boot
+- MoMo IPN (`/api/payment/momo/ipn`) needs a public URL — use a tunnel (e.g. ngrok) for local testing.
+- GHN shipping needs a registered shop + token; without one, the service falls back to `provinces.open-api.vn` for address lookups and to a flat default for fee calculation.

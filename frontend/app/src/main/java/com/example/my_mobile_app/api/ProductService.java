@@ -29,6 +29,12 @@ public interface ProductService {
     @GET("products/{id}")
     Call<ApiResponse<Product>> getProductById(@Path("id") String id);
 
+    @GET("products/category/{categoryId}")
+    Call<ApiResponse<PaginatedResponse<Product>>> getProductsByCategory(
+            @Path("categoryId") String categoryId,
+            @Query("page") int page,
+            @Query("size") int size);
+
     @GET("categories")
     Call<ApiResponse<List<Category>>> getCategories();
 
