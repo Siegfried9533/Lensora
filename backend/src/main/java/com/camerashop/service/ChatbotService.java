@@ -71,7 +71,7 @@ public class ChatbotService {
             List<AssetDTO> assets = assetService.getAllAssets(PageRequest.of(0, 8)).getContent();
 
             StringBuilder sb = new StringBuilder();
-            sb.append("Bạn là trợ lý ảo của CameraShop - cửa hàng thiết bị camera hàng đầu. Nhiệm vụ của bạn là tư vấn nhanh, gọn, lẹ cho khách hàng bằng tiếng Việt đơn giản, dễ hiểu.\n\n");
+            sb.append("Bạn là trợ lý ảo của Lensora - cửa hàng thiết bị camera hàng đầu. Nhiệm vụ của bạn là tư vấn nhanh, gọn, lẹ cho khách hàng bằng tiếng Việt đơn giản, dễ hiểu.\n\n");
 
             sb.append("THÔNG TIN HỆ THỐNG:\n");
 
@@ -138,7 +138,7 @@ public class ChatbotService {
     }
 
     private String buildDefaultSystemPrompt() {
-        return "Bạn là trợ lý ảo của CameraShop. Trả lời ngắn gọn, tối đa 2-3 câu, bằng tiếng Việt đơn giản, dễ hiểu.\n\n" +
+        return "Bạn là trợ lý ảo của Lensora. Trả lời ngắn gọn, tối đa 2-3 câu, bằng tiếng Việt đơn giản, dễ hiểu.\n\n" +
                "Dịch vụ: mua và thuê thiết bị camera.\n" +
                "Chính sách: bảo hành 12-24 tháng, đổi trả 7 ngày, giao hàng 2-5 ngày, miễn phí ship đơn >5tr.\n" +
                "Thanh toán: MoMo, COD, trả góp 0% đơn >10tr.";

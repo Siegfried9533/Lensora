@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Camera Shop</string>
+    <string name="app_name">Lensora</string>
 
     <!-- Auth -->
     <string name="auth_welcome_back">Chào mừng trở lại</string>
-    <string name="auth_login_subtitle">Đăng nhập để tiếp tục với Camera Shop</string>
+    <string name="auth_login_subtitle">Đăng nhập để tiếp tục với Lensora</string>
     <string name="auth_signup_title">Tạo tài khoản</string>
     <string name="auth_signup_subtitle">Đăng ký để bắt đầu mua và thuê thiết bị</string>
     <string name="auth_email">Email</string>
@@ -178,7 +178,7 @@
     <string name="chatbot_input_hint">Nhập tin nhắn...</string>
     <string name="chatbot_send">Gửi</string>
     <string name="chatbot_empty">Hãy đặt câu hỏi để bắt đầu</string>
-    <string name="chatbot_welcome">Xin chào! Tôi là trợ lý ảo của Camera Shop. Tôi có thể giúp bạn tìm thiết bị, giải đáp chính sách thuê và mua. Bạn cần hỗ trợ gì?</string>
+    <string name="chatbot_welcome">Xin chào! Tôi là trợ lý ảo của Lensora. Tôi có thể giúp bạn tìm thiết bị, giải đáp chính sách thuê và mua. Bạn cần hỗ trợ gì?</string>
     <string name="chatbot_suggest_find_camera">Tìm camera phù hợp cho tôi</string>
     <string name="chatbot_suggest_rental_policy">Chính sách thuê thiết bị</string>
     <string name="chatbot_suggest_rental_items">Thiết bị cho thuê</string>
