@@ -60,62 +60,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/checkout_recipient_name"
-                android:textColor="@color/text_muted"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/et_recipient_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:hint="@string/checkout_recipient_name"
-                android:importantForAutofill="no"
-                android:inputType="textCapWords|textPersonName"
-                android:padding="12dp"
-                android:singleLine="true"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_muted"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/checkout_recipient_phone"
-                android:textColor="@color/text_muted"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/et_recipient_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:hint="@string/checkout_recipient_phone"
-                android:importantForAutofill="no"
-                android:inputType="phone"
-                android:padding="12dp"
-                android:singleLine="true"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_muted"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:text="@string/checkout_province"
                 android:textColor="@color/text_muted"
                 android:textSize="12sp" />
 
-            <Spinner
-                android:id="@+id/spinner_province"
+            <EditText
+                android:id="@+id/et_province"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:background="@drawable/bg_input"
-                android:minHeight="48dp"
-                android:padding="12dp" />
+                android:hint="@string/checkout_province"
+                android:importantForAutofill="no"
+                android:inputType="textCapWords|textPostalAddress"
+                android:padding="12dp"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_muted"
+                android:textSize="14sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -125,14 +86,19 @@
                 android:textColor="@color/text_muted"
                 android:textSize="12sp" />
 
-            <Spinner
-                android:id="@+id/spinner_district"
+            <EditText
+                android:id="@+id/et_district"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:background="@drawable/bg_input"
-                android:minHeight="48dp"
-                android:padding="12dp" />
+                android:hint="@string/checkout_district"
+                android:importantForAutofill="no"
+                android:inputType="textCapWords|textPostalAddress"
+                android:padding="12dp"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_muted"
+                android:textSize="14sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -142,14 +108,19 @@
                 android:textColor="@color/text_muted"
                 android:textSize="12sp" />
 
-            <Spinner
-                android:id="@+id/spinner_ward"
+            <EditText
+                android:id="@+id/et_ward"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:background="@drawable/bg_input"
-                android:minHeight="48dp"
-                android:padding="12dp" />
+                android:hint="@string/checkout_ward"
+                android:importantForAutofill="no"
+                android:inputType="textCapWords|textPostalAddress"
+                android:padding="12dp"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_muted"
+                android:textSize="14sp" />
 
             <TextView
                 android:layout_width="wrap_content"

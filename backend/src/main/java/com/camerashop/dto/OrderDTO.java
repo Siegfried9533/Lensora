@@ -20,8 +20,6 @@ public class OrderDTO {
     private String paymentStatus;
     private Long shippingFee;
     private String ghnOrderId;
-    /** Cảnh báo khi tạo vận đơn GHN thất bại (đơn vẫn được tạo thành công). */
-    private String ghnWarning;
     private List<OrderItemDTO> orderItems;
 
     @Getter

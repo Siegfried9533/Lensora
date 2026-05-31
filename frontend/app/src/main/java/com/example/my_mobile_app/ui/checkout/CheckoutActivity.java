@@ -6,14 +6,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -28,11 +24,8 @@ import com.example.my_mobile_app.api.dto.CreateMoMoPaymentRequest;
 import com.example.my_mobile_app.api.dto.CreateOrderRequest;
 import com.example.my_mobile_app.api.dto.CreateRentalRequest;
 import com.example.my_mobile_app.model.CartItem;
-import com.example.my_mobile_app.model.District;
 import com.example.my_mobile_app.model.Order;
-import com.example.my_mobile_app.model.Province;
 import com.example.my_mobile_app.model.Rental;
-import com.example.my_mobile_app.model.Ward;
 import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.ui.payment.OrderStatusActivity;
 import com.example.my_mobile_app.ui.payment.PaymentSuccessActivity;
@@ -83,11 +76,7 @@ public class CheckoutActivity extends BaseActivity {
     private static final SimpleDateFormat API_DATE_FMT =
             new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
-    private EditText etRecipientName, etRecipientPhone, etStreet, etPostalCode, etNote;
-    private Spinner spinnerProvince, spinnerDistrict, spinnerWard;
-    private final List<Province> provinces = new ArrayList<>();
-    private final List<District> districts = new ArrayList<>();
-    private final List<Ward> wards = new ArrayList<>();
+    private EditText etProvince, etDistrict, etWard, etStreet, etPostalCode, etNote;
     private RadioGroup rgPayment;
     private TextView txtSubtotal, txtShippingFee, txtTotal, txtRentalDays, txtRentalDeposit;
     private LinearLayout summaryItems, rentalPeriodSection, rentalDepositRow;
@@ -111,11 +100,9 @@ public class CheckoutActivity extends BaseActivity {
             return;
         setContentView(R.layout.activity_checkout);
 
-        etRecipientName = findViewById(R.id.et_recipient_name);
-        etRecipientPhone = findViewById(R.id.et_recipient_phone);
-        spinnerProvince = findViewById(R.id.spinner_province);
-        spinnerDistrict = findViewById(R.id.spinner_district);
-        spinnerWard = findViewById(R.id.spinner_ward);
+        etProvince = findViewById(R.id.et_province);
+        etDistrict = findViewById(R.id.et_district);
+        etWard = findViewById(R.id.et_ward);
         etStreet = findViewById(R.id.et_street);
         etPostalCode = findViewById(R.id.et_postal_code);
         etNote = findViewById(R.id.et_note);
@@ -138,7 +125,6 @@ public class CheckoutActivity extends BaseActivity {
                 ? R.string.checkout_place_rental
                 : R.string.checkout_place_order);
         configurePaymentOptions();
-        setupAddressSpinners();
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
@@ -375,29 +361,19 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void placeOrder() {
-        String recipientName = textOf(etRecipientName);
-        if (TextUtils.isEmpty(recipientName)) {
-            showError(getString(R.string.error_enter_recipient_name));
+        String province = textOf(etProvince);
+        if (TextUtils.isEmpty(province)) {
+            showError(getString(R.string.error_enter_province));
             return;
         }
-        String recipientPhone = textOf(etRecipientPhone);
-        if (TextUtils.isEmpty(recipientPhone)) {
-            showError(getString(R.string.error_enter_recipient_phone));
+        String district = textOf(etDistrict);
+        if (TextUtils.isEmpty(district)) {
+            showError(getString(R.string.error_enter_district));
             return;
         }
-        Province selectedProvince = selectedProvince();
-        if (selectedProvince == null) {
-            showError(getString(R.string.error_select_province));
-            return;
-        }
-        District selectedDistrict = selectedDistrict();
-        if (selectedDistrict == null) {
-            showError(getString(R.string.error_select_district));
-            return;
-        }
-        Ward selectedWard = selectedWard();
-        if (selectedWard == null) {
-            showError(getString(R.string.error_select_ward));
+        String ward = textOf(etWard);
+        if (TextUtils.isEmpty(ward)) {
+            showError(getString(R.string.error_enter_ward));
             return;
         }
         String street = textOf(etStreet);
@@ -405,8 +381,7 @@ public class CheckoutActivity extends BaseActivity {
             showError(getString(R.string.error_enter_street));
             return;
         }
-        String address = buildAddress(street, selectedWard.wardName,
-                selectedDistrict.districtName, selectedProvince.provinceName);
+        String address = buildAddress(street, ward, district, province);
         // Rentals are pay-first: COD is not offered, so always pay online.
         boolean useMomo = isRentalCheckout()
                 || rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
@@ -440,10 +415,6 @@ public class CheckoutActivity extends BaseActivity {
         CreateOrderRequest req = new CreateOrderRequest(address, paymentMethod, orderItems);
         req.shippingFee = shippingFee;
         req.clearCart = isCartCheckout();
-        req.recipientName = recipientName;
-        req.recipientPhone = recipientPhone;
-        req.toDistrictId = selectedDistrict.districtId;
-        req.toWardCode = selectedWard.wardCode;
 
         btnPlaceOrder.setEnabled(false);
         showLoading();
@@ -462,11 +433,6 @@ public class CheckoutActivity extends BaseActivity {
                             return;
                         }
                         Order order = b.data;
-                        if (order.ghnWarning != null && !order.ghnWarning.isEmpty()) {
-                            // Đơn đã tạo thành công nhưng vận đơn GHN lỗi: Toast tồn tại qua chuyển màn hình.
-                            Toast.makeText(CheckoutActivity.this, order.ghnWarning,
-                                    Toast.LENGTH_LONG).show();
-                        }
                         if (useMomo) {
                             createMomoPayment(order);
                         } else {
@@ -507,150 +473,6 @@ public class CheckoutActivity extends BaseActivity {
 
     private String textOf(EditText input) {
         return input.getText() == null ? "" : input.getText().toString().trim();
-    }
-
-    // ----- GHN master-data address spinners (cascade: province -> district -> ward) -----
-
-    private void setupAddressSpinners() {
-        applyAdapter(spinnerProvince, getString(R.string.checkout_select_province), new ArrayList<>());
-        applyAdapter(spinnerDistrict, getString(R.string.checkout_select_district), new ArrayList<>());
-        applyAdapter(spinnerWard, getString(R.string.checkout_select_ward), new ArrayList<>());
-
-        spinnerProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Reset downstream selections whenever the province changes.
-                districts.clear();
-                wards.clear();
-                applyAdapter(spinnerDistrict, getString(R.string.checkout_select_district), new ArrayList<>());
-                applyAdapter(spinnerWard, getString(R.string.checkout_select_ward), new ArrayList<>());
-                Province p = selectedProvince();
-                if (p != null) {
-                    loadDistricts(p.provinceId);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
-        });
-
-        spinnerDistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                wards.clear();
-                applyAdapter(spinnerWard, getString(R.string.checkout_select_ward), new ArrayList<>());
-                District d = selectedDistrict();
-                if (d != null) {
-                    loadWards(d.districtId);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
-        });
-
-        loadProvinces();
-    }
-
-    private void loadProvinces() {
-        ApiClient.get(this).create(PaymentService.class).getProvinces()
-                .enqueue(new Callback<ApiResponse<List<Province>>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApiResponse<List<Province>>> call,
-                            @NonNull Response<ApiResponse<List<Province>>> response) {
-                        ApiResponse<List<Province>> b = response.body();
-                        if (b == null || !b.success || b.data == null) {
-                            showError(getString(R.string.error_load_address_options));
-                            return;
-                        }
-                        provinces.clear();
-                        provinces.addAll(b.data);
-                        List<String> labels = new ArrayList<>();
-                        for (Province p : provinces) labels.add(p.provinceName);
-                        applyAdapter(spinnerProvince, getString(R.string.checkout_select_province), labels);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ApiResponse<List<Province>>> call, @NonNull Throwable t) {
-                        showError(getString(R.string.error_load_address_options));
-                    }
-                });
-    }
-
-    private void loadDistricts(String provinceId) {
-        ApiClient.get(this).create(PaymentService.class).getDistricts(provinceId)
-                .enqueue(new Callback<ApiResponse<List<District>>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApiResponse<List<District>>> call,
-                            @NonNull Response<ApiResponse<List<District>>> response) {
-                        ApiResponse<List<District>> b = response.body();
-                        if (b == null || !b.success || b.data == null) {
-                            showError(getString(R.string.error_load_address_options));
-                            return;
-                        }
-                        districts.clear();
-                        districts.addAll(b.data);
-                        List<String> labels = new ArrayList<>();
-                        for (District d : districts) labels.add(d.districtName);
-                        applyAdapter(spinnerDistrict, getString(R.string.checkout_select_district), labels);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ApiResponse<List<District>>> call, @NonNull Throwable t) {
-                        showError(getString(R.string.error_load_address_options));
-                    }
-                });
-    }
-
-    private void loadWards(String districtId) {
-        ApiClient.get(this).create(PaymentService.class).getWards(districtId)
-                .enqueue(new Callback<ApiResponse<List<Ward>>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApiResponse<List<Ward>>> call,
-                            @NonNull Response<ApiResponse<List<Ward>>> response) {
-                        ApiResponse<List<Ward>> b = response.body();
-                        if (b == null || !b.success || b.data == null) {
-                            showError(getString(R.string.error_load_address_options));
-                            return;
-                        }
-                        wards.clear();
-                        wards.addAll(b.data);
-                        List<String> labels = new ArrayList<>();
-                        for (Ward w : wards) labels.add(w.wardName);
-                        applyAdapter(spinnerWard, getString(R.string.checkout_select_ward), labels);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ApiResponse<List<Ward>>> call, @NonNull Throwable t) {
-                        showError(getString(R.string.error_load_address_options));
-                    }
-                });
-    }
-
-    /** Builds an adapter whose position 0 is a non-selectable prompt; real items follow. */
-    private void applyAdapter(Spinner spinner, String prompt, List<String> labels) {
-        List<String> entries = new ArrayList<>();
-        entries.add(prompt);
-        entries.addAll(labels);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, entries);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-    }
-
-    private Province selectedProvince() {
-        int pos = spinnerProvince.getSelectedItemPosition();
-        return pos > 0 && pos - 1 < provinces.size() ? provinces.get(pos - 1) : null;
-    }
-
-    private District selectedDistrict() {
-        int pos = spinnerDistrict.getSelectedItemPosition();
-        return pos > 0 && pos - 1 < districts.size() ? districts.get(pos - 1) : null;
-    }
-
-    private Ward selectedWard() {
-        int pos = spinnerWard.getSelectedItemPosition();
-        return pos > 0 && pos - 1 < wards.size() ? wards.get(pos - 1) : null;
     }
 
     private void createRental(String address, String paymentMethod, boolean useMomo) {
