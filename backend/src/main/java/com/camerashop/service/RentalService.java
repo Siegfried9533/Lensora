@@ -5,6 +5,8 @@ import com.camerashop.entity.*;
 import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -237,7 +239,9 @@ public class RentalService {
     public List<RentalDTO> getRentalsByUser(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
-        return rentalRepository.findByUserId(user.getUserId(), org.springframework.data.domain.PageRequest.of(0, 100))
+        return rentalRepository.findByUserId(
+                        user.getUserId(),
+                        PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());

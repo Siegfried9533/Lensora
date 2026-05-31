@@ -89,6 +89,7 @@ public class CartService {
                 .cartItemId(cartItem.getCartItemId())
                 .quantity(cartItem.getQuantity())
                 .type(cartItem.getType().name())
+                .createdAt(cartItem.getCreatedAt())
                 .build();
 
         if (cartItem.getProduct() != null) {

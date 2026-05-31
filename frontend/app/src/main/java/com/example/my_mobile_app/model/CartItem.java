@@ -12,6 +12,7 @@ public class CartItem {
     public String assetName;
     public Double price;
     public String primaryImageUrl;
+    public String createdAt;
     /** Rental cart entries only. */
     public String startDate;
     public String endDate;

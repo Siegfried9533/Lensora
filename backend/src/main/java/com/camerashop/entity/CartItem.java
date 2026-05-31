@@ -2,6 +2,7 @@ package com.camerashop.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cart_items")
@@ -33,6 +34,16 @@ public class CartItem {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CartItemType type;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
     public enum CartItemType {
         PRODUCT, ASSET
