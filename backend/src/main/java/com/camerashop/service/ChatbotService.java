@@ -1,6 +1,7 @@
 package com.camerashop.service;
 
 import com.camerashop.dto.chatbot.*;
+import com.camerashop.dto.AssetDTO;
 import com.camerashop.dto.CategoryDTO;
 import com.camerashop.dto.ProductDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,9 @@ public class ChatbotService {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private AssetService assetService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private HttpURLConnection openDeepSeekConnection(int connectTimeout, int readTimeout) throws Exception {
@@ -64,6 +68,7 @@ public class ChatbotService {
         try {
             List<CategoryDTO> categories = categoryService.getAllCategories();
             List<ProductDTO> products = productService.getAllProducts(PageRequest.of(0, 10)).getContent();
+            List<AssetDTO> assets = assetService.getAllAssets(PageRequest.of(0, 8)).getContent();
 
             StringBuilder sb = new StringBuilder();
             sb.append("Bạn là trợ lý ảo của CameraShop - cửa hàng thiết bị camera hàng đầu. Nhiệm vụ của bạn là tư vấn nhanh, gọn, lẹ cho khách hàng bằng tiếng Việt đơn giản, dễ hiểu.\n\n");
@@ -82,6 +87,26 @@ public class ChatbotService {
                         p.getProductName(), p.getBrand(), p.getPrice(), p.getStockQuantity()));
             }
 
+            sb.append("\nTHIẾT BỊ CHO THUÊ:\n");
+            if (assets.isEmpty()) {
+                sb.append("  + Chưa có dữ liệu thiết bị cho thuê trong hệ thống\n");
+            } else {
+                for (AssetDTO a : assets) {
+                    String modelName = a.getModelName() == null || a.getModelName().isBlank()
+                            ? "Thiết bị chưa rõ tên"
+                            : a.getModelName();
+                    String brand = a.getBrand() == null || a.getBrand().isBlank()
+                            ? "không rõ hãng"
+                            : a.getBrand();
+                    String status = a.getStatus() == null || a.getStatus().isBlank()
+                            ? "UNKNOWN"
+                            : a.getStatus();
+                    long dailyRate = a.getDailyRate() == null ? 0L : a.getDailyRate();
+                    sb.append(String.format("  + %s (%s) - %,dđ/ngày - %s\n",
+                            modelName, brand, dailyRate, status));
+                }
+            }
+
             sb.append("\nDỊCH VỤ:\n");
             sb.append("- Mua thiết bị mới/đã qua sử dụng\n");
             sb.append("- Thuê thiết bị theo ngày\n");
@@ -91,6 +116,11 @@ public class ChatbotService {
             sb.append("- Đổi trả trong 7 ngày\n");
             sb.append("- Giao hàng 2-5 ngày, miễn phí đơn >5tr\n");
             sb.append("- Thanh toán: MoMo, COD, trả góp 0% đơn >10tr\n");
+
+            sb.append("\nCHÍNH SÁCH THUÊ:\n");
+            sb.append("- Cần đặt cọc khi thuê; số tiền cọc hiển thị trong đơn thuê\n");
+            sb.append("- Thuê theo ngày và thanh toán trước qua MoMo\n");
+            sb.append("- Trả thiết bị đúng hạn; nếu quá hạn có thể phát sinh phí phạt theo đơn thuê (penaltyFee)\n");
 
             sb.append("\nQUY TẮC TRẢ LỜI:\n");
             sb.append("1. Ngắn gọn, tối đa 2-3 câu\n");

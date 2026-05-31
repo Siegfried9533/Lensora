@@ -172,10 +172,15 @@
     <!-- Chatbot -->
     <string name="chatbot_title">Trợ lý ảo</string>
     <string name="chatbot_subtitle">Luôn sẵn sàng hỗ trợ bạn</string>
+    <string name="chatbot_status_active">Đang hoạt động</string>
     <string name="chatbot_input_hint">Nhập tin nhắn...</string>
     <string name="chatbot_send">Gửi</string>
     <string name="chatbot_empty">Hãy đặt câu hỏi để bắt đầu</string>
-    <string name="chatbot_welcome">Xin chào! Tôi là trợ lý ảo của bạn. Tôi có thể giúp bạn tìm kiếm thiết bị, tư vấn sản phẩm, hoặc trả lời câu hỏi về dịch vụ. Bạn cần giúp gì?</string>
+    <string name="chatbot_welcome">Xin chào! Tôi là trợ lý ảo của Camera Shop. Tôi có thể giúp bạn tìm thiết bị, giải đáp chính sách thuê và mua. Bạn cần hỗ trợ gì?</string>
+    <string name="chatbot_suggest_find_camera">Tìm camera phù hợp cho tôi</string>
+    <string name="chatbot_suggest_rental_policy">Chính sách thuê thiết bị</string>
+    <string name="chatbot_suggest_rental_items">Thiết bị cho thuê</string>
+    <string name="chatbot_suggest_newest">Mẫu máy mới nhất</string>
     <string name="chatbot_fallback">Xin lỗi, tôi chưa trả lời được lúc này.</string>
     <string name="error_chatbot_connection">Không thể kết nối chatbot. Vui lòng thử lại.</string>
 

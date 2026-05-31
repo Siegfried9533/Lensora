@@ -34,6 +34,7 @@ import com.example.my_mobile_app.model.User;
 import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.ui.auth.LoginActivity;
 import com.example.my_mobile_app.ui.cart.CartActivity;
+import com.example.my_mobile_app.ui.chatbot.ChatbotActivity;
 import com.example.my_mobile_app.ui.equipment.EquipmentDetailActivity;
 import com.example.my_mobile_app.ui.profile.FavoritesActivity;
 import com.example.my_mobile_app.ui.profile.ProfileActivity;
@@ -42,6 +43,7 @@ import com.example.my_mobile_app.util.TokenManager;
 import com.example.my_mobile_app.util.UserManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -109,6 +111,7 @@ public class HomeActivity extends BaseActivity
         txtWelcome = findViewById(R.id.txt_home_welcome);
         ImageButton btnCart = findViewById(R.id.btn_cart);
         ImageButton btnFavorites = findViewById(R.id.btn_favorites);
+        FloatingActionButton fabChatbot = findViewById(R.id.fab_chatbot);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
 
         productAdapter = new ProductCardAdapter(this, filteredItems, favoriteIds, this, this);
@@ -158,6 +161,7 @@ public class HomeActivity extends BaseActivity
             if (!requireLoginForAction()) return;
             startActivity(new Intent(this, FavoritesActivity.class));
         });
+        fabChatbot.setOnClickListener(v -> startActivity(new Intent(this, ChatbotActivity.class)));
     }
 
     @Override

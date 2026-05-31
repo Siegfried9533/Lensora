@@ -172,10 +172,15 @@
     <!-- Chatbot -->
     <string name="chatbot_title">Virtual Assistant</string>
     <string name="chatbot_subtitle">Always ready to help you</string>
+    <string name="chatbot_status_active">Active now</string>
     <string name="chatbot_input_hint">Type a message...</string>
     <string name="chatbot_send">Send</string>
     <string name="chatbot_empty">Ask a question to get started</string>
-    <string name="chatbot_welcome">Hello! I am your virtual assistant. I can help you find equipment, recommend products, or answer questions about our services. How can I help?</string>
+    <string name="chatbot_welcome">Hello! I am the Camera Shop virtual assistant. I can help you find equipment and answer questions about buying or renting. How can I help?</string>
+    <string name="chatbot_suggest_find_camera">Find the right camera for me</string>
+    <string name="chatbot_suggest_rental_policy">Equipment rental policy</string>
+    <string name="chatbot_suggest_rental_items">Rental equipment</string>
+    <string name="chatbot_suggest_newest">Newest models</string>
     <string name="chatbot_fallback">Sorry, I cannot answer right now.</string>
     <string name="error_chatbot_connection">Unable to connect to chatbot. Please try again.</string>
 

@@ -22,8 +22,8 @@ import com.example.my_mobile_app.api.ApiClient;
 import com.example.my_mobile_app.model.ChatMessage;
 import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.ui.home.HomeActivity;
-import com.example.my_mobile_app.util.BottomNavHelper;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -55,6 +55,7 @@ public class ChatbotActivity extends BaseActivity {
     private TextView txtEmpty;
     private EditText inputMessage;
     private ImageButton btnSend;
+    private ChipGroup chipSuggestions;
     private ChatMessageAdapter adapter;
     private Call streamCall;
     private boolean isSending;
@@ -68,17 +69,14 @@ public class ChatbotActivity extends BaseActivity {
         txtEmpty = findViewById(R.id.txt_empty);
         inputMessage = findViewById(R.id.input_message);
         btnSend = findViewById(R.id.btn_send);
+        chipSuggestions = findViewById(R.id.chip_suggestions);
         ImageButton btnBack = findViewById(R.id.btn_back);
 
         messages.add(new ChatMessage("assistant", getString(R.string.chatbot_welcome)));
         adapter = new ChatMessageAdapter(messages);
         LinearLayoutManager lm = new LinearLayoutManager(this);
-        lm.setStackFromEnd(true);
         rvMessages.setLayoutManager(lm);
         rvMessages.setAdapter(adapter);
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-        BottomNavHelper.attachTo(this, bottomNav, 0);
 
         btnBack.setOnClickListener(v -> {
             startActivity(new android.content.Intent(this, HomeActivity.class)
@@ -87,13 +85,31 @@ public class ChatbotActivity extends BaseActivity {
             finish();
         });
         btnSend.setOnClickListener(v -> send());
+        setupSuggestionChips();
         renderEmpty();
+    }
+
+    private void setupSuggestionChips() {
+        wireSuggestionChip(R.id.chip_1);
+        wireSuggestionChip(R.id.chip_2);
+        wireSuggestionChip(R.id.chip_3);
+        wireSuggestionChip(R.id.chip_4);
+    }
+
+    private void wireSuggestionChip(int chipId) {
+        Chip chip = findViewById(chipId);
+        chip.setOnClickListener(v -> {
+            inputMessage.setText(chip.getText());
+            inputMessage.setSelection(inputMessage.getText().length());
+            send();
+        });
     }
 
     private void send() {
         String text = inputMessage.getText().toString().trim();
         if (text.isEmpty() || isSending) return;
 
+        chipSuggestions.setVisibility(View.GONE);
         inputMessage.setText("");
         hideKeyboard();
         messages.add(new ChatMessage("user", text));
