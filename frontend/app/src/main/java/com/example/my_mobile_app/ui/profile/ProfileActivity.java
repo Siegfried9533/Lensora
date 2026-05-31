@@ -43,7 +43,7 @@ import retrofit2.Response;
 public class ProfileActivity extends BaseActivity {
 
     private ImageView imgAvatar;
-    private TextView txtInitial, txtName, txtEmail, txtTrustLabel;
+    private TextView txtInitial, txtName, txtEmail;
     private TextView txtOrderCount, txtRentalCount, txtReviewCount;
     private LinearLayout accountMenu, settingsMenu;
 
@@ -67,7 +67,6 @@ public class ProfileActivity extends BaseActivity {
         txtInitial = findViewById(R.id.txt_avatar_initial);
         txtName = findViewById(R.id.txt_user_name);
         txtEmail = findViewById(R.id.txt_user_email);
-        txtTrustLabel = findViewById(R.id.txt_trust_label);
         txtOrderCount = findViewById(R.id.txt_order_count);
         txtRentalCount = findViewById(R.id.txt_rental_count);
         txtReviewCount = findViewById(R.id.txt_review_count);
@@ -122,8 +121,6 @@ public class ProfileActivity extends BaseActivity {
         String name = valueOrDash(user.userName);
         txtName.setText(name);
         txtEmail.setText(valueOrDash(user.email));
-        String score = String.valueOf((int) user.trustScore);
-        txtTrustLabel.setText(getString(R.string.profile_trust_score_format, score));
         String initial = name.equals("--") ? "?" : name.substring(0, 1).toUpperCase();
         txtInitial.setText(initial);
         if (user.avatarUrl != null && !user.avatarUrl.isEmpty()) {

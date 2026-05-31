@@ -59,7 +59,7 @@ public class Order {
     private List<PaymentTransaction> paymentTransactions = new ArrayList<>();
 
     public enum PaymentMethod {
-        COD, VNPay, MoMo
+        COD, VNPAY, MOMO
     }
 
     @Builder.Default

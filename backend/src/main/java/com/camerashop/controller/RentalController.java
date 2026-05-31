@@ -4,6 +4,7 @@ import com.camerashop.dto.ApiResponse;
 import com.camerashop.dto.RentalDTO;
 import com.camerashop.entity.Rental;
 import com.camerashop.entity.User;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.RentalRepository;
 import com.camerashop.repository.UserRepository;
 import com.camerashop.service.RentalService;
@@ -35,14 +36,17 @@ public class RentalController {
     @PostMapping
     public ResponseEntity<ApiResponse> createRental(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody Map<String, String> body) {
+            @RequestBody Map<String, Object> body) {
         try {
-            String assetId = body.get("assetId");
-            LocalDate startDate = LocalDate.parse(body.get("startDate"));
-            LocalDate endDate = LocalDate.parse(body.get("endDate"));
-            String shippingAddress = body.get("shippingAddress");
-            String paymentMethod = body.get("paymentMethod");
-            Long shippingFee = Long.parseLong(body.getOrDefault("shippingFee", "0"));
+            String assetId = String.valueOf(body.get("assetId"));
+            LocalDate startDate = LocalDate.parse(String.valueOf(body.get("startDate")));
+            LocalDate endDate = LocalDate.parse(String.valueOf(body.get("endDate")));
+            String shippingAddress = body.get("shippingAddress") == null ? "" : String.valueOf(body.get("shippingAddress"));
+            String paymentMethod = body.get("paymentMethod") == null ? "COD" : String.valueOf(body.get("paymentMethod"));
+            Object shippingFeeValue = body.get("shippingFee");
+            Long shippingFee = shippingFeeValue instanceof Number
+                    ? ((Number) shippingFeeValue).longValue()
+                    : Long.parseLong(shippingFeeValue == null ? "0" : String.valueOf(shippingFeeValue));
 
             RentalDTO rental = rentalService.createRental(
                 userDetails.getUsername(), assetId, startDate, endDate,
@@ -66,9 +70,9 @@ public class RentalController {
             @PathVariable String id) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             Rental rental = rentalRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
@@ -127,9 +131,9 @@ public class RentalController {
             @RequestBody Map<String, String> body) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             Rental rental = rentalRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
@@ -148,16 +152,18 @@ public class RentalController {
     public ResponseEntity<ApiResponse> returnRental(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String id,
-            @RequestBody Map<String, String> body) {
+            @RequestBody(required = false) Map<String, String> body) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             Rental rental = rentalRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
             if (!rental.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
-            LocalDate returnDate = LocalDate.parse(body.get("returnDate"));
+            LocalDate returnDate = (body != null && body.get("returnDate") != null)
+                    ? LocalDate.parse(body.get("returnDate"))
+                    : LocalDate.now();
             RentalDTO result = rentalService.returnRental(id, returnDate);
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (RuntimeException e) {

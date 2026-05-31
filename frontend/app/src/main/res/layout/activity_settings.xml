@@ -47,7 +47,7 @@
                 android:padding="@dimen/spacing_md">
 
                 <LinearLayout
-                    android:id="@+id/row_language"
+                    android:id="@+id/row_dark_mode"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
@@ -67,8 +67,7 @@
                         android:id="@+id/switch_dark"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:enabled="false" />
+                        android:checked="true" />
                 </LinearLayout>
 
                 <View
@@ -77,8 +76,12 @@
                     android:background="@color/gray_700" />
 
                 <LinearLayout
+                    android:id="@+id/row_language"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -95,6 +98,37 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/settings_language_vietnamese" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/gray_700" />
+
+                <LinearLayout
+                    android:id="@+id/row_payment_methods"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Body"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_payment_methods" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@string/settings_payment_methods"
+                        android:rotation="180"
+                        android:src="@drawable/ic_arrow_back"
+                        android:tint="@color/text_muted" />
                 </LinearLayout>
 
                 <View

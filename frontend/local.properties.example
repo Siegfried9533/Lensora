@@ -1,0 +1,12 @@
+# Sao chép file này thành local.properties và điền đường dẫn thật
+# cp local.properties.example local.properties
+#
+# File local.properties đã được gitignore — KHÔNG commit file thật.
+
+# Đường dẫn Android SDK (thay bằng path thật trên máy của bạn)
+sdk.dir=/home/your_username/Android/Sdk
+
+# URL backend API
+# - Máy ảo Android Emulator  : http://10.0.2.2:8080/api/
+# - Thiết bị thật (cùng wifi) : http://<IP-LAN-máy-host>:8080/api/
+#   Tìm IP LAN: ip addr show (Linux) / ipconfig (Windows)

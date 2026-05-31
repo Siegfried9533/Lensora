@@ -4,6 +4,7 @@ import com.camerashop.entity.Notification;
 import com.camerashop.entity.Rental;
 import com.camerashop.repository.RentalRepository;
 import com.camerashop.service.NotificationService;
+import com.camerashop.service.RentalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,15 +16,39 @@ import java.util.List;
  * Scheduled jobs for notifications
  * - Rental return reminders (2 days before due date)
  * - Overdue rental notifications
+ * - Releasing abandoned unpaid rental holds (pay-first cleanup)
  */
 @Component
 public class NotificationScheduler {
+
+    /** Minutes a PENDING (unpaid) rental hold is kept before it is auto-cancelled. */
+    private static final int RENTAL_HOLD_MINUTES = 15;
 
     @Autowired
     private RentalRepository rentalRepository;
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private RentalService rentalService;
+
+    /**
+     * Release abandoned rental holds every minute. A rental created as PENDING blocks the
+     * asset's dates; if the user never completes the pay-first payment, this frees the slot
+     * so nobody else is locked out — mirroring how real marketplaces expire unpaid carts.
+     */
+    @Scheduled(fixedRate = 60_000)
+    public void releaseExpiredRentalHolds() {
+        try {
+            int released = rentalService.releaseExpiredHolds(RENTAL_HOLD_MINUTES);
+            if (released > 0) {
+                System.out.println("Released " + released + " expired rental hold(s)");
+            }
+        } catch (Exception e) {
+            System.err.println("Error releasing expired rental holds: " + e.getMessage());
+        }
+    }
 
     /**
      * Send rental return reminders every day at 9 AM

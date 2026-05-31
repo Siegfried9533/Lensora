@@ -2,7 +2,10 @@ package com.camerashop.service;
 
 import com.camerashop.dto.OrderDTO;
 import com.camerashop.entity.*;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +42,15 @@ public class OrderService {
     @SuppressWarnings("unchecked")
     @Transactional
     public OrderDTO createOrder(String email, String shippingAddress, String paymentMethod,
-                                 Long shippingFee, List<Map<String, Object>> items) {
+                                 Long shippingFee, List<Map<String, Object>> items, boolean clearCart) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
-        Order.PaymentMethod orderPaymentMethod = Order.PaymentMethod.valueOf(paymentMethod);
+        if (items == null || items.isEmpty()) {
+            throw new RuntimeException("Đơn hàng phải có ít nhất 1 sản phẩm");
+        }
+
+        Order.PaymentMethod orderPaymentMethod = Order.PaymentMethod.valueOf(paymentMethod.toUpperCase());
 
         Order order = Order.builder()
                 .user(user)
@@ -63,7 +70,7 @@ public class OrderService {
             int quantity = ((Number) item.get("quantity")).intValue();
 
             Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm: " + productId));
 
             long itemTotal = product.getPrice() * quantity;
             totalAmount += itemTotal;
@@ -90,16 +97,19 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         orderRepository.save(order);
 
-        // Xoa gio hang cua nguoi dung
-        cartItemRepository.deleteByUserId(user.getUserId());
+        if (clearCart) {
+            cartItemRepository.deleteByUserId(user.getUserId());
+        }
 
         return toDTO(order);
     }
 
     public List<OrderDTO> getOrdersByUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-        return orderRepository.findByUserId(user.getUserId(), org.springframework.data.domain.PageRequest.of(0, 100))
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+        return orderRepository.findByUserId(
+                        user.getUserId(),
+                        PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "orderDate")))
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -107,8 +117,25 @@ public class OrderService {
 
     public OrderDTO getOrderById(String orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
         return toDTO(order);
+    }
+
+    @Transactional
+    public OrderDTO cancelOrderForCustomer(String email, String orderId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+
+        if (!order.getUser().getUserId().equals(user.getUserId())) {
+            throw new SecurityException("Không có quyền truy cập");
+        }
+        if (order.getStatus() != Order.OrderStatus.PENDING) {
+            throw new IllegalStateException("Chỉ có thể hủy đơn hàng đang chờ xử lý");
+        }
+
+        return updateOrderStatus(orderId, Order.OrderStatus.CANCELLED);
     }
 
     /**
@@ -117,7 +144,7 @@ public class OrderService {
     @Transactional
     public OrderDTO updateOrderStatus(String orderId, Order.OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
 
         Order.OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);

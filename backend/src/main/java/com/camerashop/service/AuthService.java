@@ -5,9 +5,9 @@ import com.camerashop.entity.EmailVerificationToken;
 import com.camerashop.entity.PasswordResetToken;
 import com.camerashop.entity.User;
 import com.camerashop.entity.User.Role;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.PasswordResetTokenRepository;
 import com.camerashop.repository.UserRepository;
-import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -128,7 +128,7 @@ public class AuthService {
 
     public void resendVerificationEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         if (user.isEmailVerified()) {
             throw new RuntimeException("Email đã được xác minh");
@@ -137,8 +137,8 @@ public class AuthService {
         EmailVerificationToken token = tokenService.createVerificationToken(user);
         try {
             emailService.sendEmailVerification(user.getEmail(), user.getUserName(), token.getToken());
-        } catch (MessagingException e) {
-            throw new RuntimeException("Gửi email xác minh thất bại", e);
+        } catch (Exception e) {
+            System.err.println("Failed to send verification email: " + e.getMessage());
         }
     }
 
@@ -163,7 +163,7 @@ public class AuthService {
 
     public UserDTO getCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         return UserDTO.builder()
                 .userId(user.getUserId())
@@ -177,7 +177,7 @@ public class AuthService {
 
     public UserDTO updateAvatar(String email, String avatarUrl) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);
@@ -194,7 +194,7 @@ public class AuthService {
 
     public void changePassword(String email, String oldPassword, String newPassword) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new RuntimeException("Mật khẩu cũ không chính xác");
@@ -206,7 +206,7 @@ public class AuthService {
 
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản với email này"));
 
         // Vô hiệu hóa các token hiện có của người dùng này
         passwordResetTokenRepository.deleteByUserId(user.getUserId());
@@ -222,8 +222,8 @@ public class AuthService {
 
         try {
             emailService.sendPasswordResetEmail(user.getEmail(), user.getUserName(), tokenValue);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Gửi email đặt lại mật khẩu thất bại", e);
+        } catch (Exception e) {
+            System.err.println("Failed to send password reset email: " + e.getMessage());
         }
     }
 

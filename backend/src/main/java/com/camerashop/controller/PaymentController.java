@@ -4,6 +4,7 @@ import com.camerashop.dto.ApiResponse;
 import com.camerashop.entity.Order;
 import com.camerashop.entity.PaymentTransaction;
 import com.camerashop.entity.Rental;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.OrderRepository;
 import com.camerashop.repository.PaymentTransactionRepository;
 import com.camerashop.repository.RentalRepository;
@@ -63,8 +64,7 @@ public class PaymentController {
             // Kiểm tra đơn hàng tồn tại
             Optional<Order> orderOpt = orderRepository.findById(orderId);
             if (orderOpt.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Không tìm thấy đơn hàng: " + orderId));
+                throw new ResourceNotFoundException("Không tìm thấy đơn hàng: " + orderId);
             }
 
             Order order = orderOpt.get();
@@ -92,6 +92,9 @@ public class PaymentController {
 
             return ResponseEntity.ok(ApiResponse.success(response));
 
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Yêu cầu không hợp lệ: " + e.getMessage()));
@@ -115,12 +118,14 @@ public class PaymentController {
             // Kiểm tra đơn thuê tồn tại
             Optional<Rental> rentalOpt = rentalRepository.findById(rentalId);
             if (rentalOpt.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Không tìm thấy đơn thuê: " + rentalId));
+                throw new ResourceNotFoundException("Không tìm thấy đơn thuê: " + rentalId);
             }
 
             Rental rental = rentalOpt.get();
             long totalAmount = rental.getTotalRentFee() + rental.getDepositFee();
+            if (rental.getShippingFee() != null) {
+                totalAmount += rental.getShippingFee();
+            }
 
             // Tạo URL thanh toán MoMo
             String payUrl = momoService.createPaymentUrl(rentalId, totalAmount, orderInfo);
@@ -131,6 +136,9 @@ public class PaymentController {
 
             return ResponseEntity.ok(ApiResponse.success(response));
 
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Tạo thanh toán thất bại: " + e.getMessage()));
@@ -225,10 +233,22 @@ public class PaymentController {
                     paymentTransactionRepository.save(transaction);
 
                     if (isSuccess) {
-                        rental.setStatus(Rental.RentalStatus.ACTIVE);
+                        // Only a still-held (PENDING) rental may be activated. If the hold was
+                        // already cancelled/expired, another booking may now occupy these dates —
+                        // activating here would double-book. A still-PENDING hold provably has no
+                        // overlapping booking (PENDING blocks overlaps in createRental), so this is
+                        // the authoritative pay-first gate. Late payments are flagged for refund.
+                        if (rental.getStatus() == Rental.RentalStatus.PENDING) {
+                            rental.setStatus(Rental.RentalStatus.ACTIVE);
+                            rental.setPaymentStatus("SUCCESS");
+                        } else {
+                            rental.setPaymentStatus("SUCCESS_LATE");
+                        }
                         rentalRepository.save(rental);
                     } else {
+                        // Payment failed — release the hold so the asset's dates free up.
                         rental.setStatus(Rental.RentalStatus.CANCELLED);
+                        rental.setPaymentStatus("FAILED");
                         rentalRepository.save(rental);
                     }
                 }

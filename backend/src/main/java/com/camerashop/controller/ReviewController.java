@@ -2,6 +2,7 @@ package com.camerashop.controller;
 
 import com.camerashop.dto.ApiResponse;
 import com.camerashop.entity.User;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.ReviewRepository;
 import com.camerashop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class ReviewController {
     @GetMapping("/me/count")
     public ResponseEntity<ApiResponse> countMyReviews(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         return ResponseEntity.ok(ApiResponse.success(reviewRepository.countByUserUserId(user.getUserId())));
     }
 }

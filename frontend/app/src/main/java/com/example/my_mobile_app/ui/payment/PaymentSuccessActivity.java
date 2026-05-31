@@ -23,10 +23,13 @@ public class PaymentSuccessActivity extends BaseActivity {
 
         MaterialButton btnViewOrder = findViewById(R.id.btn_view_order);
         MaterialButton btnHome = findViewById(R.id.btn_home);
+        String rentalId = getIntent().getStringExtra(EXTRA_RENTAL_ID);
+        if (rentalId != null && !rentalId.isEmpty()) {
+            btnViewOrder.setText(R.string.payment_view_rental);
+        }
 
         btnViewOrder.setOnClickListener(v -> {
             String orderId = getIntent().getStringExtra(EXTRA_ORDER_ID);
-            String rentalId = getIntent().getStringExtra(EXTRA_RENTAL_ID);
             if (orderId != null && !orderId.isEmpty()) {
                 startActivity(new Intent(this, OrderDetailActivity.class)
                         .putExtra(OrderDetailActivity.EXTRA_ORDER_ID, orderId));
@@ -42,8 +45,8 @@ public class PaymentSuccessActivity extends BaseActivity {
 
     private void goHome() {
         Intent i = new Intent(this, HomeActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
-        finishAffinity();
+        finish();
     }
 }

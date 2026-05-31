@@ -23,7 +23,7 @@ import retrofit2.Response;
  * Splash + routing entry point.
  *
  * Flow (Phase 3):
- *   - No token in SharedPreferences -> LoginActivity.
+ *   - No token in SharedPreferences -> LoginActivi29ty.
  *   - Token present -> call /auth/me to validate.
  *       success -> save User, then route to HomeActivity (Phase 4).
  *       fail    -> clear token, route to LoginActivity.

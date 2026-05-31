@@ -58,7 +58,7 @@
                 android:layout_marginTop="6dp"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="@color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 tools:text="NIKON Z9" />
@@ -102,7 +102,7 @@
                     android:contentDescription="@string/action_decrease"
                     android:padding="10dp"
                     android:src="@drawable/ic_minus"
-                    app:tint="@color/white" />
+                    app:tint="@color/text_primary" />
 
                 <TextView
                     android:id="@+id/txt_qty"
@@ -110,7 +110,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     tools:text="1" />
@@ -123,7 +123,7 @@
                     android:contentDescription="@string/action_increase"
                     android:padding="10dp"
                     android:src="@drawable/ic_plus"
-                    app:tint="@color/white" />
+                    app:tint="@color/text_primary" />
             </LinearLayout>
         </LinearLayout>
 

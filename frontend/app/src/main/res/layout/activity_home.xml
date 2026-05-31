@@ -7,234 +7,204 @@
     android:background="@color/bg_dark_secondary"
     android:orientation="vertical">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.core.widget.NestedScrollView
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:fillViewport="true">
+            android:layout_height="match_parent">
 
-            <LinearLayout
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="18dp">
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:fillViewport="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:paddingHorizontal="24dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="18dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/txt_logo"
-                            style="@style/Text.Display"
-                            android:layout_width="match_parent"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/home_title" />
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/txt_home_welcome"
-                            style="@style/Text.Muted"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/home_welcome_guest" />
-                    </LinearLayout>
+                            <TextView
+                                android:id="@+id/txt_logo"
+                                style="@style/Text.Display"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_title" />
 
-                    <ImageButton
-                        android:id="@+id/btn_favorites"
-                        android:layout_width="1dp"
-                        android:layout_height="1dp"
-                        android:background="@android:color/transparent"
-                        android:contentDescription="@string/profile_favorites"
-                        android:src="@drawable/ic_heart_outline"
-                        android:visibility="gone" />
-
-                    <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp">
+                            <TextView
+                                android:id="@+id/txt_home_welcome"
+                                style="@style/Text.Muted"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/home_welcome_guest" />
+                        </LinearLayout>
 
                         <ImageButton
-                            android:id="@+id/btn_cart"
+                            android:id="@+id/btn_favorites"
+                            android:layout_width="1dp"
+                            android:layout_height="1dp"
+                            android:background="@android:color/transparent"
+                            android:contentDescription="@string/profile_favorites"
+                            android:src="@drawable/ic_heart_outline"
+                            android:visibility="gone" />
+
+                        <FrameLayout
                             android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_circle_dark"
-                            android:contentDescription="@string/cart_title"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_shopping_cart"
-                            app:tint="@color/text_muted" />
+                            android:layout_height="40dp">
 
-                        <TextView
-                            android:id="@+id/txt_cart_badge"
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:layout_gravity="top|end"
-                            android:layout_marginTop="-2dp"
-                            android:layout_marginEnd="-2dp"
-                            android:background="@drawable/bg_badge_red"
-                            android:gravity="center"
-                            android:textColor="@color/white"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:visibility="gone"
-                            tools:text="3" />
-                    </FrameLayout>
+                            <ImageButton
+                                android:id="@+id/btn_cart"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="@drawable/bg_circle_dark"
+                                android:contentDescription="@string/cart_title"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_shopping_cart"
+                                app:tint="@color/text_muted" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_sign_in"
-                        style="@style/Button.Primary"
-                        android:layout_width="1dp"
-                        android:layout_height="1dp"
-                        android:text="@string/auth_login"
-                        android:textSize="15sp"
-                        android:visibility="gone" />
-                </LinearLayout>
+                            <TextView
+                                android:id="@+id/txt_cart_badge"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_gravity="top|end"
+                                android:layout_marginTop="-2dp"
+                                android:layout_marginEnd="-2dp"
+                                android:background="@drawable/bg_badge_red"
+                                android:gravity="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="3" />
+                        </FrameLayout>
 
-                <EditText
-                    android:id="@+id/input_search"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/input_height"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/bg_search"
-                    android:drawableStart="@drawable/ic_search"
-                    android:drawablePadding="14dp"
-                    android:hint="@string/action_search_hint"
-                    android:imeOptions="actionSearch"
-                    android:importantForAutofill="no"
-                    android:inputType="text"
-                    android:paddingHorizontal="18dp"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/nav_inactive"
-                    android:textSize="@dimen/text_body" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_sign_in"
+                            style="@style/Button.Primary"
+                            android:layout_width="1dp"
+                            android:layout_height="1dp"
+                            android:text="@string/auth_login"
+                            android:textSize="15sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/input_height"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/bg_segment_container"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="4dp">
+                    <EditText
+                        android:id="@+id/input_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/input_height"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/bg_search"
+                        android:drawableStart="@drawable/ic_search"
+                        android:drawablePadding="14dp"
+                        android:hint="@string/action_search_hint"
+                        android:imeOptions="actionSearch"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:paddingHorizontal="18dp"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/nav_inactive"
+                        android:textSize="@dimen/text_body" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_buy"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_segment_active"
-                        android:backgroundTint="@null"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:text="@string/home_buy"
-                        android:textAllCaps="false"
-                        android:textColor="@color/black"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/input_height"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/bg_segment_container"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="4dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_rent"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_segment_inactive"
-                        android:backgroundTint="@null"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:text="@string/home_rent"
-                        android:textAllCaps="false"
-                        android:textColor="@color/nav_inactive"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_buy"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_active"
+                            android:backgroundTint="@null"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:text="@string/home_buy"
+                            android:textAllCaps="false"
+                            android:textColor="@color/black"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_categories"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="20dp"
-                    android:clipToPadding="false"
-                    android:scrollbars="none" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_rent"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_inactive"
+                            android:backgroundTint="@null"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:text="@string/home_rent"
+                            android:textAllCaps="false"
+                            android:textColor="@color/nav_inactive"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:background="@drawable/bg_promo"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="28dp">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_categories"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="20dp"
+                        android:clipToPadding="false"
+                        android:scrollbars="none" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/home_special_offer"
-                        android:textColor="@color/black"
-                        android:textSize="11sp"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/home_featured"
+                        android:textColor="@color/text_primary"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_products"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="@string/home_summer_sale"
-                        android:textColor="@color/white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="@string/home_special_offer_desc"
-                        android:textColor="@color/white"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="112dp"
-                        android:layout_height="36dp"
-                        android:layout_marginTop="14dp"
-                        android:background="@drawable/bg_button_outline"
-                        android:gravity="center"
-                        android:text="@string/home_shop_now"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="12dp"
+                        android:clipToPadding="false"
+                        android:nestedScrollingEnabled="false"
+                        android:scrollbars="none" />
                 </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="@string/home_featured"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_products"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false"
-                    android:scrollbars="none" />
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_chatbot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            android:contentDescription="@string/chatbot_title"
+            app:backgroundTint="@color/orange"
+            app:srcCompat="@drawable/ic_chat"
+            app:tint="@color/white" />
+    </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"

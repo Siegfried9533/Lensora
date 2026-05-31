@@ -36,7 +36,7 @@ public class AuthController {
             AuthResponse response = authService.login(request);
             return ResponseEntity.ok(ApiResponse.success(response));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Email hoặc mật khẩu không hợp lệ"));
+            return ResponseEntity.status(401).body(ApiResponse.error("Email hoặc mật khẩu không hợp lệ"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResponse.error("Đăng nhập thất bại: " + e.getMessage()));
         }
@@ -44,6 +44,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Chưa xác thực - vui lòng đăng nhập"));
+        }
         try {
             UserDTO user = authService.getCurrentUser(userDetails.getUsername());
             return ResponseEntity.ok(ApiResponse.success(user));

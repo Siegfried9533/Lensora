@@ -1,0 +1,1484 @@
+{
+  "info": {
+    "name": "Lensora API Test Cases",
+    "description": "Bộ test case REST API Backend Lensora (Spring Boot). Base URL: http://localhost:8080/api. Auth: Bearer <JWT>. Mọi response bọc trong ApiResponse { success, message, data }.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080/api" },
+    { "key": "token", "value": "YOUR_JWT_TOKEN_HERE" },
+    { "key": "user_id", "value": "1" },
+    { "key": "product_id", "value": "1" },
+    { "key": "asset_id", "value": "1" },
+    { "key": "category_id", "value": "1" },
+    { "key": "cart_item_id", "value": "1" },
+    { "key": "order_id", "value": "1" },
+    { "key": "rental_id", "value": "1" },
+    { "key": "notification_id", "value": "1" },
+    { "key": "order_code", "value": "ORDER123" },
+    { "key": "province_id", "value": "201" },
+    { "key": "district_id", "value": "1442" },
+    { "key": "verify_token", "value": "VERIFY_TOKEN_HERE" },
+    { "key": "reset_token", "value": "RESET_TOKEN_HERE" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "TC-HLT-001 | Health check trả về UP",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          },
+          "_postman_previewlanguage": "json",
+          "description": "Type: Positive | Priority: High\nExpected: success=true, data.status=\"UP\"\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "TC-AUT-001 | Đăng ký tài khoản hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"Test User\",\n  \"phoneNumber\": \"0901234567\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Email chưa tồn tại\nExpected: success=true, trả về AuthResponse (token + user)\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-002 | Đăng ký với email đã tồn tại",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"testuser2\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"Test User 2\",\n  \"phoneNumber\": \"0901234568\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Email đã tồn tại trong DB\nExpected: success=false, message báo email đã tồn tại\nExpected Status: 400"
+        },
+        {
+          "name": "TC-AUT-003 | Đăng ký bỏ trống email/password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"testuser3\",\n  \"email\": \"\",\n  \"password\": \"\",\n  \"fullName\": \"Test User 3\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: -\nExpected: success=false, lỗi validation (email/password trống)\nExpected Status: 400"
+        },
+        {
+          "name": "TC-AUT-004 | Đăng ký với email không đúng định dạng",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"testuser4\",\n  \"email\": \"abc.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"Test User 4\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: -\nExpected: success=false, lỗi format email\nExpected Status: 400"
+        },
+        {
+          "name": "TC-AUT-005 | Đăng nhập hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Tài khoản đã tồn tại và đã verify\nExpected: success=true, trả về AuthResponse (token + user)\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-006 | Đăng nhập sai password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"WrongPassword999\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Tài khoản tồn tại\nExpected: success=false, message sai mật khẩu\nExpected Status: 401"
+        },
+        {
+          "name": "TC-AUT-007 | Đăng nhập email không tồn tại",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nope@x.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Email không tồn tại\nExpected: success=false, message không tìm thấy tài khoản\nExpected Status: 404"
+        },
+        {
+          "name": "TC-AUT-008 | Lấy thông tin user (token hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, có JWT hợp lệ\nExpected: success=true, trả về thông tin user hiện tại\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-009 | Lấy thông tin user (không có token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Không có Authorization header\nExpected: success=false, 401 Unauthorized\nExpected Status: 401"
+        },
+        {
+          "name": "TC-AUT-010 | Lấy thông tin user (token không hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer invalid_token_string" }],
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Token sai/hết hạn\nExpected: success=false, 401 Unauthorized\nExpected Status: 401"
+        },
+        {
+          "name": "TC-AUT-011 | Cập nhật avatar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"avatarUrl\": \"https://example.com/avatar/user1.jpg\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/avatar", "host": ["{{base_url}}"], "path": ["auth", "avatar"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Đã đăng nhập\nExpected: success=true, avatar được cập nhật\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-012 | Đổi mật khẩu hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword456!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/change-password", "host": ["{{base_url}}"], "path": ["auth", "change-password"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, biết mật khẩu cũ\nExpected: success=true, mật khẩu được cập nhật\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-013 | Đổi mật khẩu sai oldPassword",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"WrongOldPassword\",\n  \"newPassword\": \"NewPassword456!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/change-password", "host": ["{{base_url}}"], "path": ["auth", "change-password"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=false, message sai mật khẩu cũ\nExpected Status: 400"
+        },
+        {
+          "name": "TC-AUT-014 | Xác thực email (token hợp lệ)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email?token={{verify_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-email"],
+              "query": [{ "key": "token", "value": "{{verify_token}}" }]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Token xác thực email còn hiệu lực\nExpected: success=true, email được xác thực\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-015 | Xác thực email (token sai)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email?token=bad_token_value",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-email"],
+              "query": [{ "key": "token", "value": "bad_token_value" }]
+            }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Token không hợp lệ\nExpected: success=false, message token sai/hết hạn\nExpected Status: 400"
+        },
+        {
+          "name": "TC-AUT-016 | Gửi lại email xác thực",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/resend-verification", "host": ["{{base_url}}"], "path": ["auth", "resend-verification"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Email tồn tại, chưa verify\nExpected: success=true, email xác thực được gửi lại\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-017 | Quên mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/forgot-password", "host": ["{{base_url}}"], "path": ["auth", "forgot-password"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Email tồn tại\nExpected: success=true, email đặt lại mật khẩu được gửi\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-018 | Đặt lại mật khẩu (token hợp lệ)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reset_token}}\",\n  \"newPassword\": \"ResetPassword789!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Token reset còn hiệu lực\nExpected: success=true, mật khẩu được đặt lại\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AUT-019 | Đặt lại mật khẩu (token sai)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"bad_reset_token\",\n  \"newPassword\": \"ResetPassword789!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Token sai/hết hạn\nExpected: success=false, message token không hợp lệ\nExpected Status: 400"
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "TC-PRD-001 | Lấy danh sách sản phẩm (mặc định)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Có sản phẩm trong DB\nExpected: success=true, danh sách sản phẩm với phân trang mặc định\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PRD-002 | Lấy danh sách sản phẩm (có phân trang)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?page=1&size=5",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Có sản phẩm trong DB\nExpected: success=true, 5 sản phẩm trang 1\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PRD-003 | Tìm kiếm sản phẩm theo tên",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/search?searchQuery=canon",
+              "host": ["{{base_url}}"],
+              "path": ["products", "search"],
+              "query": [{ "key": "searchQuery", "value": "canon" }]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Có sản phẩm chứa từ khóa\nExpected: success=true, danh sách sản phẩm khớp\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PRD-004 | Tìm kiếm sản phẩm theo categoryId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/search?categoryId={{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "search"],
+              "query": [{ "key": "categoryId", "value": "{{category_id}}" }]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Category tồn tại, có sản phẩm thuộc category\nExpected: success=true, danh sách sản phẩm thuộc category\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PRD-005 | Lấy chi tiết sản phẩm (id hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Sản phẩm tồn tại\nExpected: success=true, chi tiết sản phẩm\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PRD-006 | Lấy chi tiết sản phẩm (id không tồn tại)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/999999",
+              "host": ["{{base_url}}"],
+              "path": ["products", "999999"]
+            }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: ID không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-PRD-007 | Lấy sản phẩm theo category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/category/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "category", "{{category_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Category tồn tại\nExpected: success=true, danh sách sản phẩm thuộc category\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "item": [
+        {
+          "name": "TC-AST-001 | Lấy danh sách tài sản",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/assets", "host": ["{{base_url}}"], "path": ["assets"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Có tài sản trong DB\nExpected: success=true, danh sách tài sản cho thuê\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AST-002 | Tìm kiếm tài sản (nhiều điều kiện)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/assets/search?searchQuery=lens&categoryId={{category_id}}&status=AVAILABLE",
+              "host": ["{{base_url}}"],
+              "path": ["assets", "search"],
+              "query": [
+                { "key": "searchQuery", "value": "lens" },
+                { "key": "categoryId", "value": "{{category_id}}" },
+                { "key": "status", "value": "AVAILABLE" }
+              ]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Có tài sản khớp điều kiện\nExpected: success=true, danh sách tài sản phù hợp\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AST-003 | Lấy chi tiết tài sản (id hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/assets/{{asset_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["assets", "{{asset_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Tài sản tồn tại\nExpected: success=true, chi tiết tài sản\nExpected Status: 200"
+        },
+        {
+          "name": "TC-AST-004 | Lấy chi tiết tài sản (id không tồn tại)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/assets/999999",
+              "host": ["{{base_url}}"],
+              "path": ["assets", "999999"]
+            }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: ID không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-AST-005 | Lấy tài sản theo category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/assets/category/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["assets", "category", "{{category_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Category tồn tại\nExpected: success=true, danh sách tài sản thuộc category\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "TC-CAT-001 | Lấy tất cả danh mục",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Có danh mục trong DB\nExpected: success=true, danh sách tất cả categories\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CAT-002 | Lấy danh mục theo type (PRODUCT)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/by-type/PRODUCT",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "by-type", "PRODUCT"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Có danh mục thuộc type PRODUCT\nExpected: success=true, danh sách categories loại PRODUCT\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "TC-CRT-001 | Lấy giỏ hàng (có token)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=true, giỏ hàng hiện tại của user\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CRT-002 | Lấy giỏ hàng (không có token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Không có token\nExpected: success=false, 401 Unauthorized\nExpected Status: 401"
+        },
+        {
+          "name": "TC-CRT-003 | Thêm sản phẩm vào giỏ hàng hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": {{product_id}},\n  \"type\": \"PRODUCT\",\n  \"quantity\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, sản phẩm tồn tại\nExpected: success=true, item được thêm vào cart\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CRT-004 | Thêm vào giỏ hàng (itemId không hợp lệ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": 999999,\n  \"type\": \"PRODUCT\",\n  \"quantity\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: itemId không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-CRT-005 | Cập nhật số lượng item trong giỏ hàng",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}/quantity",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}", "quantity"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Item tồn tại trong cart\nExpected: success=true, quantity được cập nhật thành 3\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CRT-006 | Cập nhật số lượng = 0 (xóa item)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}/quantity",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}", "quantity"]
+            }
+          },
+          "description": "Type: Negative/Edge | Priority: Medium\nPrecondition: Item tồn tại trong cart\nExpected: success=false hoặc item bị xóa\nExpected Status: 400 hoặc 200"
+        },
+        {
+          "name": "TC-CRT-007 | Xóa một item khỏi giỏ hàng",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Item tồn tại trong cart của user\nExpected: success=true, item bị xóa khỏi cart\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CRT-008 | Xóa item không tồn tại khỏi giỏ hàng",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/cart/999999",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "999999"]
+            }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Cart item ID không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-CRT-009 | Xóa toàn bộ giỏ hàng",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Đã đăng nhập, có items trong cart\nExpected: success=true, toàn bộ giỏ hàng bị xóa\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "TC-FAV-001 | Lấy danh sách yêu thích",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/favorites", "host": ["{{base_url}}"], "path": ["favorites"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=true, danh sách yêu thích của user\nExpected Status: 200"
+        },
+        {
+          "name": "TC-FAV-002 | Toggle yêu thích (thêm vào)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": {{product_id}},\n  \"type\": \"PRODUCT\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/favorites/toggle", "host": ["{{base_url}}"], "path": ["favorites", "toggle"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Item chưa có trong danh sách yêu thích\nExpected: success=true, item được thêm vào favorites\nExpected Status: 200"
+        },
+        {
+          "name": "TC-FAV-003 | Toggle yêu thích (xóa khỏi)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": {{product_id}},\n  \"type\": \"PRODUCT\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/favorites/toggle", "host": ["{{base_url}}"], "path": ["favorites", "toggle"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Item đã có trong danh sách yêu thích\nExpected: success=true, item bị xóa khỏi favorites\nExpected Status: 200"
+        },
+        {
+          "name": "TC-FAV-004 | Kiểm tra trạng thái yêu thích",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/favorites/check?itemId={{product_id}}&type=PRODUCT",
+              "host": ["{{base_url}}"],
+              "path": ["favorites", "check"],
+              "query": [
+                { "key": "itemId", "value": "{{product_id}}" },
+                { "key": "type", "value": "PRODUCT" }
+              ]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Đã đăng nhập\nExpected: success=true, trả về boolean isFavorited\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "TC-ORD-001 | Tạo đơn hàng hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Nguyen Van A\",\n    \"phone\": \"0901234567\",\n    \"province\": \"Hà Nội\",\n    \"district\": \"Cầu Giấy\",\n    \"ward\": \"Dịch Vọng\",\n    \"addressDetail\": \"123 Đường ABC\"\n  },\n  \"paymentMethod\": \"MOMO\",\n  \"shippingFee\": 30000,\n  \"items\": [\n    {\n      \"productId\": {{product_id}},\n      \"quantity\": 1,\n      \"price\": 1500000\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, sản phẩm tồn tại\nExpected: success=true, đơn hàng được tạo\nExpected Status: 200"
+        },
+        {
+          "name": "TC-ORD-002 | Tạo đơn hàng với COD",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Nguyen Van B\",\n    \"phone\": \"0901234568\",\n    \"province\": \"TP.HCM\",\n    \"district\": \"Quận 1\",\n    \"ward\": \"Bến Nghé\",\n    \"addressDetail\": \"456 Đường XYZ\"\n  },\n  \"paymentMethod\": \"COD\",\n  \"shippingFee\": 35000,\n  \"items\": [\n    {\n      \"productId\": {{product_id}},\n      \"quantity\": 2,\n      \"price\": 1500000\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, sản phẩm tồn tại\nExpected: success=true, đơn hàng COD được tạo\nExpected Status: 200"
+        },
+        {
+          "name": "TC-ORD-003 | Tạo đơn hàng với items rỗng",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Nguyen Van A\",\n    \"phone\": \"0901234567\",\n    \"province\": \"Hà Nội\",\n    \"district\": \"Cầu Giấy\",\n    \"ward\": \"Dịch Vọng\",\n    \"addressDetail\": \"123 Đường ABC\"\n  },\n  \"paymentMethod\": \"MOMO\",\n  \"shippingFee\": 30000,\n  \"items\": []\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=false, lỗi items không được rỗng\nExpected Status: 400"
+        },
+        {
+          "name": "TC-ORD-004 | Lấy danh sách đơn hàng",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, có đơn hàng\nExpected: success=true, danh sách đơn hàng của user\nExpected Status: 200"
+        },
+        {
+          "name": "TC-ORD-005 | Lấy chi tiết đơn hàng (id hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đơn hàng tồn tại và thuộc về user\nExpected: success=true, chi tiết đơn hàng\nExpected Status: 200"
+        },
+        {
+          "name": "TC-ORD-006 | Lấy chi tiết đơn hàng (id không tồn tại)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/orders/999999",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "999999"]
+            }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Order ID không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-ORD-007 | Cập nhật trạng thái đơn hàng (SHIPPED)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SHIPPED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "status"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đơn hàng tồn tại, có quyền cập nhật\nExpected: success=true, trạng thái được cập nhật thành SHIPPED\nExpected Status: 200"
+        },
+        {
+          "name": "TC-ORD-008 | Cập nhật trạng thái (CANCELLED)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "status"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Đơn hàng đang ở trạng thái có thể hủy\nExpected: success=true, đơn hàng bị hủy\nExpected Status: 200"
+        },
+        {
+          "name": "TC-ORD-009 | Cập nhật trạng thái không hợp lệ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INVALID_STATUS\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "status"]
+            }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Đơn hàng tồn tại\nExpected: success=false, lỗi trạng thái không hợp lệ\nExpected Status: 400"
+        },
+        {
+          "name": "TC-ORD-010 | Cập nhật trạng thái với body rỗng",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "status"]
+            }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Đơn hàng tồn tại\nExpected: success=false, lỗi thiếu trường status\nExpected Status: 400"
+        }
+      ]
+    },
+    {
+      "name": "Rentals",
+      "item": [
+        {
+          "name": "TC-RNT-001 | Tạo đơn thuê hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": {{asset_id}},\n  \"startDate\": \"2025-06-10\",\n  \"endDate\": \"2025-06-15\",\n  \"shippingAddress\": {\n    \"fullName\": \"Nguyen Van A\",\n    \"phone\": \"0901234567\",\n    \"province\": \"Hà Nội\",\n    \"district\": \"Cầu Giấy\",\n    \"ward\": \"Dịch Vọng\",\n    \"addressDetail\": \"123 Đường ABC\"\n  },\n  \"paymentMethod\": \"MOMO\",\n  \"shippingFee\": 30000\n}"
+            },
+            "url": { "raw": "{{base_url}}/rentals", "host": ["{{base_url}}"], "path": ["rentals"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, tài sản AVAILABLE trong khoảng thời gian\nExpected: success=true, đơn thuê được tạo\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RNT-002 | Tạo đơn thuê thiếu shippingAddress",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": {{asset_id}},\n  \"startDate\": \"2025-06-10\",\n  \"endDate\": \"2025-06-15\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/rentals", "host": ["{{base_url}}"], "path": ["rentals"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=false, lỗi validation thiếu trường bắt buộc\nExpected Status: 400"
+        },
+        {
+          "name": "TC-RNT-003 | Tạo đơn thuê startDate > endDate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": {{asset_id}},\n  \"startDate\": \"2025-06-20\",\n  \"endDate\": \"2025-06-15\",\n  \"shippingAddress\": {\n    \"fullName\": \"Nguyen Van A\",\n    \"phone\": \"0901234567\",\n    \"province\": \"Hà Nội\",\n    \"district\": \"Cầu Giấy\",\n    \"ward\": \"Dịch Vọng\",\n    \"addressDetail\": \"123 Đường ABC\"\n  },\n  \"paymentMethod\": \"COD\",\n  \"shippingFee\": 30000\n}"
+            },
+            "url": { "raw": "{{base_url}}/rentals", "host": ["{{base_url}}"], "path": ["rentals"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: startDate sau endDate\nExpected: success=false, lỗi ngày thuê không hợp lệ\nExpected Status: 400"
+        },
+        {
+          "name": "TC-RNT-004 | Lấy danh sách đơn thuê",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/rentals", "host": ["{{base_url}}"], "path": ["rentals"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, có đơn thuê\nExpected: success=true, danh sách đơn thuê của user\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RNT-005 | Lấy chi tiết đơn thuê (id hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/rentals/{{rental_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rentals", "{{rental_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đơn thuê tồn tại và thuộc về user\nExpected: success=true, chi tiết đơn thuê\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RNT-006 | Lấy chi tiết đơn thuê (id không tồn tại)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/rentals/999999",
+              "host": ["{{base_url}}"],
+              "path": ["rentals", "999999"]
+            }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Rental ID không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-RNT-007 | Kiểm tra tài sản còn trống",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rentals/check-availability?assetId={{asset_id}}&startDate=2025-06-10&endDate=2025-06-15",
+              "host": ["{{base_url}}"],
+              "path": ["rentals", "check-availability"],
+              "query": [
+                { "key": "assetId", "value": "{{asset_id}}" },
+                { "key": "startDate", "value": "2025-06-10" },
+                { "key": "endDate", "value": "2025-06-15" }
+              ]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Tài sản tồn tại\nExpected: success=true, trả về available=true/false\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RNT-008 | Tính giá thuê",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": {{asset_id}},\n  \"startDate\": \"2025-06-10\",\n  \"endDate\": \"2025-06-15\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/rentals/calculate-price", "host": ["{{base_url}}"], "path": ["rentals", "calculate-price"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Tài sản tồn tại, ngày hợp lệ\nExpected: success=true, giá thuê được tính\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RNT-009 | Gia hạn thuê hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newEndDate\": \"2025-06-20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rentals/{{rental_id}}/extend",
+              "host": ["{{base_url}}"],
+              "path": ["rentals", "{{rental_id}}", "extend"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Đơn thuê đang ACTIVE, ngày gia hạn hợp lệ\nExpected: success=true, ngày kết thúc được cập nhật\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RNT-010 | Gia hạn với ngày trong quá khứ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newEndDate\": \"2020-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rentals/{{rental_id}}/extend",
+              "host": ["{{base_url}}"],
+              "path": ["rentals", "{{rental_id}}", "extend"]
+            }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Đơn thuê đang ACTIVE\nExpected: success=false, lỗi ngày gia hạn không hợp lệ\nExpected Status: 400"
+        },
+        {
+          "name": "TC-RNT-011 | Trả tài sản",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"returnDate\": \"2025-06-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rentals/{{rental_id}}/return",
+              "host": ["{{base_url}}"],
+              "path": ["rentals", "{{rental_id}}", "return"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đơn thuê đang ACTIVE\nExpected: success=true, trạng thái chuyển sang RETURNED\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "TC-PAY-001 | Tạo thanh toán MoMo (order hợp lệ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": {{order_id}},\n  \"amount\": 1530000,\n  \"orderInfo\": \"Thanh toan don hang #{{order_id}}\",\n  \"requestType\": \"captureWallet\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/create", "host": ["{{base_url}}"], "path": ["payment", "momo", "create"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đơn hàng tồn tại, chưa thanh toán\nExpected: success=true, payUrl MoMo để redirect\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PAY-002 | Tạo thanh toán MoMo (orderId không hợp lệ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 999999,\n  \"amount\": 1530000,\n  \"orderInfo\": \"Thanh toan don hang\",\n  \"requestType\": \"captureWallet\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/create", "host": ["{{base_url}}"], "path": ["payment", "momo", "create"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: orderId không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-PAY-003 | Tạo thanh toán MoMo (amount sai)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": {{order_id}},\n  \"amount\": 1,\n  \"orderInfo\": \"Thanh toan don hang\",\n  \"requestType\": \"captureWallet\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/create", "host": ["{{base_url}}"], "path": ["payment", "momo", "create"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Amount khác totalAmount của đơn hàng\nExpected: success=false, lỗi số tiền không khớp\nExpected Status: 400"
+        },
+        {
+          "name": "TC-PAY-004 | Tạo thanh toán MoMo cho đơn thuê",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalId\": {{rental_id}},\n  \"orderInfo\": \"Thanh toan don thue #{{rental_id}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/create-rental", "host": ["{{base_url}}"], "path": ["payment", "momo", "create-rental"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đơn thuê tồn tại, chưa thanh toán\nExpected: success=true, payUrl MoMo cho rental\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PAY-005 | Tạo thanh toán MoMo rental (rentalId không hợp lệ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalId\": 999999,\n  \"orderInfo\": \"Thanh toan don thue\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/create-rental", "host": ["{{base_url}}"], "path": ["payment", "momo", "create-rental"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: rentalId không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-PAY-006 | MoMo IPN (chữ ký đúng, resultCode=0)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partnerCode\": \"MOMO\",\n  \"orderId\": \"LENSORA_{{order_id}}_1234567890\",\n  \"requestId\": \"REQ_1234567890\",\n  \"amount\": 1530000,\n  \"orderInfo\": \"Thanh toan don hang\",\n  \"orderType\": \"momo_wallet\",\n  \"transId\": 1234567890,\n  \"resultCode\": 0,\n  \"message\": \"Successful.\",\n  \"payType\": \"qr\",\n  \"responseTime\": 1700000000000,\n  \"extraData\": \"\",\n  \"signature\": \"VALID_SIGNATURE_FROM_MOMO\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/ipn", "host": ["{{base_url}}"], "path": ["payment", "momo", "ipn"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Chữ ký HMAC hợp lệ, resultCode=0\nExpected: Đơn hàng chuyển sang PAID, HTTP 204 No Content\nExpected Status: 204"
+        },
+        {
+          "name": "TC-PAY-007 | MoMo IPN (chữ ký sai)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partnerCode\": \"MOMO\",\n  \"orderId\": \"LENSORA_{{order_id}}_1234567890\",\n  \"requestId\": \"REQ_1234567890\",\n  \"amount\": 1530000,\n  \"orderInfo\": \"Thanh toan don hang\",\n  \"orderType\": \"momo_wallet\",\n  \"transId\": 1234567890,\n  \"resultCode\": 0,\n  \"message\": \"Successful.\",\n  \"payType\": \"qr\",\n  \"responseTime\": 1700000000000,\n  \"extraData\": \"\",\n  \"signature\": \"INVALID_WRONG_SIGNATURE\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/ipn", "host": ["{{base_url}}"], "path": ["payment", "momo", "ipn"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Chữ ký HMAC sai\nExpected: Từ chối, trả về lỗi chữ ký\nExpected Status: 400"
+        },
+        {
+          "name": "TC-PAY-008 | MoMo IPN (resultCode != 0)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partnerCode\": \"MOMO\",\n  \"orderId\": \"LENSORA_{{order_id}}_1234567890\",\n  \"requestId\": \"REQ_1234567890\",\n  \"amount\": 1530000,\n  \"orderInfo\": \"Thanh toan don hang\",\n  \"orderType\": \"momo_wallet\",\n  \"transId\": 0,\n  \"resultCode\": 1006,\n  \"message\": \"Payment failed.\",\n  \"payType\": \"\",\n  \"responseTime\": 1700000000000,\n  \"extraData\": \"\",\n  \"signature\": \"VALID_SIGNATURE_FROM_MOMO\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/ipn", "host": ["{{base_url}}"], "path": ["payment", "momo", "ipn"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Chữ ký hợp lệ nhưng resultCode != 0 (thất bại)\nExpected: Đơn hàng giữ trạng thái PENDING hoặc chuyển FAILED\nExpected Status: 204"
+        },
+        {
+          "name": "TC-PAY-009 | MoMo Callback (thành công)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payment/momo/callback?orderId=LENSORA_{{order_id}}_1234&errorCode=0&message=Success&transId=1234567890&amount=1530000&signature=VALID_SIG",
+              "host": ["{{base_url}}"],
+              "path": ["payment", "momo", "callback"],
+              "query": [
+                { "key": "orderId", "value": "LENSORA_{{order_id}}_1234" },
+                { "key": "errorCode", "value": "0" },
+                { "key": "message", "value": "Success" },
+                { "key": "transId", "value": "1234567890" },
+                { "key": "amount", "value": "1530000" },
+                { "key": "signature", "value": "VALID_SIG" }
+              ]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: errorCode=0, chữ ký hợp lệ\nExpected: Redirect về trang thành công\nExpected Status: 302"
+        },
+        {
+          "name": "TC-PAY-010 | MoMo Callback (chữ ký sai)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payment/momo/callback?orderId=LENSORA_{{order_id}}_1234&errorCode=0&signature=BAD_SIG",
+              "host": ["{{base_url}}"],
+              "path": ["payment", "momo", "callback"],
+              "query": [
+                { "key": "orderId", "value": "LENSORA_{{order_id}}_1234" },
+                { "key": "errorCode", "value": "0" },
+                { "key": "signature", "value": "BAD_SIG" }
+              ]
+            }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Chữ ký không hợp lệ\nExpected: Redirect về trang thất bại hoặc lỗi\nExpected Status: 302 hoặc 400"
+        },
+        {
+          "name": "TC-PAY-011 | Lấy trạng thái thanh toán (orderCode hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/payment/status/{{order_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["payment", "status", "{{order_code}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: orderCode tồn tại\nExpected: success=true, trạng thái thanh toán\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PAY-012 | Lấy trạng thái thanh toán (orderCode sai)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/payment/status/INVALID_ORDER_CODE",
+              "host": ["{{base_url}}"],
+              "path": ["payment", "status", "INVALID_ORDER_CODE"]
+            }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: orderCode không tồn tại\nExpected: success=false, 404 Not Found\nExpected Status: 404"
+        },
+        {
+          "name": "TC-PAY-013 | Query trạng thái MoMo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"LENSORA_{{order_id}}_1234567890\",\n  \"requestId\": \"QUERY_REQ_1234567890\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/query", "host": ["{{base_url}}"], "path": ["payment", "momo", "query"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: orderId tồn tại\nExpected: success=true, trạng thái từ MoMo\nExpected Status: 200"
+        },
+        {
+          "name": "TC-PAY-014 | Query MoMo với body rỗng",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": { "raw": "{{base_url}}/payment/momo/query", "host": ["{{base_url}}"], "path": ["payment", "momo", "query"] }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: -\nExpected: success=false, lỗi thiếu trường bắt buộc\nExpected Status: 400"
+        }
+      ]
+    },
+    {
+      "name": "Shipping",
+      "item": [
+        {
+          "name": "TC-SHP-001 | Tính phí vận chuyển",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toDistrict\": 1442,\n  \"toWard\": \"21211\",\n  \"weight\": 500,\n  \"insuranceValue\": 1500000\n}"
+            },
+            "url": { "raw": "{{base_url}}/shipping/calculate", "host": ["{{base_url}}"], "path": ["shipping", "calculate"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: GHN service đang hoạt động\nExpected: success=true, phí vận chuyển được tính\nExpected Status: 200"
+        },
+        {
+          "name": "TC-SHP-002 | Lấy danh sách tỉnh/thành",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/shipping/provinces", "host": ["{{base_url}}"], "path": ["shipping", "provinces"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: GHN service đang hoạt động\nExpected: success=true, danh sách tỉnh/thành phố\nExpected Status: 200"
+        },
+        {
+          "name": "TC-SHP-003 | Lấy danh sách quận/huyện theo tỉnh",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/shipping/districts/{{province_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["shipping", "districts", "{{province_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: provinceId hợp lệ\nExpected: success=true, danh sách quận/huyện\nExpected Status: 200"
+        },
+        {
+          "name": "TC-SHP-004 | Lấy danh sách phường/xã theo quận",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/shipping/wards/{{district_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["shipping", "wards", "{{district_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: districtId hợp lệ\nExpected: success=true, danh sách phường/xã\nExpected Status: 200"
+        },
+        {
+          "name": "TC-SHP-005 | Theo dõi đơn vận chuyển",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/shipping/track/{{order_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["shipping", "track", "{{order_code}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: orderCode tồn tại trong GHN\nExpected: success=true, thông tin tracking đơn hàng\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "TC-NTF-001 | Lấy danh sách thông báo (có phân trang)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/notifications?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, có thông báo\nExpected: success=true, danh sách thông báo với phân trang\nExpected Status: 200"
+        },
+        {
+          "name": "TC-NTF-002 | Lấy thông báo (không có token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] }
+          },
+          "description": "Type: Negative | Priority: High\nPrecondition: Không có token\nExpected: success=false, 401 Unauthorized\nExpected Status: 401"
+        },
+        {
+          "name": "TC-NTF-003 | Lấy thông báo chưa đọc",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/unread", "host": ["{{base_url}}"], "path": ["notifications", "unread"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=true, danh sách thông báo chưa đọc\nExpected Status: 200"
+        },
+        {
+          "name": "TC-NTF-004 | Đếm thông báo chưa đọc",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/unread/count", "host": ["{{base_url}}"], "path": ["notifications", "unread", "count"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập\nExpected: success=true, số lượng thông báo chưa đọc\nExpected Status: 200"
+        },
+        {
+          "name": "TC-NTF-005 | Đánh dấu một thông báo đã đọc",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "{{notification_id}}", "read"]
+            }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Thông báo tồn tại và thuộc về user\nExpected: success=true, thông báo đánh dấu đã đọc\nExpected Status: 200"
+        },
+        {
+          "name": "TC-NTF-006 | Đánh dấu tất cả thông báo đã đọc",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Đã đăng nhập, có thông báo chưa đọc\nExpected: success=true, tất cả thông báo đánh dấu đã đọc\nExpected Status: 200"
+        },
+        {
+          "name": "TC-NTF-007 | Xóa một thông báo",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/notifications/{{notification_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "{{notification_id}}"]
+            }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Thông báo tồn tại và thuộc về user\nExpected: success=true, thông báo bị xóa\nExpected Status: 200"
+        },
+        {
+          "name": "TC-NTF-008 | Lấy thông báo hệ thống",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/notifications/system", "host": ["{{base_url}}"], "path": ["notifications", "system"] }
+          },
+          "description": "Type: Positive | Priority: Low\nPrecondition: -\nExpected: success=true, danh sách thông báo hệ thống\nExpected Status: 200"
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "TC-RVW-001 | Lấy số lượng đánh giá của user (có token)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/reviews/me/count", "host": ["{{base_url}}"], "path": ["reviews", "me", "count"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Đã đăng nhập\nExpected: success=true, số lượng đánh giá của user\nExpected Status: 200"
+        },
+        {
+          "name": "TC-RVW-002 | Lấy số lượng đánh giá (không có token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/reviews/me/count", "host": ["{{base_url}}"], "path": ["reviews", "me", "count"] }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: Không có token\nExpected: success=false, 401 Unauthorized\nExpected Status: 401"
+        }
+      ]
+    },
+    {
+      "name": "Chatbot",
+      "item": [
+        {
+          "name": "TC-CHB-001 | Chat sync với chatbot",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Tôi muốn tìm máy ảnh Canon EOS\",\n  \"conversationId\": null,\n  \"userId\": null\n}"
+            },
+            "url": { "raw": "{{base_url}}/chatbot/chat-sync", "host": ["{{base_url}}"], "path": ["chatbot", "chat-sync"] }
+          },
+          "description": "Type: Positive | Priority: High\nPrecondition: Chatbot service đang hoạt động\nExpected: success=true, câu trả lời từ chatbot\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CHB-002 | Chat async với chatbot",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Cho tôi biết về các thiết bị cho thuê\",\n  \"conversationId\": null,\n  \"userId\": null\n}"
+            },
+            "url": { "raw": "{{base_url}}/chatbot/chat", "host": ["{{base_url}}"], "path": ["chatbot", "chat"] }
+          },
+          "description": "Type: Positive | Priority: Medium\nPrecondition: Chatbot service đang hoạt động\nExpected: success=true, response stream từ chatbot\nExpected Status: 200"
+        },
+        {
+          "name": "TC-CHB-003 | Chat sync với message rỗng",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"\",\n  \"conversationId\": null,\n  \"userId\": null\n}"
+            },
+            "url": { "raw": "{{base_url}}/chatbot/chat-sync", "host": ["{{base_url}}"], "path": ["chatbot", "chat-sync"] }
+          },
+          "description": "Type: Negative | Priority: Medium\nPrecondition: -\nExpected: success=false, lỗi message không được rỗng\nExpected Status: 400"
+        }
+      ]
+    }
+  ]
+}

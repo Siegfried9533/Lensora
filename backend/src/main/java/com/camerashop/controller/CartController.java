@@ -4,6 +4,7 @@ import com.camerashop.dto.ApiResponse;
 import com.camerashop.dto.CartItemDTO;
 import com.camerashop.entity.CartItem;
 import com.camerashop.entity.User;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.CartItemRepository;
 import com.camerashop.repository.UserRepository;
 import com.camerashop.service.CartService;
@@ -61,9 +62,9 @@ public class CartController {
             @PathVariable String id) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             CartItem cartItem = cartItemRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm trong giỏ hàng"));
             if (!cartItem.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }
@@ -81,9 +82,9 @@ public class CartController {
             @RequestBody Map<String, Integer> body) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
             CartItem cartItem = cartItemRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm trong giỏ hàng"));
             if (!cartItem.getUser().getUserId().equals(user.getUserId())) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền truy cập"));
             }

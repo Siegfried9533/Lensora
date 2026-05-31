@@ -2,12 +2,16 @@ package com.camerashop.service;
 
 import com.camerashop.dto.RentalDTO;
 import com.camerashop.entity.*;
+import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,43 +43,43 @@ public class RentalService {
         if (asset == null || asset.getStatus() != Asset.AssetStatus.AVAILABLE) {
             return false;
         }
+        return !hasOverlappingRental(assetId, startDate, endDate);
+    }
 
-        // Kiem tra cac don thue chong cheo
+    /**
+     * True if an active/pending rental already covers any day in [startDate, endDate].
+     * Cancelled and completed rentals do not block the slot.
+     */
+    private boolean hasOverlappingRental(String assetId, LocalDate startDate, LocalDate endDate) {
         List<Rental> existingRentals = rentalRepository.findByAssetId(assetId);
         for (Rental rental : existingRentals) {
-            // Bo qua cac don thue da huy hoac hoan thanh
             if (rental.getStatus() == Rental.RentalStatus.CANCELLED ||
                 rental.getStatus() == Rental.RentalStatus.COMPLETED) {
                 continue;
             }
-
-            // Kiem tra chong cheo ngay
             boolean overlaps = !(endDate.isBefore(rental.getStartDate()) ||
                                 startDate.isAfter(rental.getEndDate()));
             if (overlaps) {
-                return false;
+                return true;
             }
         }
-
-        return true;
+        return false;
     }
 
     @Transactional
     public RentalDTO createRental(String email, String assetId, LocalDate startDate, LocalDate endDate,
                                    String shippingAddress, String paymentMethod, Long shippingFee) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
-        Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
-
-        if (asset.getStatus() != Asset.AssetStatus.AVAILABLE) {
-            throw new RuntimeException("Thiết bị không có sẵn để thuê");
-        }
-
-        // Kiem tra tinh san co trong khoang ngay
-        if (!isAssetAvailable(assetId, startDate, endDate)) {
-            throw new RuntimeException("Thiết bị không có sẵn trong khoảng thời gian đã chọn");
+        // Pay-first: rentals cannot be COD. Only online methods (MoMo) are accepted; the
+        // asset is handed over only after payment succeeds (IPN flips status to ACTIVE).
+        Rental.PaymentMethod paymentMethodEnum;
+        try {
+            paymentMethodEnum = Rental.PaymentMethod.valueOf(
+                    paymentMethod == null ? "" : paymentMethod.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Thuê thiết bị yêu cầu thanh toán trước. Vui lòng chọn phương thức thanh toán trực tuyến (MoMo).");
         }
 
         long days = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
@@ -83,11 +87,23 @@ public class RentalService {
             throw new RuntimeException("Ngày kết thúc phải sau ngày bắt đầu");
         }
 
+        // Acquire a row-level write lock on the asset so concurrent rental requests for the
+        // same asset are serialized. The overlap re-check below runs while holding the lock —
+        // this is the authoritative guard against two people renting the same camera at once.
+        Asset asset = assetRepository.findByIdForUpdate(assetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
+
+        if (asset.getStatus() != Asset.AssetStatus.AVAILABLE) {
+            throw new RuntimeException("Thiết bị không có sẵn để thuê");
+        }
+
+        if (hasOverlappingRental(assetId, startDate, endDate)) {
+            throw new RuntimeException("Thiết bị đã được thuê trong khoảng thời gian đã chọn");
+        }
+
         // Tinh phi
         long totalRentFee = asset.getDailyRate() * days;
         long depositFee = asset.getDailyRate() * 3; // Dat coc 3 ngay
-
-        Rental.PaymentMethod paymentMethodEnum = Rental.PaymentMethod.valueOf(paymentMethod);
 
         Rental rental = Rental.builder()
                 .user(user)
@@ -98,6 +114,7 @@ public class RentalService {
                 .totalRentFee(totalRentFee)
                 .penaltyFee(0L)
                 .status(Rental.RentalStatus.PENDING)
+                .paymentStatus("PENDING")
                 .shippingAddress(shippingAddress)
                 .paymentMethod(paymentMethodEnum)
                 .shippingFee(shippingFee)
@@ -109,12 +126,31 @@ public class RentalService {
     }
 
     /**
+     * Release rental holds that were created (PENDING) but never paid within the window.
+     * Without this, an abandoned unpaid checkout would block the camera's dates forever.
+     * Returns the number of holds released. Invoked by the scheduled job.
+     */
+    @Transactional
+    public int releaseExpiredHolds(int holdMinutes) {
+        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(holdMinutes);
+        List<Rental> expired = rentalRepository.findExpiredHolds(Rental.RentalStatus.PENDING, cutoff);
+        for (Rental rental : expired) {
+            rental.setStatus(Rental.RentalStatus.CANCELLED);
+            rental.setPaymentStatus("EXPIRED");
+        }
+        if (!expired.isEmpty()) {
+            rentalRepository.saveAll(expired);
+        }
+        return expired.size();
+    }
+
+    /**
      * Gia han thoi gian thue
      */
     @Transactional
     public RentalDTO extendRental(String rentalId, LocalDate newEndDate) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
 
         if (rental.getStatus() != Rental.RentalStatus.ACTIVE &&
             rental.getStatus() != Rental.RentalStatus.PENDING) {
@@ -142,7 +178,7 @@ public class RentalService {
     @Transactional
     public RentalDTO returnRental(String rentalId, LocalDate returnDate) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
 
         if (rental.getStatus() == Rental.RentalStatus.COMPLETED) {
             throw new RuntimeException("Đơn thuê đã hoàn thành");
@@ -181,7 +217,7 @@ public class RentalService {
      */
     public Map<String, Object> calculateRentalPrice(String assetId, LocalDate startDate, LocalDate endDate) {
         Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thiết bị cho thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thiết bị cho thuê"));
 
         long days = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
         if (days <= 0) {
@@ -202,8 +238,10 @@ public class RentalService {
 
     public List<RentalDTO> getRentalsByUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-        return rentalRepository.findByUserId(user.getUserId(), org.springframework.data.domain.PageRequest.of(0, 100))
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+        return rentalRepository.findByUserId(
+                        user.getUserId(),
+                        PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -211,7 +249,7 @@ public class RentalService {
 
     public RentalDTO getRentalById(String rentalId) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuê"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn thuê"));
         return toDTO(rental);
     }
 
@@ -239,6 +277,7 @@ public class RentalService {
                 .shippingAddress(rental.getShippingAddress())
                 .paymentMethod(rental.getPaymentMethod() != null ? rental.getPaymentMethod().name() : null)
                 .shippingFee(rental.getShippingFee())
+                .paymentStatus(rental.getPaymentStatus())
                 .build();
     }
 }

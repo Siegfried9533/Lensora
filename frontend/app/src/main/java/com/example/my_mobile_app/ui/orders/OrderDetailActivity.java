@@ -20,9 +20,15 @@ import com.example.my_mobile_app.util.DateUtils;
 import com.example.my_mobile_app.util.PriceFormatter;
 import com.example.my_mobile_app.util.StatusUtils;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,14 +62,13 @@ public class OrderDetailActivity extends BaseActivity {
         btnCancel = findViewById(R.id.btn_cancel_order);
 
         btnBack.setOnClickListener(v -> finish());
-        btnCancel.setOnClickListener(v ->
-                showError(getString(R.string.error_cancel_order_unavailable)));
         String orderId = getIntent().getStringExtra(EXTRA_ORDER_ID);
         if (orderId == null || orderId.isEmpty()) {
             showError(getString(R.string.error_missing_order_id));
             finish();
             return;
         }
+        btnCancel.setOnClickListener(v -> confirmCancel(orderId));
         load(orderId);
     }
 
@@ -88,6 +93,93 @@ public class OrderDetailActivity extends BaseActivity {
                         showError(getString(R.string.error_load_order_detail));
                     }
                 });
+    }
+
+    private void confirmCancel(String orderId) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.order_detail_cancel)
+                .setMessage(R.string.order_cancel_confirm)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_confirm, (dialog, which) -> cancelOrder(orderId))
+                .show();
+    }
+
+    private void cancelOrder(String orderId) {
+        setCancelBusy(true);
+        OrderService service = ApiClient.get(this).create(OrderService.class);
+        service.cancelOrder(orderId)
+                .enqueue(new Callback<ApiResponse<Order>>() {
+                    @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
+                                                      @NonNull Response<ApiResponse<Order>> response) {
+                        ApiResponse<Order> body = response.body();
+                        if (response.isSuccessful() && body != null && body.success && body.data != null) {
+                            onCancelSuccess(body.data);
+                            return;
+                        }
+                        cancelOrderViaStatus(service, orderId, errorMessage(response));
+                    }
+
+                    @Override public void onFailure(@NonNull Call<ApiResponse<Order>> call,
+                                                    @NonNull Throwable t) {
+                        cancelOrderViaStatus(service, orderId, getString(R.string.error_cancel_order_connection));
+                    }
+                });
+    }
+
+    private void cancelOrderViaStatus(OrderService service, String orderId, String firstError) {
+        Map<String, String> body = new HashMap<>();
+        body.put("status", "CANCELLED");
+        service.updateOrderStatus(orderId, body)
+                .enqueue(new Callback<ApiResponse<Order>>() {
+                    @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
+                                                      @NonNull Response<ApiResponse<Order>> response) {
+                        ApiResponse<Order> result = response.body();
+                        if (response.isSuccessful() && result != null && result.success && result.data != null) {
+                            onCancelSuccess(result.data);
+                            return;
+                        }
+                        setCancelBusy(false);
+                        String message = errorMessage(response);
+                        showError(message != null ? message : firstError);
+                    }
+
+                    @Override public void onFailure(@NonNull Call<ApiResponse<Order>> call,
+                                                    @NonNull Throwable t) {
+                        setCancelBusy(false);
+                        showError(firstError != null
+                                ? firstError
+                                : getString(R.string.error_cancel_order_connection));
+                    }
+                });
+    }
+
+    private void onCancelSuccess(Order order) {
+        setCancelBusy(false);
+        showSuccess(getString(R.string.success_order_cancelled));
+        bind(order);
+    }
+
+    private void setCancelBusy(boolean busy) {
+        btnCancel.setEnabled(!busy);
+        if (busy) showLoading(); else hideLoading();
+    }
+
+    private String errorMessage(Response<ApiResponse<Order>> response) {
+        ApiResponse<Order> body = response.body();
+        if (body != null && body.message != null && !body.message.isEmpty()) {
+            return body.message;
+        }
+        ResponseBody errorBody = response.errorBody();
+        if (errorBody == null) {
+            return null;
+        }
+        try {
+            JSONObject obj = new JSONObject(errorBody.string());
+            String message = obj.optString("message");
+            return message.isEmpty() ? null : message;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private void bind(Order order) {

@@ -74,7 +74,7 @@ public class CategoryChipAdapter extends RecyclerView.Adapter<CategoryChipAdapte
                 : c.categoryName);
         h.text.setBackgroundResource(selected ? R.drawable.bg_chip_selected : R.drawable.bg_chip);
         h.text.setTextColor(ContextCompat.getColor(h.text.getContext(),
-                selected ? R.color.black : R.color.white));
+                selected ? R.color.black : R.color.text_primary));
         h.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onCategoryClick(c);
         });

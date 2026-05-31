@@ -6,6 +6,7 @@ public class CreateOrderRequest {
     public String shippingAddress;
     public String paymentMethod;
     public Double shippingFee;
+    public Boolean clearCart;
     public List<Item> items;
 
     public CreateOrderRequest() {}

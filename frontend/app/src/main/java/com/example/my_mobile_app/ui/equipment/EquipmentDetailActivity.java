@@ -26,6 +26,7 @@ import com.example.my_mobile_app.api.dto.AddToCartRequest;
 import com.example.my_mobile_app.model.Asset;
 import com.example.my_mobile_app.model.Product;
 import com.example.my_mobile_app.ui.BaseActivity;
+import com.example.my_mobile_app.ui.checkout.CheckoutActivity;
 import com.example.my_mobile_app.util.PriceFormatter;
 import com.example.my_mobile_app.util.TokenManager;
 import com.google.android.material.button.MaterialButton;
@@ -129,7 +130,13 @@ public class EquipmentDetailActivity extends BaseActivity {
         findViewById(R.id.btn_qty_minus).setOnClickListener(v -> changeQty(-1));
         findViewById(R.id.btn_qty_plus).setOnClickListener(v -> changeQty(1));
 
-        btnAction.setOnClickListener(v -> addToCart());
+        btnAction.setOnClickListener(v -> {
+            if ("PRODUCT".equals(itemType)) {
+                buyNow();
+            } else {
+                rentNow();
+            }
+        });
         btnAddCart.setOnClickListener(v -> addToCart());
 
         loadItem();
@@ -196,6 +203,8 @@ public class EquipmentDetailActivity extends BaseActivity {
                 {getString(R.string.equipment_stock), String.valueOf(product.stockQuantity)},
         });
         btnAddCart.setVisibility(View.VISIBLE);
+        btnAddCart.setEnabled(true);
+        btnAction.setEnabled(true);
         btnAction.setText(R.string.action_buy_now);
     }
 
@@ -214,12 +223,13 @@ public class EquipmentDetailActivity extends BaseActivity {
                 {getString(R.string.equipment_status), asset.status},
         });
         updateDateButtons();
-        btnAddCart.setVisibility(View.VISIBLE);
+        btnAddCart.setVisibility(View.GONE);
         btnAction.setText(R.string.action_rent_now);
         if (!"AVAILABLE".equals(asset.status)) {
             btnAction.setEnabled(false);
-            btnAddCart.setEnabled(false);
             btnAction.setText(R.string.equipment_unavailable);
+        } else {
+            btnAction.setEnabled(true);
         }
     }
 
@@ -246,7 +256,7 @@ public class EquipmentDetailActivity extends BaseActivity {
 
             TextView value = new TextView(this);
             value.setText(kv[1]);
-            value.setTextColor(getColor(R.color.white));
+            value.setTextColor(getColor(R.color.text_primary));
             value.setTextSize(14);
             row.addView(value, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -362,10 +372,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     private void toggleFavorite() {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
-            return;
-        }
+        if (!requireLoginForAction()) return;
         Map<String, String> body = new HashMap<>();
         body.put("itemId", itemId);
         body.put("type", itemType);
@@ -383,11 +390,43 @@ public class EquipmentDetailActivity extends BaseActivity {
                 });
     }
 
-    private void addToCart() {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
+    private void buyNow() {
+        if (!requireLoginForAction()) return;
+        if (product == null) return;
+        if (product.stockQuantity > 0 && qty > product.stockQuantity) {
+            showError(getString(R.string.error_out_of_stock));
             return;
         }
+
+        Intent i = new Intent(this, CheckoutActivity.class);
+        i.putExtra(CheckoutActivity.EXTRA_MODE, CheckoutActivity.MODE_PRODUCT);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_ID, product.productId);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_NAME, product.productName);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_PRICE, product.price);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_QUANTITY, qty);
+        startActivity(i);
+    }
+
+    private void rentNow() {
+        if (!requireLoginForAction()) return;
+        if (asset == null) return;
+        if (endMillis <= startMillis) {
+            showError(getString(R.string.error_return_after_start));
+            return;
+        }
+
+        Intent i = new Intent(this, CheckoutActivity.class);
+        i.putExtra(CheckoutActivity.EXTRA_MODE, CheckoutActivity.MODE_RENTAL);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_ID, asset.assetId);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_NAME, asset.modelName);
+        i.putExtra(CheckoutActivity.EXTRA_ITEM_PRICE, asset.dailyRate);
+        i.putExtra(CheckoutActivity.EXTRA_RENTAL_START_MILLIS, startMillis);
+        i.putExtra(CheckoutActivity.EXTRA_RENTAL_END_MILLIS, endMillis);
+        startActivity(i);
+    }
+
+    private void addToCart() {
+        if (!requireLoginForAction()) return;
         AddToCartRequest req;
         if ("PRODUCT".equals(itemType)) {
             req = new AddToCartRequest(itemId, "PRODUCT", qty);

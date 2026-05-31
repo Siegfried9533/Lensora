@@ -1,6 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
 }
+val localProps = Properties()
+localProps.load(rootProject.file("local.properties").inputStream())
+
+val apiBaseUrl = localProps.getProperty(
+    "api.base.url",
+    "http://10.0.2.2:8080/api/"
+)
 
 android {
     namespace = "com.example.my_mobile_app"
@@ -14,6 +23,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // BASE_URL đọc từ local.properties (không commit), fallback về emulator loopback
+        val baseUrl = localProps.getProperty("api.base.url", "http://10.0.2.2:8080/api/")
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildFeatures {

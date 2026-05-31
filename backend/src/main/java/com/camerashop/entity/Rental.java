@@ -52,11 +52,25 @@ public class Rental {
 
     private Long shippingFee = 0L;
 
+    /** PENDING until payment succeeds; rentals are pay-first so the asset is only handed over once SUCCESS. */
+    private String paymentStatus = "PENDING";
+
+    /** When the PENDING hold was created — used by the scheduled job that releases abandoned holds. */
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+
     public enum RentalStatus {
         PENDING, ACTIVE, COMPLETED, CANCELLED
     }
 
+    /** Rentals are pay-first — COD is intentionally not allowed (unlike orders). */
     public enum PaymentMethod {
-        COD, MoMo
+        MOMO
     }
 }

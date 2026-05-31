@@ -107,17 +107,30 @@
     <string name="cart_checkout">Thanh toán</string>
     <string name="checkout_title">Thanh toán</string>
     <string name="checkout_shipping_address">Địa chỉ giao hàng</string>
+    <string name="checkout_saved_address">Địa chỉ đã lưu</string>
+    <string name="checkout_select_saved_address">Chọn địa chỉ đã lưu</string>
+    <string name="checkout_no_saved_address">Chưa có địa chỉ đã lưu</string>
+    <string name="checkout_saved_address_number">Địa chỉ %1$d: %2$s</string>
     <string name="checkout_province">Tỉnh / Thành phố</string>
+    <string name="checkout_select_province">Chọn Tỉnh / Thành phố</string>
     <string name="checkout_district">Quận / Huyện</string>
+    <string name="checkout_select_district">Chọn Quận / Huyện</string>
     <string name="checkout_ward">Phường / Xã</string>
+    <string name="checkout_select_ward">Chọn Phường / Xã</string>
     <string name="checkout_street">Số nhà, tên đường</string>
+    <string name="checkout_postal_code">Mã bưu điện</string>
     <string name="checkout_note">Ghi chú</string>
     <string name="checkout_payment_method">Phương thức thanh toán</string>
     <string name="checkout_payment_cod">Thanh toán khi nhận hàng (COD)</string>
     <string name="checkout_payment_momo">Ví MoMo</string>
     <string name="checkout_shipping_fee">Phí vận chuyển</string>
     <string name="checkout_place_order">Đặt hàng</string>
+    <string name="checkout_place_rental">Đặt thuê</string>
     <string name="checkout_order_summary">Tóm tắt đơn hàng</string>
+    <string name="checkout_rental_period">Thời gian thuê</string>
+    <string name="checkout_rental_days_format">Tiền thuê (%1$d ngày): %2$s</string>
+    <string name="checkout_rental_deposit">Tiền cọc</string>
+    <string name="checkout_days_suffix">ngày</string>
 
     <!-- Status -->
     <string name="status_pending">Chờ xử lý</string>
@@ -149,6 +162,7 @@
     <string name="payment_failed_title">Thanh toán thất bại</string>
     <string name="payment_processing">Đang xử lý thanh toán...</string>
     <string name="payment_view_order">Xem đơn hàng</string>
+    <string name="payment_view_rental">Xem đơn thuê</string>
     <string name="payment_success_body">Đơn hàng của bạn đã được tiếp nhận. Cảm ơn bạn đã mua sắm!</string>
     <string name="payment_failed_body">Giao dịch không thành công. Vui lòng thử lại.</string>
     <string name="payment_processing_hint">Vui lòng chờ trong giây lát. Bạn có thể quay lại app sau khi hoàn tất thanh toán.</string>
@@ -158,10 +172,15 @@
     <!-- Chatbot -->
     <string name="chatbot_title">Trợ lý ảo</string>
     <string name="chatbot_subtitle">Luôn sẵn sàng hỗ trợ bạn</string>
+    <string name="chatbot_status_active">Đang hoạt động</string>
     <string name="chatbot_input_hint">Nhập tin nhắn...</string>
     <string name="chatbot_send">Gửi</string>
     <string name="chatbot_empty">Hãy đặt câu hỏi để bắt đầu</string>
-    <string name="chatbot_welcome">Xin chào! Tôi là trợ lý ảo của bạn. Tôi có thể giúp bạn tìm kiếm thiết bị, tư vấn sản phẩm, hoặc trả lời câu hỏi về dịch vụ. Bạn cần giúp gì?</string>
+    <string name="chatbot_welcome">Xin chào! Tôi là trợ lý ảo của Camera Shop. Tôi có thể giúp bạn tìm thiết bị, giải đáp chính sách thuê và mua. Bạn cần hỗ trợ gì?</string>
+    <string name="chatbot_suggest_find_camera">Tìm camera phù hợp cho tôi</string>
+    <string name="chatbot_suggest_rental_policy">Chính sách thuê thiết bị</string>
+    <string name="chatbot_suggest_rental_items">Thiết bị cho thuê</string>
+    <string name="chatbot_suggest_newest">Mẫu máy mới nhất</string>
     <string name="chatbot_fallback">Xin lỗi, tôi chưa trả lời được lúc này.</string>
     <string name="error_chatbot_connection">Không thể kết nối chatbot. Vui lòng thử lại.</string>
 
@@ -231,6 +250,8 @@
     <string name="error_order_not_found">Không tìm thấy đơn hàng</string>
     <string name="error_load_order_detail">Không thể tải chi tiết đơn hàng</string>
     <string name="error_cancel_order_unavailable">Backend hiện chưa có endpoint huỷ đơn cho khách hàng</string>
+    <string name="error_cancel_order_failed">Không thể hủy đơn hàng</string>
+    <string name="error_cancel_order_connection">Lỗi kết nối khi hủy đơn hàng</string>
     <string name="error_missing_item_info">Thiếu thông tin sản phẩm</string>
     <string name="error_product_not_found">Không tìm thấy sản phẩm</string>
     <string name="error_asset_not_found">Không tìm thấy thiết bị</string>
@@ -240,12 +261,19 @@
     <string name="error_return_after_start">Ngày trả phải sau ngày bắt đầu</string>
     <string name="error_add_to_cart">Không thể thêm vào giỏ</string>
     <string name="error_load_provinces">Lỗi tải tỉnh/thành</string>
+    <string name="error_load_address_connection">Không kết nối được máy chủ để tải danh sách địa chỉ. Hãy đảm bảo backend đang chạy, rồi chạm vào ô để thử lại.</string>
     <string name="error_load_cart">Lỗi tải giỏ hàng</string>
-    <string name="error_select_full_address">Vui lòng chọn đầy đủ địa chỉ</string>
+    <string name="error_select_full_address">Vui lòng nhập đầy đủ địa chỉ</string>
+    <string name="error_enter_province">Vui lòng nhập tỉnh / thành phố</string>
+    <string name="error_enter_district">Vui lòng nhập quận / huyện</string>
+    <string name="error_enter_ward">Vui lòng nhập phường / xã</string>
     <string name="error_enter_street">Vui lòng nhập số nhà, tên đường</string>
     <string name="error_empty_order_cart">Giỏ không có sản phẩm để đặt. Thiết bị thuê hãy đặt từ trang chi tiết.</string>
     <string name="error_place_order_failed">Đặt hàng thất bại</string>
     <string name="error_place_order_connection">Lỗi kết nối khi đặt hàng</string>
+    <string name="error_place_rental_failed">Đặt thuê thất bại</string>
+    <string name="error_place_rental_connection">Lỗi kết nối khi đặt thuê</string>
+    <string name="error_rental_start_in_past">Ngày thuê không được ở quá khứ</string>
     <string name="error_create_momo">Không tạo được thanh toán MoMo</string>
     <string name="error_create_momo_connection">Lỗi kết nối khi tạo thanh toán MoMo</string>
     <string name="error_clear_cart">Không thể xoá giỏ hàng</string>
@@ -259,7 +287,9 @@
     <string name="success_marked_all_read">Đã đánh dấu tất cả đã đọc</string>
     <string name="success_notification_read">Đã đọc thông báo</string>
     <string name="success_added_to_cart">Đã thêm vào giỏ</string>
+    <string name="success_order_cancelled">Đã hủy đơn hàng</string>
     <string name="checkout_momo_order_info">Thanh toán đơn hàng: %1$s</string>
+    <string name="checkout_momo_rental_info">Thanh toán đơn thuê: %1$s</string>
 
     <!-- Profile sub-screens -->
     <string name="personal_info_save">Lưu thay đổi</string>
@@ -306,6 +336,7 @@
     <!-- Order / rental detail -->
     <string name="order_detail_title">Chi tiết đơn hàng</string>
     <string name="order_detail_cancel">Huỷ đơn</string>
+    <string name="order_cancel_confirm">Hủy đơn hàng này? Sản phẩm sẽ được hoàn lại kho.</string>
     <string name="order_detail_products">Sản phẩm</string>
     <string name="order_detail_shipping">Giao hàng</string>
     <string name="order_detail_payment">Thanh toán</string>
@@ -350,4 +381,28 @@
     <!-- Misc -->
     <string name="loading">Đang tải...</string>
     <string name="currency_symbol">₫</string>
+
+    <!-- Payment methods (settings) -->
+    <string name="settings_payment_methods">Phương thức thanh toán</string>
+    <string name="payment_methods_title">Phương thức thanh toán</string>
+    <string name="payment_methods_subtitle">Thêm tài khoản ngân hàng hoặc ví MoMo để thanh toán nhanh hơn khi mua hàng.</string>
+    <string name="payment_methods_empty">Bạn chưa lưu phương thức thanh toán nào.</string>
+    <string name="payment_methods_add">Thêm phương thức thanh toán</string>
+    <string name="payment_methods_type">Loại</string>
+    <string name="payment_methods_type_momo">Ví MoMo</string>
+    <string name="payment_methods_type_bank">Tài khoản ngân hàng</string>
+    <string name="payment_methods_label_hint">Tên (vd: Vietcombank, Ví MoMo)</string>
+    <string name="payment_methods_holder_hint">Tên chủ tài khoản</string>
+    <string name="payment_methods_account_hint">Số tài khoản / số điện thoại</string>
+    <string name="payment_methods_set_default">Đặt làm mặc định</string>
+    <string name="payment_methods_default_badge">Mặc định</string>
+    <string name="payment_methods_added">Đã thêm phương thức thanh toán</string>
+    <string name="payment_methods_deleted">Đã xóa phương thức thanh toán</string>
+    <string name="payment_methods_default_done">Đã cập nhật phương thức mặc định</string>
+    <string name="payment_methods_load_error">Không tải được phương thức thanh toán. Vui lòng kiểm tra kết nối.</string>
+    <string name="payment_methods_label_required">Vui lòng nhập tên cho phương thức thanh toán</string>
+    <string name="payment_methods_delete_confirm">Xóa phương thức thanh toán này?</string>
+
+    <!-- Rental checkout (pay-first) -->
+    <string name="checkout_rental_prepay_note">Thuê thiết bị yêu cầu thanh toán trước. Hãy thanh toán trực tuyến ngay để xác nhận đơn thuê và nhận máy ảnh.</string>
 </resources>

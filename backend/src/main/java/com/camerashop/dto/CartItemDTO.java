@@ -1,6 +1,7 @@
 package com.camerashop.dto;
 
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,6 +14,7 @@ public class CartItemDTO {
     private String assetId;
     private Integer quantity;
     private String type;
+    private LocalDateTime createdAt;
     // Computed fields
     private String productName;
     private String assetName;

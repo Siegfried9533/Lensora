@@ -48,7 +48,7 @@
                         android:contentDescription="@string/action_back"
                         android:padding="8dp"
                         android:src="@drawable/ic_arrow_back"
-                        app:tint="@color/white" />
+                        app:tint="@color/text_primary" />
 
                     <Space
                         android:layout_width="0dp"
@@ -63,7 +63,7 @@
                         android:contentDescription="@string/action_favorite"
                         android:padding="8dp"
                         android:src="@drawable/ic_heart_outline"
-                        app:tint="@color/white" />
+                        app:tint="@color/text_primary" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -97,7 +97,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_primary"
                     android:textSize="26sp"
                     android:textStyle="bold"
                     xmlns:tools="http://schemas.android.com/tools"
@@ -195,7 +195,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/equipment_buyer_protection"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -309,7 +309,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/cart_quantity"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -330,7 +330,7 @@
                         android:minWidth="40dp"
                         android:gravity="center"
                         android:text="1"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, String> {
-    @Query("SELECT c FROM CartItem c WHERE c.user.userId = :userId")
+    @Query("SELECT c FROM CartItem c WHERE c.user.userId = :userId ORDER BY c.createdAt DESC")
     List<CartItem> findByUserId(@Param("userId") String userId);
 
     @Modifying

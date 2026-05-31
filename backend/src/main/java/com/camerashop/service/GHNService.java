@@ -2,6 +2,8 @@ package com.camerashop.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @Service
 public class GHNService {
+
+    private static final String VIETNAM_PROVINCES_API = "https://provinces.open-api.vn/api/v1";
 
     @Value("${app.ghn.api-url}")
     private String ghnApiUrl;
@@ -192,7 +196,7 @@ public class GHNService {
             );
 
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.has("data")) {
+            if (jsonNode.has("data") && hasItems(jsonNode.get("data"))) {
                 return jsonNode.get("data");
             }
 
@@ -200,7 +204,7 @@ public class GHNService {
             System.err.println("Failed to get provinces: " + e.getMessage());
         }
 
-        return objectMapper.createArrayNode();
+        return getOpenApiProvinces();
     }
 
     /**
@@ -224,7 +228,7 @@ public class GHNService {
             );
 
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.has("data")) {
+            if (jsonNode.has("data") && hasItems(jsonNode.get("data"))) {
                 return jsonNode.get("data");
             }
 
@@ -232,7 +236,7 @@ public class GHNService {
             System.err.println("Failed to get districts: " + e.getMessage());
         }
 
-        return objectMapper.createArrayNode();
+        return getOpenApiDistricts(provinceId);
     }
 
     /**
@@ -256,7 +260,7 @@ public class GHNService {
             );
 
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.has("data")) {
+            if (jsonNode.has("data") && hasItems(jsonNode.get("data"))) {
                 return jsonNode.get("data");
             }
 
@@ -264,7 +268,77 @@ public class GHNService {
             System.err.println("Failed to get wards: " + e.getMessage());
         }
 
-        return objectMapper.createArrayNode();
+        return getOpenApiWards(districtId);
+    }
+
+    private boolean hasItems(JsonNode node) {
+        return node != null && node.isArray() && node.size() > 0;
+    }
+
+    private JsonNode getOpenApiProvinces() {
+        ArrayNode result = objectMapper.createArrayNode();
+        try {
+            String response = restTemplate.getForObject(VIETNAM_PROVINCES_API + "/?depth=1", String.class);
+            JsonNode provinces = objectMapper.readTree(response);
+            if (!provinces.isArray()) {
+                return result;
+            }
+
+            for (JsonNode province : provinces) {
+                ObjectNode item = result.addObject();
+                item.put("ProvinceID", province.path("code").asText());
+                item.put("ProvinceName", province.path("name").asText());
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to get fallback provinces: " + e.getMessage());
+        }
+        return result;
+    }
+
+    private JsonNode getOpenApiDistricts(String provinceId) {
+        ArrayNode result = objectMapper.createArrayNode();
+        try {
+            String response = restTemplate.getForObject(
+                    VIETNAM_PROVINCES_API + "/p/" + provinceId + "?depth=2",
+                    String.class);
+            JsonNode districts = objectMapper.readTree(response).path("districts");
+            if (!districts.isArray()) {
+                return result;
+            }
+
+            for (JsonNode district : districts) {
+                ObjectNode item = result.addObject();
+                item.put("DistrictID", district.path("code").asText());
+                item.put("DistrictName", district.path("name").asText());
+                item.put("ProvinceID", district.path("province_code").asText(provinceId));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to get fallback districts: " + e.getMessage());
+        }
+        return result;
+    }
+
+    private JsonNode getOpenApiWards(String districtId) {
+        ArrayNode result = objectMapper.createArrayNode();
+        try {
+            String response = restTemplate.getForObject(
+                    VIETNAM_PROVINCES_API + "/d/" + districtId + "?depth=2",
+                    String.class);
+            JsonNode wards = objectMapper.readTree(response).path("wards");
+            if (!wards.isArray()) {
+                return result;
+            }
+
+            for (JsonNode ward : wards) {
+                ObjectNode item = result.addObject();
+                item.put("WardCode", ward.path("code").asText());
+                item.put("WardName", ward.path("name").asText());
+                item.put("DistrictID", ward.path("district_code").asText(districtId));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to get fallback wards: " + e.getMessage());
+        }
+        return result;
     }
 
     /**

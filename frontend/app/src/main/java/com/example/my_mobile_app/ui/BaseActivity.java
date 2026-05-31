@@ -3,6 +3,7 @@ package com.example.my_mobile_app.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.my_mobile_app.R;
 import com.example.my_mobile_app.ui.auth.LoginActivity;
 import com.example.my_mobile_app.util.LocaleHelper;
+import com.example.my_mobile_app.util.ThemeManager;
 import com.example.my_mobile_app.util.TokenManager;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -25,6 +27,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(LocaleHelper.apply(newBase));
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ThemeManager.applySavedMode(this);
+        super.onCreate(savedInstanceState);
     }
 
     /** Show a full-screen translucent overlay with a centered spinner. */
@@ -84,6 +92,16 @@ public abstract class BaseActivity extends AppCompatActivity {
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                         | Intent.FLAG_ACTIVITY_NEW_TASK));
         finish();
+        return false;
+    }
+
+    /**
+     * Returns true when signed in. Otherwise opens login while leaving the
+     * current browsable screen in the back stack.
+     */
+    protected boolean requireLoginForAction() {
+        if (TokenManager.getToken(this) != null) return true;
+        startActivity(new Intent(this, LoginActivity.class));
         return false;
     }
 }
