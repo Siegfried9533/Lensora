@@ -24,7 +24,7 @@ public interface CartService {
     Call<ApiResponse<CartItem>> addToCart(@Body AddToCartRequest body);
 
     @DELETE("cart/{cartItemId}")
-    Call<ApiResponse<Void>> removeFromCart(@Path("cartItemId") String cartItemId);
+    Call<ApiResponse<Object>> removeFromCart(@Path("cartItemId") String cartItemId);
 
     @PUT("cart/{cartItemId}/quantity")
     Call<ApiResponse<CartItem>> updateQuantity(
@@ -32,5 +32,5 @@ public interface CartService {
             @Body UpdateQuantityRequest body);
 
     @DELETE("cart")
-    Call<ApiResponse<Void>> clearCart();
+    Call<ApiResponse<Object>> clearCart();
 }

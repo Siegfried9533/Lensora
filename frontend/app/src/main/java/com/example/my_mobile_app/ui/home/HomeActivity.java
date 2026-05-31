@@ -151,17 +151,11 @@ public class HomeActivity extends BaseActivity
         swipe.setOnRefreshListener(this::loadAll);
 
         btnCart.setOnClickListener(v -> {
-            if (TokenManager.getToken(this) == null) {
-                showError(getString(R.string.error_login_required));
-                return;
-            }
+            if (!requireLoginForAction()) return;
             startActivity(new android.content.Intent(this, CartActivity.class));
         });
         btnFavorites.setOnClickListener(v -> {
-            if (TokenManager.getToken(this) == null) {
-                showError(getString(R.string.error_login_required));
-                return;
-            }
+            if (!requireLoginForAction()) return;
             startActivity(new Intent(this, FavoritesActivity.class));
         });
     }
@@ -344,10 +338,7 @@ public class HomeActivity extends BaseActivity
 
     @Override
     public void onFavoriteClick(DisplayItem item) {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
-            return;
-        }
+        if (!requireLoginForAction()) return;
         java.util.HashMap<String, String> body = new java.util.HashMap<>();
         body.put("itemId", item.id);
         body.put("type", item.type);

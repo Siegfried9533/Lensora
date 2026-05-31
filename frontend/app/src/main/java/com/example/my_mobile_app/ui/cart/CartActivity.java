@@ -24,9 +24,13 @@ import com.example.my_mobile_app.ui.equipment.EquipmentDetailActivity;
 import com.example.my_mobile_app.util.PriceFormatter;
 import com.google.android.material.button.MaterialButton;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -119,22 +123,97 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_delete, (d, w) -> {
                     showLoading();
-                    ApiClient.get(this).create(CartService.class).clearCart()
-                            .enqueue(new Callback<ApiResponse<Void>>() {
-                                @Override public void onResponse(@NonNull Call<ApiResponse<Void>> call,
-                                                                  @NonNull Response<ApiResponse<Void>> response) {
-                                    hideLoading();
-                                    load();
+                    CartService service = ApiClient.get(this).create(CartService.class);
+                    service.clearCart()
+                            .enqueue(new Callback<ApiResponse<Object>>() {
+                                @Override public void onResponse(@NonNull Call<ApiResponse<Object>> call,
+                                                                  @NonNull Response<ApiResponse<Object>> response) {
+                                    ApiResponse<Object> body = response.body();
+                                    if (response.isSuccessful() && (body == null || body.success)) {
+                                        hideLoading();
+                                        load();
+                                        return;
+                                    }
+                                    clearCartByItems(service, errorMessage(response));
                                 }
 
-                                @Override public void onFailure(@NonNull Call<ApiResponse<Void>> call,
+                                @Override public void onFailure(@NonNull Call<ApiResponse<Object>> call,
                                                                 @NonNull Throwable t) {
-                                    hideLoading();
-                                    showError(getString(R.string.error_clear_cart));
+                                    clearCartByItems(service, t.getMessage());
                                 }
                             });
                 })
                 .show();
+    }
+
+    private void clearCartByItems(CartService service, String firstError) {
+        List<CartItem> snapshot = new ArrayList<>(items);
+        if (snapshot.isEmpty()) {
+            hideLoading();
+            render();
+            return;
+        }
+
+        AtomicInteger remaining = new AtomicInteger(snapshot.size());
+        final boolean[] failed = {false};
+        for (CartItem item : snapshot) {
+            if (item.cartItemId == null || item.cartItemId.isEmpty()) {
+                failed[0] = true;
+                if (remaining.decrementAndGet() == 0) finishFallbackClear(failed[0], firstError);
+                continue;
+            }
+            service.removeFromCart(item.cartItemId)
+                    .enqueue(new Callback<ApiResponse<Object>>() {
+                        @Override public void onResponse(@NonNull Call<ApiResponse<Object>> call,
+                                                          @NonNull Response<ApiResponse<Object>> response) {
+                            ApiResponse<Object> body = response.body();
+                            if (!response.isSuccessful() || (body != null && !body.success)) {
+                                failed[0] = true;
+                            }
+                            if (remaining.decrementAndGet() == 0) {
+                                finishFallbackClear(failed[0], firstError);
+                            }
+                        }
+
+                        @Override public void onFailure(@NonNull Call<ApiResponse<Object>> call,
+                                                        @NonNull Throwable t) {
+                            failed[0] = true;
+                            if (remaining.decrementAndGet() == 0) {
+                                finishFallbackClear(true, firstError != null ? firstError : t.getMessage());
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void finishFallbackClear(boolean failed, String firstError) {
+        hideLoading();
+        if (failed) {
+            showError(firstError != null && !firstError.isEmpty()
+                    ? firstError
+                    : getString(R.string.error_clear_cart));
+            load();
+            return;
+        }
+        load();
+    }
+
+    private String errorMessage(Response<ApiResponse<Object>> response) {
+        ApiResponse<Object> body = response.body();
+        if (body != null && body.message != null && !body.message.isEmpty()) {
+            return body.message;
+        }
+        ResponseBody errorBody = response.errorBody();
+        if (errorBody == null) {
+            return null;
+        }
+        try {
+            JSONObject obj = new JSONObject(errorBody.string());
+            String message = obj.optString("message");
+            return message.isEmpty() ? null : message;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     @Override
@@ -159,11 +238,11 @@ public class CartActivity extends BaseActivity implements CartItemAdapter.Callba
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_delete, (d, w) -> {
                     ApiClient.get(this).create(CartService.class).removeFromCart(item.cartItemId)
-                            .enqueue(new Callback<ApiResponse<Void>>() {
-                                @Override public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                            .enqueue(new Callback<ApiResponse<Object>>() {
+                                @Override public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
                                     load();
                                 }
-                                @Override public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                                @Override public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
                                     showError(getString(R.string.error_delete_item));
                                 }
                             });

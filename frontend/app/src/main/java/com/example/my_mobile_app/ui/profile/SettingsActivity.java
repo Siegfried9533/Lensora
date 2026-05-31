@@ -12,7 +12,9 @@ import com.example.my_mobile_app.MainActivity;
 import com.example.my_mobile_app.R;
 import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.util.LocaleHelper;
+import com.example.my_mobile_app.util.ThemeManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -24,12 +26,18 @@ public class SettingsActivity extends BaseActivity {
         setContentView(R.layout.activity_settings);
 
         ImageButton btnBack = findViewById(R.id.btn_back);
+        LinearLayout rowDarkMode = findViewById(R.id.row_dark_mode);
         LinearLayout rowLanguage = findViewById(R.id.row_language);
         LinearLayout rowPaymentMethods = findViewById(R.id.row_payment_methods);
+        MaterialSwitch switchDark = findViewById(R.id.switch_dark);
         txtLanguageValue = findViewById(R.id.txt_language_value);
         TextView txtVersion = findViewById(R.id.txt_version);
 
         btnBack.setOnClickListener(v -> finish());
+        switchDark.setChecked(ThemeManager.isDarkMode(this));
+        switchDark.setOnCheckedChangeListener((buttonView, checked) ->
+                ThemeManager.setDarkMode(this, checked));
+        rowDarkMode.setOnClickListener(v -> switchDark.setChecked(!switchDark.isChecked()));
         rowLanguage.setOnClickListener(v -> showLanguageDialog());
         rowPaymentMethods.setOnClickListener(v ->
                 startActivity(new Intent(this, PaymentMethodsActivity.class)));

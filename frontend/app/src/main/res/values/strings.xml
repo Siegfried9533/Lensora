@@ -118,6 +118,7 @@
     <string name="checkout_ward">Ward</string>
     <string name="checkout_select_ward">Choose Ward</string>
     <string name="checkout_street">Street address</string>
+    <string name="checkout_postal_code">Postal code</string>
     <string name="checkout_note">Note</string>
     <string name="checkout_payment_method">Payment Method</string>
     <string name="checkout_payment_cod">Cash on Delivery (COD)</string>
@@ -244,6 +245,8 @@
     <string name="error_order_not_found">Order not found</string>
     <string name="error_load_order_detail">Unable to load order details</string>
     <string name="error_cancel_order_unavailable">The backend does not have a customer order-cancel endpoint yet</string>
+    <string name="error_cancel_order_failed">Unable to cancel order</string>
+    <string name="error_cancel_order_connection">Connection error while cancelling order</string>
     <string name="error_missing_item_info">Missing product information</string>
     <string name="error_product_not_found">Product not found</string>
     <string name="error_asset_not_found">Equipment not found</string>
@@ -255,7 +258,10 @@
     <string name="error_load_provinces">Unable to load provinces</string>
     <string name="error_load_address_connection">Could not reach the server to load the address list. Make sure the backend is running, then tap a field to retry.</string>
     <string name="error_load_cart">Unable to load cart</string>
-    <string name="error_select_full_address">Please select the full address</string>
+    <string name="error_select_full_address">Please enter the full address</string>
+    <string name="error_enter_province">Please enter your province or city</string>
+    <string name="error_enter_district">Please enter your district</string>
+    <string name="error_enter_ward">Please enter your ward</string>
     <string name="error_enter_street">Please enter your street address</string>
     <string name="error_empty_order_cart">Your cart has no products to order. Rental equipment must be booked from the detail page.</string>
     <string name="error_place_order_failed">Order failed</string>
@@ -276,6 +282,7 @@
     <string name="success_marked_all_read">Marked all as read</string>
     <string name="success_notification_read">Notification marked as read</string>
     <string name="success_added_to_cart">Added to cart</string>
+    <string name="success_order_cancelled">Order cancelled</string>
     <string name="checkout_momo_order_info">Order payment: %1$s</string>
     <string name="checkout_momo_rental_info">Rental payment: %1$s</string>
 
@@ -324,6 +331,7 @@
     <!-- Order / rental detail -->
     <string name="order_detail_title">Order Details</string>
     <string name="order_detail_cancel">Cancel order</string>
+    <string name="order_cancel_confirm">Cancel this order? The products will be returned to stock.</string>
     <string name="order_detail_products">Products</string>
     <string name="order_detail_shipping">Shipping</string>
     <string name="order_detail_payment">Payment</string>

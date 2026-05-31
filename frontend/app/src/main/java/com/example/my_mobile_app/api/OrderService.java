@@ -25,6 +25,9 @@ public interface OrderService {
     @GET("orders/{orderId}")
     Call<ApiResponse<Order>> getOrderById(@Path("orderId") String orderId);
 
+    @PATCH("orders/{orderId}/cancel")
+    Call<ApiResponse<Order>> cancelOrder(@Path("orderId") String orderId);
+
     @PATCH("orders/{orderId}/status")
     Call<ApiResponse<Order>> updateOrderStatus(
             @Path("orderId") String orderId,

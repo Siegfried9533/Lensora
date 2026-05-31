@@ -118,6 +118,7 @@
     <string name="checkout_ward">Phường / Xã</string>
     <string name="checkout_select_ward">Chọn Phường / Xã</string>
     <string name="checkout_street">Số nhà, tên đường</string>
+    <string name="checkout_postal_code">Mã bưu điện</string>
     <string name="checkout_note">Ghi chú</string>
     <string name="checkout_payment_method">Phương thức thanh toán</string>
     <string name="checkout_payment_cod">Thanh toán khi nhận hàng (COD)</string>
@@ -244,6 +245,8 @@
     <string name="error_order_not_found">Không tìm thấy đơn hàng</string>
     <string name="error_load_order_detail">Không thể tải chi tiết đơn hàng</string>
     <string name="error_cancel_order_unavailable">Backend hiện chưa có endpoint huỷ đơn cho khách hàng</string>
+    <string name="error_cancel_order_failed">Không thể hủy đơn hàng</string>
+    <string name="error_cancel_order_connection">Lỗi kết nối khi hủy đơn hàng</string>
     <string name="error_missing_item_info">Thiếu thông tin sản phẩm</string>
     <string name="error_product_not_found">Không tìm thấy sản phẩm</string>
     <string name="error_asset_not_found">Không tìm thấy thiết bị</string>
@@ -255,7 +258,10 @@
     <string name="error_load_provinces">Lỗi tải tỉnh/thành</string>
     <string name="error_load_address_connection">Không kết nối được máy chủ để tải danh sách địa chỉ. Hãy đảm bảo backend đang chạy, rồi chạm vào ô để thử lại.</string>
     <string name="error_load_cart">Lỗi tải giỏ hàng</string>
-    <string name="error_select_full_address">Vui lòng chọn đầy đủ địa chỉ</string>
+    <string name="error_select_full_address">Vui lòng nhập đầy đủ địa chỉ</string>
+    <string name="error_enter_province">Vui lòng nhập tỉnh / thành phố</string>
+    <string name="error_enter_district">Vui lòng nhập quận / huyện</string>
+    <string name="error_enter_ward">Vui lòng nhập phường / xã</string>
     <string name="error_enter_street">Vui lòng nhập số nhà, tên đường</string>
     <string name="error_empty_order_cart">Giỏ không có sản phẩm để đặt. Thiết bị thuê hãy đặt từ trang chi tiết.</string>
     <string name="error_place_order_failed">Đặt hàng thất bại</string>
@@ -276,6 +282,7 @@
     <string name="success_marked_all_read">Đã đánh dấu tất cả đã đọc</string>
     <string name="success_notification_read">Đã đọc thông báo</string>
     <string name="success_added_to_cart">Đã thêm vào giỏ</string>
+    <string name="success_order_cancelled">Đã hủy đơn hàng</string>
     <string name="checkout_momo_order_info">Thanh toán đơn hàng: %1$s</string>
     <string name="checkout_momo_rental_info">Thanh toán đơn thuê: %1$s</string>
 
@@ -324,6 +331,7 @@
     <!-- Order / rental detail -->
     <string name="order_detail_title">Chi tiết đơn hàng</string>
     <string name="order_detail_cancel">Huỷ đơn</string>
+    <string name="order_cancel_confirm">Hủy đơn hàng này? Sản phẩm sẽ được hoàn lại kho.</string>
     <string name="order_detail_products">Sản phẩm</string>
     <string name="order_detail_shipping">Giao hàng</string>
     <string name="order_detail_payment">Thanh toán</string>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="orange">#FFFF8C42</color>
+    <color name="orange_light">#FFFFB07A</color>
+    <color name="orange_dark">#FFE0732E</color>
+    <color name="orange_10">#1AFF8C42</color>
+    <color name="orange_20">#33FF8C42</color>
+    <color name="orange_30">#4DFF8C42</color>
+
+    <color name="gray_100">#FFF3F4F6</color>
+    <color name="gray_200">#FFE5E7EB</color>
+    <color name="gray_300">#FFD1D5DB</color>
+    <color name="gray_400">#FF9CA3AF</color>
+    <color name="gray_500">#FF6B7280</color>
+    <color name="gray_600">#FF4B5563</color>
+    <color name="gray_700">#FF374151</color>
+    <color name="gray_800">#FF1F2937</color>
+    <color name="gray_900">#FF111827</color>
+
+    <color name="ms_bg">#FF1A1A1A</color>
+    <color name="ms_surface">#FF0A0A0A</color>
+    <color name="ms_surface_2">#FF111111</color>
+
+    <color name="bg_dark_primary">#FF0A0A0A</color>
+    <color name="bg_dark_secondary">#FF1A1A1A</color>
+    <color name="bg_dark_tertiary">#FF111111</color>
+    <color name="surface_dark">#FF0A0A0A</color>
+    <color name="surface_input">#FF0A0A0A</color>
+    <color name="surface_icon">#FF111111</color>
+    <color name="surface_stat">#FFFF8C42</color>
+
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_body">#FFD1D5DB</color>
+    <color name="text_muted">#FF9CA3AF</color>
+    <color name="text_soft">#FFD1D5DB</color>
+    <color name="text_disabled">#FF4B5563</color>
+    <color name="border_dark">#FF1F2937</color>
+    <color name="border_soft">#FF1F2937</color>
+    <color name="border_strong">#FF374151</color>
+    <color name="nav_inactive">#FF6B7280</color>
+
+    <color name="red_500">#FFEF4444</color>
+    <color name="red_400">#FFF87171</color>
+    <color name="green_500">#FF22C55E</color>
+    <color name="green_400">#FF4ADE80</color>
+    <color name="blue_500">#FF3B82F6</color>
+    <color name="blue_400">#FF60A5FA</color>
+    <color name="yellow_500">#FFEAB308</color>
+    <color name="yellow_400">#FFFACC15</color>
+    <color name="purple_500">#FFA855F7</color>
+    <color name="purple_400">#FFC084FC</color>
+</resources>

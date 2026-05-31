@@ -117,6 +117,23 @@ public class OrderService {
         return toDTO(order);
     }
 
+    @Transactional
+    public OrderDTO cancelOrderForCustomer(String email, String orderId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+
+        if (!order.getUser().getUserId().equals(user.getUserId())) {
+            throw new SecurityException("Không có quyền truy cập");
+        }
+        if (order.getStatus() != Order.OrderStatus.PENDING) {
+            throw new IllegalStateException("Chỉ có thể hủy đơn hàng đang chờ xử lý");
+        }
+
+        return updateOrderStatus(orderId, Order.OrderStatus.CANCELLED);
+    }
+
     /**
      * Cap nhat trang thai don hang va kich hoat thong bao
      */

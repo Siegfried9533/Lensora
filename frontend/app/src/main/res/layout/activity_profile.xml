@@ -59,7 +59,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:gravity="center"
-                                    android:textColor="@color/white"
+                                    android:textColor="@color/text_primary"
                                     android:textSize="36sp"
                                     android:textStyle="bold" />
                             </FrameLayout>
@@ -91,7 +91,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:letterSpacing="-0.02"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -101,17 +101,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:alpha="0.9"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="13sp" />
 
-                            <TextView
-                                android:id="@+id/txt_trust_label"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:alpha="0.75"
-                                android:textColor="@color/white"
-                                android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -137,7 +129,7 @@
                                 android:layout_width="18dp"
                                 android:layout_height="18dp"
                                 android:src="@drawable/ic_box"
-                                app:tint="@color/white" />
+                                app:tint="@color/text_primary" />
 
                             <TextView
                                 android:id="@+id/txt_order_count"
@@ -145,7 +137,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="0"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -153,7 +145,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/profile_orders_label"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="9sp" />
                         </LinearLayout>
 
@@ -174,7 +166,7 @@
                                 android:layout_width="18dp"
                                 android:layout_height="18dp"
                                 android:src="@drawable/ic_camera_outline"
-                                app:tint="@color/white" />
+                                app:tint="@color/text_primary" />
 
                             <TextView
                                 android:id="@+id/txt_rental_count"
@@ -182,7 +174,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="0"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -190,7 +182,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/profile_rentals_label"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="9sp" />
                         </LinearLayout>
 
@@ -208,7 +200,7 @@
                                 android:layout_width="18dp"
                                 android:layout_height="18dp"
                                 android:src="@drawable/ic_star_outline"
-                                app:tint="@color/white" />
+                                app:tint="@color/text_primary" />
 
                             <TextView
                                 android:id="@+id/txt_review_count"
@@ -216,7 +208,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="0"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -224,7 +216,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/profile_rating_label"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_primary"
                                 android:textSize="9sp" />
                         </LinearLayout>
                     </LinearLayout>

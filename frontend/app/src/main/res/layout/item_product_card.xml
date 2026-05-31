@@ -39,7 +39,7 @@
                 android:padding="9dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_heart_outline"
-                app:tint="@color/white" />
+                app:tint="@color/text_primary" />
 
             <TextView
                 android:id="@+id/txt_type_badge"
@@ -52,7 +52,7 @@
                 android:letterSpacing="0.06"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="3dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 tools:text="PRODUCT" />

@@ -22,7 +22,7 @@
             android:contentDescription="@string/action_back"
             android:padding="10dp"
             android:src="@drawable/ic_arrow_back"
-            app:tint="@color/white" />
+            app:tint="@color/text_primary" />
 
         <FrameLayout
             android:layout_width="58dp"
@@ -35,7 +35,7 @@
                 android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_robot"
-                app:tint="@color/white" />
+                app:tint="@color/text_primary" />
         </FrameLayout>
 
         <LinearLayout
@@ -101,7 +101,7 @@
             android:inputType="textMultiLine|textCapSentences"
             android:maxLines="4"
             android:paddingHorizontal="18dp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_primary"
             android:textColorHint="@color/nav_inactive"
             android:textSize="18sp" />
 

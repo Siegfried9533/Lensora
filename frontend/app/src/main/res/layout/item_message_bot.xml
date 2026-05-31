@@ -32,6 +32,6 @@
         android:lineSpacingExtra="3dp"
         android:paddingHorizontal="18dp"
         android:paddingVertical="16dp"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary"
         android:textSize="20sp" />
 </LinearLayout>

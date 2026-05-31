@@ -76,6 +76,26 @@ public class OrderController {
     }
 
     /**
+     * Khach hang huy don cua chinh minh khi don con dang cho xu ly.
+     * PATCH /api/orders/{orderId}/cancel
+     */
+    @PatchMapping("/{orderId}/cancel")
+    public ResponseEntity<ApiResponse> cancelOrder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String orderId) {
+        try {
+            OrderDTO result = orderService.cancelOrderForCustomer(userDetails.getUsername(), orderId);
+            return ResponseEntity.ok(ApiResponse.success(result));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
      * Cập nhật trạng thái đơn hàng.
      * ADMIN có thể cập nhật mọi trạng thái.
      * USER chỉ có thể hủy đơn hàng của chính mình.

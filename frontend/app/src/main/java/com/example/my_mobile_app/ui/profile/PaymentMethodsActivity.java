@@ -114,7 +114,7 @@ public class PaymentMethodsActivity extends BaseActivity {
                 ? getString(R.string.payment_methods_type_bank)
                 : getString(R.string.payment_methods_type_momo);
         title.setText(m.label + "  ·  " + typeLabel);
-        title.setTextColor(getColor(R.color.white));
+        title.setTextColor(getColor(R.color.text_primary));
         title.setTextSize(15);
         title.setTypeface(title.getTypeface(), android.graphics.Typeface.BOLD);
         col.addView(title);

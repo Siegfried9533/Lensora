@@ -256,7 +256,7 @@ public class EquipmentDetailActivity extends BaseActivity {
 
             TextView value = new TextView(this);
             value.setText(kv[1]);
-            value.setTextColor(getColor(R.color.white));
+            value.setTextColor(getColor(R.color.text_primary));
             value.setTextSize(14);
             row.addView(value, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -372,10 +372,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     private void toggleFavorite() {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
-            return;
-        }
+        if (!requireLoginForAction()) return;
         Map<String, String> body = new HashMap<>();
         body.put("itemId", itemId);
         body.put("type", itemType);
@@ -394,10 +391,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     private void buyNow() {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
-            return;
-        }
+        if (!requireLoginForAction()) return;
         if (product == null) return;
         if (product.stockQuantity > 0 && qty > product.stockQuantity) {
             showError(getString(R.string.error_out_of_stock));
@@ -414,10 +408,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     private void rentNow() {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
-            return;
-        }
+        if (!requireLoginForAction()) return;
         if (asset == null) return;
         if (endMillis <= startMillis) {
             showError(getString(R.string.error_return_after_start));
@@ -435,10 +426,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     private void addToCart() {
-        if (TokenManager.getToken(this) == null) {
-            showError(getString(R.string.error_login_required));
-            return;
-        }
+        if (!requireLoginForAction()) return;
         AddToCartRequest req;
         if ("PRODUCT".equals(itemType)) {
             req = new AddToCartRequest(itemId, "PRODUCT", qty);

@@ -24,7 +24,7 @@
         android:layout_marginTop="@dimen/spacing_md"
         android:hint="@string/payment_methods_label_hint"
         android:inputType="text"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary"
         android:textColorHint="@color/text_muted" />
 
     <EditText
@@ -34,7 +34,7 @@
         android:layout_marginTop="@dimen/spacing_md"
         android:hint="@string/payment_methods_holder_hint"
         android:inputType="textPersonName"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary"
         android:textColorHint="@color/text_muted" />
 
     <EditText
@@ -44,7 +44,7 @@
         android:layout_marginTop="@dimen/spacing_md"
         android:hint="@string/payment_methods_account_hint"
         android:inputType="number"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary"
         android:textColorHint="@color/text_muted" />
 
     <CheckBox
@@ -53,5 +53,5 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_md"
         android:text="@string/payment_methods_set_default"
-        android:textColor="@color/white" />
+        android:textColor="@color/text_primary" />
 </LinearLayout>

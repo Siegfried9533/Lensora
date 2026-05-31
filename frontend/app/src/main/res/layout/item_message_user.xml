@@ -17,7 +17,7 @@
         android:lineSpacingExtra="3dp"
         android:paddingHorizontal="18dp"
         android:paddingVertical="16dp"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary"
         android:textSize="20sp" />
 
     <FrameLayout
@@ -31,6 +31,6 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_user_outline"
-            app:tint="@color/white" />
+            app:tint="@color/text_primary" />
     </FrameLayout>
 </LinearLayout>

@@ -30,29 +30,29 @@
     <color name="gray_800">#FF1F2937</color>
     <color name="gray_900">#FF111827</color>
 
-    <!-- Dark surfaces (design tokens) -->
-    <color name="ms_bg">#FF1A1A1A</color>
-    <color name="ms_surface">#FF0A0A0A</color>
-    <color name="ms_surface_2">#FF111111</color>
+    <!-- Light surfaces (design tokens) -->
+    <color name="ms_bg">#FFF6F7FB</color>
+    <color name="ms_surface">#FFFFFFFF</color>
+    <color name="ms_surface_2">#FFF1F5F9</color>
 
     <!-- Legacy aliases retargeted to design tokens (do not remove) -->
-    <color name="bg_dark_primary">#FF0A0A0A</color>
-    <color name="bg_dark_secondary">#FF1A1A1A</color>
-    <color name="bg_dark_tertiary">#FF111111</color>
-    <color name="surface_dark">#FF0A0A0A</color>
-    <color name="surface_input">#FF0A0A0A</color>
-    <color name="surface_icon">#FF111111</color>
+    <color name="bg_dark_primary">#FFFFFFFF</color>
+    <color name="bg_dark_secondary">#FFF6F7FB</color>
+    <color name="bg_dark_tertiary">#FFF1F5F9</color>
+    <color name="surface_dark">#FFFFFFFF</color>
+    <color name="surface_input">#FFFFFFFF</color>
+    <color name="surface_icon">#FFF1F5F9</color>
     <color name="surface_stat">#FFFF8C42</color>
 
     <!-- Text & borders -->
-    <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_body">#FFD1D5DB</color>
-    <color name="text_muted">#FF9CA3AF</color>
-    <color name="text_soft">#FFD1D5DB</color>
-    <color name="text_disabled">#FF4B5563</color>
-    <color name="border_dark">#FF1F2937</color>
-    <color name="border_soft">#FF1F2937</color>
-    <color name="border_strong">#FF374151</color>
+    <color name="text_primary">#FF111827</color>
+    <color name="text_body">#FF374151</color>
+    <color name="text_muted">#FF6B7280</color>
+    <color name="text_soft">#FF4B5563</color>
+    <color name="text_disabled">#FF9CA3AF</color>
+    <color name="border_dark">#FFD9DEE7</color>
+    <color name="border_soft">#FFE5E7EB</color>
+    <color name="border_strong">#FFCBD5E1</color>
     <color name="nav_inactive">#FF6B7280</color>
 
     <!-- Status (chip) families -->
