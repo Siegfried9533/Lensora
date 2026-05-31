@@ -18,6 +18,8 @@ public class Order {
     public String paymentStatus;
     public Double shippingFee;
     public String ghnOrderId;
+    /** Cảnh báo khi backend tạo vận đơn GHN thất bại (đơn vẫn được tạo). Chỉ có ở phản hồi tạo đơn. */
+    public String ghnWarning;
     public List<OrderItem> orderItems;
 
     public Order() {}

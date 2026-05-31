@@ -111,6 +111,8 @@
     <string name="checkout_select_saved_address">Choose a saved address</string>
     <string name="checkout_no_saved_address">No saved addresses yet</string>
     <string name="checkout_saved_address_number">Address %1$d: %2$s</string>
+    <string name="checkout_recipient_name">Recipient name</string>
+    <string name="checkout_recipient_phone">Phone number</string>
     <string name="checkout_province">Province / City</string>
     <string name="checkout_select_province">Choose Province / City</string>
     <string name="checkout_district">District</string>
@@ -267,6 +269,12 @@
     <string name="error_enter_province">Please enter your province or city</string>
     <string name="error_enter_district">Please enter your district</string>
     <string name="error_enter_ward">Please enter your ward</string>
+    <string name="error_enter_recipient_name">Please enter the recipient name</string>
+    <string name="error_enter_recipient_phone">Please enter the recipient phone number</string>
+    <string name="error_select_province">Please select a province / city</string>
+    <string name="error_select_district">Please select a district</string>
+    <string name="error_select_ward">Please select a ward</string>
+    <string name="error_load_address_options">Unable to load the address list. Please make sure the backend is running and try again.</string>
     <string name="error_enter_street">Please enter your street address</string>
     <string name="error_empty_order_cart">Your cart has no products to order. Rental equipment must be booked from the detail page.</string>
     <string name="error_place_order_failed">Order failed</string>
@@ -342,6 +350,7 @@
     <string name="order_detail_payment">Payment</string>
     <string name="order_detail_no_products">No products</string>
     <string name="order_code_format">Order ID: %1$s</string>
+    <string name="order_detail_ghn_code">GHN tracking code: %1$s</string>
     <string name="order_date_format">Order date: %1$s</string>
     <string name="order_meta_format">%1$d products | %2$s</string>
     <string name="order_timeline_prefix">Tracking: </string>

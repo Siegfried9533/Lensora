@@ -43,7 +43,13 @@ public class OrderController {
             boolean clearCart = clearCartValue == null || Boolean.parseBoolean(String.valueOf(clearCartValue));
             List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
 
-            OrderDTO order = orderService.createOrder(userDetails.getUsername(), shippingAddress, paymentMethod, shippingFee, items, clearCart);
+            String recipientName = (String) body.get("recipientName");
+            String recipientPhone = (String) body.get("recipientPhone");
+            String toDistrictId = body.get("toDistrictId") != null ? String.valueOf(body.get("toDistrictId")) : null;
+            String toWardCode = body.get("toWardCode") != null ? String.valueOf(body.get("toWardCode")) : null;
+
+            OrderDTO order = orderService.createOrder(userDetails.getUsername(), shippingAddress, paymentMethod,
+                    shippingFee, items, clearCart, recipientName, recipientPhone, toDistrictId, toWardCode);
             return ResponseEntity.ok(ApiResponse.success(order));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
@@ -129,10 +135,12 @@ public class OrderController {
 
             if (!isAdmin) {
                 if (newStatus != Order.OrderStatus.CANCELLED) {
-                    return ResponseEntity.status(403).body(ApiResponse.error("Chỉ admin mới có quyền cập nhật trạng thái này"));
+                    return ResponseEntity.status(403)
+                            .body(ApiResponse.error("Chỉ admin mới có quyền cập nhật trạng thái này"));
                 }
                 if (order.getStatus() != Order.OrderStatus.PENDING) {
-                    return ResponseEntity.badRequest().body(ApiResponse.error("Chỉ có thể hủy đơn hàng đang ở trạng thái PENDING"));
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("Chỉ có thể hủy đơn hàng đang ở trạng thái PENDING"));
                 }
             }
 

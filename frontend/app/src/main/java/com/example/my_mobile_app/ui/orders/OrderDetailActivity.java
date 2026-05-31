@@ -38,7 +38,7 @@ public class OrderDetailActivity extends BaseActivity {
 
     public static final String EXTRA_ORDER_ID = "order_id";
 
-    private TextView txtCode, txtStatus, txtDate, txtTimeline, txtAddress, txtPayment, txtSubtotal, txtShipping, txtTotal;
+    private TextView txtCode, txtStatus, txtDate, txtTimeline, txtAddress, txtGhn, txtPayment, txtSubtotal, txtShipping, txtTotal;
     private LinearLayout itemsContainer;
     private MaterialButton btnCancel;
 
@@ -54,6 +54,7 @@ public class OrderDetailActivity extends BaseActivity {
         txtDate = findViewById(R.id.txt_order_date);
         txtTimeline = findViewById(R.id.txt_status_timeline);
         txtAddress = findViewById(R.id.txt_shipping_address);
+        txtGhn = findViewById(R.id.txt_ghn_code);
         txtPayment = findViewById(R.id.txt_payment_method);
         txtSubtotal = findViewById(R.id.txt_subtotal);
         txtShipping = findViewById(R.id.txt_shipping_fee);
@@ -77,7 +78,7 @@ public class OrderDetailActivity extends BaseActivity {
         ApiClient.get(this).create(OrderService.class).getOrderById(orderId)
                 .enqueue(new Callback<ApiResponse<Order>>() {
                     @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
-                                                      @NonNull Response<ApiResponse<Order>> response) {
+                                                     @NonNull Response<ApiResponse<Order>> response) {
                         hideLoading();
                         ApiResponse<Order> body = response.body();
                         if (body == null || !body.success || body.data == null) {
@@ -110,7 +111,7 @@ public class OrderDetailActivity extends BaseActivity {
         service.cancelOrder(orderId)
                 .enqueue(new Callback<ApiResponse<Order>>() {
                     @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
-                                                      @NonNull Response<ApiResponse<Order>> response) {
+                                                     @NonNull Response<ApiResponse<Order>> response) {
                         ApiResponse<Order> body = response.body();
                         if (response.isSuccessful() && body != null && body.success && body.data != null) {
                             onCancelSuccess(body.data);
@@ -132,7 +133,7 @@ public class OrderDetailActivity extends BaseActivity {
         service.updateOrderStatus(orderId, body)
                 .enqueue(new Callback<ApiResponse<Order>>() {
                     @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
-                                                      @NonNull Response<ApiResponse<Order>> response) {
+                                                     @NonNull Response<ApiResponse<Order>> response) {
                         ApiResponse<Order> result = response.body();
                         if (response.isSuccessful() && result != null && result.success && result.data != null) {
                             onCancelSuccess(result.data);
@@ -194,6 +195,12 @@ public class OrderDetailActivity extends BaseActivity {
         txtTimeline.setText(buildTimeline(order.status));
         btnCancel.setVisibility("PENDING".equalsIgnoreCase(order.status) ? View.VISIBLE : View.GONE);
         txtAddress.setText(valueOrDash(order.shippingAddress));
+        if (order.ghnOrderId != null && !order.ghnOrderId.isEmpty()) {
+            txtGhn.setText(getString(R.string.order_detail_ghn_code, order.ghnOrderId));
+            txtGhn.setVisibility(View.VISIBLE);
+        } else {
+            txtGhn.setVisibility(View.GONE);
+        }
         txtPayment.setText(valueOrDash(order.paymentMethod) + " | " + valueOrDash(order.paymentStatus));
 
         double shipping = order.shippingFee == null ? 0 : order.shippingFee;
