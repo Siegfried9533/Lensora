@@ -344,8 +344,8 @@ public class NotificationService {
     public void createWelcomeNotification(String userId) {
         createNotification(
                 userId,
-                "Chào mừng đến với Camera Shop!",
-                "Cảm ơn bạn đã tham gia Camera Shop! Hãy khám phá bộ sưu tập máy ảnh, ống kính và thiết bị cao cấp của chúng tôi.",
+                "Chào mừng đến với Lensora!",
+                "Cảm ơn bạn đã tham gia Lensora! Hãy khám phá bộ sưu tập máy ảnh, ống kính và thiết bị cao cấp của chúng tôi.",
                 Notification.NotificationType.SYSTEM,
                 null,
                 null,

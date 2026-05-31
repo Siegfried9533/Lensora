@@ -43,7 +43,7 @@ public class EmailService {
                 </div>
                 <div class="content">
                     <p>Hi %s,</p>
-                    <p>Thank you for registering with Camera Shop! Please verify your email address by clicking the button below:</p>
+                    <p>Thank you for registering with Lensora! Please verify your email address by clicking the button below:</p>
                     <p style="text-align: center;">
                         <a href="%s" class="button">Verify Email</a>
                     </p>
@@ -53,7 +53,7 @@ public class EmailService {
                     <p>If you didn't create an account, you can safely ignore this email.</p>
                 </div>
                 <div class="footer">
-                    <p>&copy; 2024 Camera Shop. All rights reserved.</p>
+                    <p>&copy; 2024 Lensora. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -64,7 +64,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setFrom(fromEmail);
         helper.setTo(to);
-        helper.setSubject("Verify Your Email - Camera Shop");
+        helper.setSubject("Verify Your Email - Lensora");
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
@@ -113,7 +113,7 @@ public class EmailService {
                     <p>We'll send you another email when your order ships.</p>
                 </div>
                 <div class="footer">
-                    <p>&copy; 2024 Camera Shop. All rights reserved.</p>
+                    <p>&copy; 2024 Lensora. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -126,7 +126,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setFrom(fromEmail);
         helper.setTo(to);
-        helper.setSubject("Order Confirmation - Camera Shop");
+        helper.setSubject("Order Confirmation - Lensora");
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
@@ -156,7 +156,7 @@ public class EmailService {
                 </div>
                 <div class="content">
                     <p>Hi %s,</p>
-                    <p>We received a request to reset your Camera Shop account password. Click the button below to set a new password:</p>
+                    <p>We received a request to reset your Lensora account password. Click the button below to set a new password:</p>
                     <p style="text-align: center;">
                         <a href="%s" class="button">Reset Password</a>
                     </p>
@@ -168,7 +168,7 @@ public class EmailService {
                     </div>
                 </div>
                 <div class="footer">
-                    <p>&copy; 2024 Camera Shop. All rights reserved.</p>
+                    <p>&copy; 2024 Lensora. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -179,7 +179,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setFrom(fromEmail);
         helper.setTo(to);
-        helper.setSubject("Reset Your Password - Camera Shop");
+        helper.setSubject("Reset Your Password - Lensora");
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
@@ -224,7 +224,7 @@ public class EmailService {
                     <p>Please bring a valid ID when picking up your equipment.</p>
                 </div>
                 <div class="footer">
-                    <p>&copy; 2024 Camera Shop. All rights reserved.</p>
+                    <p>&copy; 2024 Lensora. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -236,7 +236,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setFrom(fromEmail);
         helper.setTo(to);
-        helper.setSubject("Rental Confirmation - Camera Shop");
+        helper.setSubject("Rental Confirmation - Lensora");
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
