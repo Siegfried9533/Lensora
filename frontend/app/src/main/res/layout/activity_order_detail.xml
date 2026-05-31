@@ -120,6 +120,14 @@
             android:padding="@dimen/spacing_md" />
 
         <TextView
+            android:id="@+id/txt_ghn_code"
+            style="@style/Text.Muted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:visibility="gone" />
+
+        <TextView
             style="@style/Text.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

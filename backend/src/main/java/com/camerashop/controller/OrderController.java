@@ -43,7 +43,13 @@ public class OrderController {
             boolean clearCart = clearCartValue == null || Boolean.parseBoolean(String.valueOf(clearCartValue));
             List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
 
-            OrderDTO order = orderService.createOrder(userDetails.getUsername(), shippingAddress, paymentMethod, shippingFee, items, clearCart);
+            String recipientName = (String) body.get("recipientName");
+            String recipientPhone = (String) body.get("recipientPhone");
+            String toDistrictId = body.get("toDistrictId") != null ? String.valueOf(body.get("toDistrictId")) : null;
+            String toWardCode = body.get("toWardCode") != null ? String.valueOf(body.get("toWardCode")) : null;
+
+            OrderDTO order = orderService.createOrder(userDetails.getUsername(), shippingAddress, paymentMethod,
+                    shippingFee, items, clearCart, recipientName, recipientPhone, toDistrictId, toWardCode);
             return ResponseEntity.ok(ApiResponse.success(order));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));

@@ -111,6 +111,8 @@
     <string name="checkout_select_saved_address">Chọn địa chỉ đã lưu</string>
     <string name="checkout_no_saved_address">Chưa có địa chỉ đã lưu</string>
     <string name="checkout_saved_address_number">Địa chỉ %1$d: %2$s</string>
+    <string name="checkout_recipient_name">Tên người nhận</string>
+    <string name="checkout_recipient_phone">Số điện thoại</string>
     <string name="checkout_province">Tỉnh / Thành phố</string>
     <string name="checkout_select_province">Chọn Tỉnh / Thành phố</string>
     <string name="checkout_district">Quận / Huyện</string>
@@ -267,6 +269,12 @@
     <string name="error_enter_province">Vui lòng nhập tỉnh / thành phố</string>
     <string name="error_enter_district">Vui lòng nhập quận / huyện</string>
     <string name="error_enter_ward">Vui lòng nhập phường / xã</string>
+    <string name="error_enter_recipient_name">Vui lòng nhập tên người nhận</string>
+    <string name="error_enter_recipient_phone">Vui lòng nhập số điện thoại người nhận</string>
+    <string name="error_select_province">Vui lòng chọn tỉnh / thành phố</string>
+    <string name="error_select_district">Vui lòng chọn quận / huyện</string>
+    <string name="error_select_ward">Vui lòng chọn phường / xã</string>
+    <string name="error_load_address_options">Không tải được danh sách địa chỉ. Hãy đảm bảo backend đang chạy rồi thử lại.</string>
     <string name="error_enter_street">Vui lòng nhập số nhà, tên đường</string>
     <string name="error_empty_order_cart">Giỏ không có sản phẩm để đặt. Thiết bị thuê hãy đặt từ trang chi tiết.</string>
     <string name="error_place_order_failed">Đặt hàng thất bại</string>
@@ -342,6 +350,7 @@
     <string name="order_detail_payment">Thanh toán</string>
     <string name="order_detail_no_products">Không có sản phẩm</string>
     <string name="order_code_format">Mã đơn: %1$s</string>
+    <string name="order_detail_ghn_code">Mã vận đơn GHN: %1$s</string>
     <string name="order_date_format">Ngày đặt: %1$s</string>
     <string name="order_meta_format">%1$d sản phẩm | %2$s</string>
     <string name="order_timeline_prefix">Theo dõi: </string>
