@@ -27,9 +27,9 @@ public class PaymentFailedActivity extends BaseActivity {
         findViewById(R.id.btn_retry).setOnClickListener(v -> finish());
         ((MaterialButton) findViewById(R.id.btn_home)).setOnClickListener(v -> {
             Intent i = new Intent(this, HomeActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
-            finishAffinity();
+            finish();
         });
     }
 }
