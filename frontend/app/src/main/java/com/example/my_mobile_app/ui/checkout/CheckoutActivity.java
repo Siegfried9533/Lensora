@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -110,6 +111,8 @@ public class CheckoutActivity extends BaseActivity {
         if (!requireLogin())
             return;
         setContentView(R.layout.activity_checkout);
+
+        loadProvinces(); //kiểm tra API
 
         etRecipientName = findViewById(R.id.et_recipient_name);
         etRecipientPhone = findViewById(R.id.et_recipient_phone);
@@ -553,6 +556,8 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void loadProvinces() {
+        Log.d("CHECKOUT", "loadProvinces called");
+
         ApiClient.get(this).create(PaymentService.class).getProvinces()
                 .enqueue(new Callback<ApiResponse<List<Province>>>() {
                     @Override
