@@ -38,6 +38,7 @@ import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.ui.payment.OrderStatusActivity;
 import com.example.my_mobile_app.ui.payment.PaymentSuccessActivity;
 import com.example.my_mobile_app.util.PriceFormatter;
+import com.example.my_mobile_app.util.TextNormalizer;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
@@ -509,7 +510,7 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private String textOf(EditText input) {
-        return input.getText() == null ? "" : input.getText().toString().trim();
+        return input.getText() == null ? "" : TextNormalizer.trimAndNormalize(input.getText().toString());
     }
 
     // ----- GHN master-data address spinners (cascade: province -> district -> ward) -----
@@ -692,15 +693,19 @@ public class CheckoutActivity extends BaseActivity {
                             return;
                         }
                         Rental rental = b.data;
-                        if (useMomo) {
-                            createMomoPaymentRental(rental);
-                        } else {
-                            Intent i = new Intent(CheckoutActivity.this, PaymentSuccessActivity.class);
-                            i.putExtra(PaymentSuccessActivity.EXTRA_RENTAL_ID, rental.rentalId);
-                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(i);
-                            finish();
+                        // Backend tạo đơn thuê + URL thanh toán MoMo trong cùng 1 lệnh: nếu thanh toán
+                        // lỗi, backend đã xóa đơn thuê và trả lỗi (xử lý ở nhánh !success ở trên), nên
+                        // tới đây luôn có payUrl. Mở MoMo rồi theo dõi trạng thái thanh toán.
+                        if (rental.payUrl == null || rental.payUrl.isEmpty()) {
+                            showError(getString(R.string.error_create_momo));
+                            return;
                         }
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(rental.payUrl)));
+                        Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
+                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, rental.rentalId);
+                        i.putExtra(OrderStatusActivity.EXTRA_RENTAL_ID, rental.rentalId);
+                        startActivity(i);
+                        finish();
                     }
 
                     @Override
@@ -739,45 +744,6 @@ public class CheckoutActivity extends BaseActivity {
                         Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
                         i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, orderCode);
                         i.putExtra(OrderStatusActivity.EXTRA_ORDER_ID, order.orderId);
-                        startActivity(i);
-                        finish();
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Throwable t) {
-                        hideLoading();
-                        showError(getString(R.string.error_create_momo_connection));
-                    }
-                });
-    }
-
-    private void createMomoPaymentRental(Rental rental) {
-        Map<String, String> req = new HashMap<>();
-        req.put("rentalId", rental.rentalId);
-        req.put("orderInfo", getString(R.string.checkout_momo_rental_info, rental.rentalId));
-
-        showLoading();
-        ApiClient.get(this).create(PaymentService.class).createMoMoPaymentRental(req)
-                .enqueue(new Callback<ApiResponse<Map<String, String>>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApiResponse<Map<String, String>>> call,
-                                           @NonNull Response<ApiResponse<Map<String, String>>> response) {
-                        hideLoading();
-                        ApiResponse<Map<String, String>> b = response.body();
-                        if (b == null || !b.success || b.data == null) {
-                            showError(getString(R.string.error_create_momo));
-                            return;
-                        }
-                        String payUrl = b.data.get("payUrl");
-                        String orderCode = b.data.get("rentalId");
-                        if (orderCode == null)
-                            orderCode = rental.rentalId;
-                        if (payUrl != null && !payUrl.isEmpty()) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(payUrl)));
-                        }
-                        Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, orderCode);
-                        i.putExtra(OrderStatusActivity.EXTRA_RENTAL_ID, rental.rentalId);
                         startActivity(i);
                         finish();
                     }

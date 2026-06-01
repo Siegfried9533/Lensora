@@ -188,14 +188,21 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    /** Trạng thái kết thúc — không đồng bộ thêm từ GHN nữa. */
+    private static final List<Order.OrderStatus> TERMINAL_STATUSES =
+            List.of(Order.OrderStatus.CANCELLED, Order.OrderStatus.DELIVERED);
+
     public OrderDTO getOrderById(String orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        // Không gọi GHN tại đây: job quét định kỳ (syncAllGhnOrders) là nơi DUY NHẤT ghi trạng thái
+        // từ GHN, tránh race ghi đè/hoàn kho 2 lần và độ trễ HTTP mỗi lần mở chi tiết. Màn hình
+        // giao dịch poll danh sách nội bộ nên vẫn phản ánh thay đổi trong vòng ~30s.
         return toDTO(order);
     }
 
     @Transactional
-    public OrderDTO cancelOrderForCustomer(String email, String orderId) {
+    public OrderDTO cancelOrderForCustomer(String email, String orderId, String cancelReason) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
         Order order = orderRepository.findById(orderId)
@@ -208,18 +215,38 @@ public class OrderService {
             throw new IllegalStateException("Chỉ có thể hủy đơn hàng đang chờ xử lý");
         }
 
-        return updateOrderStatus(orderId, Order.OrderStatus.CANCELLED);
+        return updateOrderStatus(orderId, Order.OrderStatus.CANCELLED, cancelReason);
+    }
+
+    @Transactional
+    public OrderDTO updateOrderStatus(String orderId, Order.OrderStatus newStatus) {
+        return updateOrderStatus(orderId, newStatus, null);
     }
 
     /**
-     * Cap nhat trang thai don hang va kich hoat thong bao
+     * Cap nhat trang thai don hang va kich hoat thong bao.
+     * Khi huy (CANCELLED) co the kem ly do va se day lenh huy sang GHN.
      */
     @Transactional
-    public OrderDTO updateOrderStatus(String orderId, Order.OrderStatus newStatus) {
+    public OrderDTO updateOrderStatus(String orderId, Order.OrderStatus newStatus, String cancelReason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        return applyStatus(order, newStatus, true, cancelReason);
+    }
 
+    /**
+     * Áp dụng trạng thái mới cho đơn và gửi thông báo.
+     *
+     * @param propagateToGhn true khi thay đổi bắt nguồn từ app (khách/admin hủy) → gọi GHN hủy vận đơn;
+     *                       false khi GHN là nguồn thay đổi → KHÔNG gọi lại GHN để tránh vòng lặp.
+     * @param cancelReason   lý do hủy (chỉ dùng khi newStatus = CANCELLED).
+     */
+    private OrderDTO applyStatus(Order order, Order.OrderStatus newStatus,
+                                 boolean propagateToGhn, String cancelReason) {
         Order.OrderStatus oldStatus = order.getStatus();
+        if (oldStatus == newStatus) {
+            return toDTO(order);
+        }
         order.setStatus(newStatus);
 
         // Xu ly logic theo tung trang thai
@@ -229,14 +256,17 @@ public class OrderService {
             order.setDeliveredDate(LocalDateTime.now());
         } else if (newStatus == Order.OrderStatus.CANCELLED) {
             order.setCancelledDate(LocalDateTime.now());
-            // Huy van don GHN truoc (neu co); loi GHN khong chan viec huy don noi bo
-            if (order.getGhnOrderId() != null && !order.getGhnOrderId().isBlank()
+            if (cancelReason != null && !cancelReason.isBlank()) {
+                order.setCancelReason(cancelReason);
+            }
+            // Huy van don GHN (neu app la nguon huy); loi GHN khong chan viec huy don noi bo
+            if (propagateToGhn && order.getGhnOrderId() != null && !order.getGhnOrderId().isBlank()
                     && ghnService.isConfigured()) {
                 try {
                     ghnService.cancelShippingOrder(order.getGhnOrderId());
                 } catch (Exception e) {
                     log.error("Không thể hủy vận đơn GHN {} cho đơn {}: {}",
-                            order.getGhnOrderId(), orderId, e.getMessage());
+                            order.getGhnOrderId(), order.getOrderId(), e.getMessage());
                 }
             }
             // Hoan tra ton kho cho don hang bi huy
@@ -257,6 +287,72 @@ public class OrderService {
         }
 
         return toDTO(order);
+    }
+
+    /**
+     * Quét tất cả đơn còn mở có mã vận đơn GHN và đồng bộ trạng thái từ GHN về app.
+     * Gọi bởi job định kỳ ({@code NotificationScheduler}) — tách lời gọi GHN ra khỏi
+     * đường đọc danh sách để giao diện vẫn nhanh khi poll. Trả về số đơn thay đổi.
+     */
+    @Transactional
+    public int syncAllGhnOrders() {
+        if (!ghnService.isConfigured()) {
+            return 0;
+        }
+        int changed = 0;
+        for (Order order : orderRepository.findSyncableGhnOrders(TERMINAL_STATUSES)) {
+            if (syncOrderFromGhn(order)) {
+                changed++;
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * Đồng bộ 1 đơn từ GHN. Trả về true nếu trạng thái nội bộ thay đổi.
+     * GHN lỗi / trạng thái không xác định ("UNKNOWN") = không làm gì (giữ nguyên trạng thái nội bộ),
+     * nên một sự cố GHN tạm thời không ghi đè trạng thái thật.
+     */
+    @Transactional
+    public boolean syncOrderFromGhn(Order order) {
+        if (!ghnService.isConfigured()) {
+            return false;
+        }
+        String code = order.getGhnOrderId();
+        if (code == null || code.isBlank()) {
+            return false;
+        }
+        Order.OrderStatus current = order.getStatus();
+        if (current == Order.OrderStatus.CANCELLED || current == Order.OrderStatus.DELIVERED) {
+            return false;
+        }
+        Order.OrderStatus mapped = mapGhnStatus(ghnService.getOrderStatus(code));
+        if (mapped == null || mapped == current) {
+            return false;
+        }
+        String reason = mapped == Order.OrderStatus.CANCELLED ? "Vận đơn đã bị hủy trên GHN" : null;
+        // GHN là nguồn thay đổi → propagateToGhn = false (không gọi lại lệnh hủy GHN).
+        applyStatus(order, mapped, false, reason);
+        return true;
+    }
+
+    /** Ánh xạ trạng thái vận đơn GHN v2 sang trạng thái đơn nội bộ. null = bỏ qua (giữ nguyên). */
+    private Order.OrderStatus mapGhnStatus(String ghnStatus) {
+        if (ghnStatus == null) {
+            return null;
+        }
+        switch (ghnStatus.toLowerCase()) {
+            case "cancel":
+                return Order.OrderStatus.CANCELLED;
+            case "delivered":
+                return Order.OrderStatus.DELIVERED;
+            case "delivering":
+            case "money_collect_delivering":
+                return Order.OrderStatus.SHIPPED;
+            default:
+                // ready_to_pick, picking, picked, storing, transporting, sorting, UNKNOWN... → giữ nguyên
+                return null;
+        }
     }
 
     private OrderDTO toDTO(Order order) {
@@ -288,6 +384,7 @@ public class OrderService {
                 .paymentStatus(order.getPaymentStatus())
                 .shippingFee(order.getShippingFee())
                 .ghnOrderId(order.getGhnOrderId())
+                .cancelReason(order.getCancelReason())
                 .orderItems(itemDTOs)
                 .build();
     }

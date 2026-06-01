@@ -21,6 +21,8 @@ public class Rental {
     public Long shippingFee;
     /** PENDING | SUCCESS | FAILED | EXPIRED. */
     public String paymentStatus;
+    /** URL thanh toán MoMo trả về cùng đơn thuê khi tạo; mở để thanh toán ngay. */
+    public String payUrl;
 
     public Rental() {}
 }

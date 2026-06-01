@@ -20,6 +20,8 @@ public class Order {
     public String ghnOrderId;
     /** Cảnh báo khi backend tạo vận đơn GHN thất bại (đơn vẫn được tạo). Chỉ có ở phản hồi tạo đơn. */
     public String ghnWarning;
+    /** Lý do hủy đơn (nếu đã hủy). */
+    public String cancelReason;
     public List<OrderItem> orderItems;
 
     public Order() {}

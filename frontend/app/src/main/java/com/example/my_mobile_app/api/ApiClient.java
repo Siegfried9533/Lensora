@@ -83,8 +83,10 @@ public final class ApiClient {
             Request.Builder b = original.newBuilder();
 
             if (original.header("Content-Type") == null) {
-                b.header("Content-Type", "application/json");
+                b.header("Content-Type", "application/json; charset=utf-8");
             }
+            b.header("Accept", "application/json");
+            b.header("Accept-Charset", "UTF-8");
             String token = TokenManager.getToken(appContext);
             if (token != null && !token.isEmpty() && original.header("Authorization") == null) {
                 b.header("Authorization", "Bearer " + token);

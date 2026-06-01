@@ -68,6 +68,7 @@ public class GHNService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Token", ghnToken);
             headers.set("ShopId", shopId);
+            headers.set("ShopId", shopId);
 
             Map<String, Object> body = new HashMap<>();
             body.put("service_type_id", 2); // Standard delivery
@@ -347,7 +348,7 @@ public class GHNService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    ghnApiUrl + "/shipping-order/detail",
+                    baseUrl() + "/v2/shipping-order/detail",
                     HttpMethod.POST,
                     request,
                     String.class

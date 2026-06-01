@@ -347,6 +347,15 @@
     <string name="order_detail_title">Chi tiết đơn hàng</string>
     <string name="order_detail_cancel">Huỷ đơn</string>
     <string name="order_cancel_confirm">Hủy đơn hàng này? Sản phẩm sẽ được hoàn lại kho.</string>
+    <string name="order_cancel_reason_title">Lý do hủy đơn</string>
+    <string name="order_cancel_reason_label">Lý do hủy: %1$s</string>
+    <string-array name="order_cancel_reasons">
+        <item>Tôi đổi ý không mua nữa</item>
+        <item>Tìm được nơi bán giá tốt hơn</item>
+        <item>Đặt nhầm sản phẩm hoặc địa chỉ</item>
+        <item>Thời gian giao hàng quá lâu</item>
+        <item>Lý do khác</item>
+    </string-array>
     <string name="order_detail_products">Sản phẩm</string>
     <string name="order_detail_shipping">Giao hàng</string>
     <string name="order_detail_payment">Thanh toán</string>

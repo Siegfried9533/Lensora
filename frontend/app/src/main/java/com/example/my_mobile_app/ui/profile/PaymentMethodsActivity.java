@@ -21,6 +21,7 @@ import com.example.my_mobile_app.api.ApiResponse;
 import com.example.my_mobile_app.api.PaymentMethodService;
 import com.example.my_mobile_app.model.SavedPaymentMethod;
 import com.example.my_mobile_app.ui.BaseActivity;
+import com.example.my_mobile_app.util.TextNormalizer;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
@@ -186,7 +187,7 @@ public class PaymentMethodsActivity extends BaseActivity {
                 .setTitle(R.string.payment_methods_add)
                 .setView(dialogView)
                 .setPositiveButton(R.string.action_save, (dialog, which) -> {
-                    String label = etLabel.getText().toString().trim();
+                    String label = TextNormalizer.trimAndNormalize(etLabel.getText().toString());
                     if (TextUtils.isEmpty(label)) {
                         showError(getString(R.string.payment_methods_label_required));
                         return;
@@ -194,8 +195,8 @@ public class PaymentMethodsActivity extends BaseActivity {
                     int pos = spType.getSelectedItemPosition();
                     String type = typeValues[Math.max(0, Math.min(pos, typeValues.length - 1))];
                     addMethod(type, label,
-                            etHolder.getText().toString().trim(),
-                            etAccount.getText().toString().trim(),
+                            TextNormalizer.trimAndNormalize(etHolder.getText().toString()),
+                            TextNormalizer.trimAndNormalize(etAccount.getText().toString()),
                             cbDefault.isChecked());
                 })
                 .setNegativeButton(R.string.action_cancel, null)

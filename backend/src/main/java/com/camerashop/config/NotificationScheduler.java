@@ -4,6 +4,7 @@ import com.camerashop.entity.Notification;
 import com.camerashop.entity.Rental;
 import com.camerashop.repository.RentalRepository;
 import com.camerashop.service.NotificationService;
+import com.camerashop.service.OrderService;
 import com.camerashop.service.RentalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,6 +33,26 @@ public class NotificationScheduler {
 
     @Autowired
     private RentalService rentalService;
+
+    @Autowired
+    private OrderService orderService;
+
+    /**
+     * Đồng bộ trạng thái đơn hàng từ GHN về app mỗi 30 giây. Phản ánh việc hủy/giao
+     * vận đơn thực hiện trên web GHN (không có webhook tới localhost trong môi trường dev).
+     * Giao diện chỉ poll danh sách nội bộ (nhanh); mọi lời gọi GHN tập trung ở job này.
+     */
+    @Scheduled(fixedRate = 30_000)
+    public void syncGhnOrderStatuses() {
+        try {
+            int changed = orderService.syncAllGhnOrders();
+            if (changed > 0) {
+                System.out.println("Synced " + changed + " order status(es) from GHN");
+            }
+        } catch (Exception e) {
+            System.err.println("Error syncing order statuses from GHN: " + e.getMessage());
+        }
+    }
 
     /**
      * Release abandoned rental holds every minute. A rental created as PENDING blocks the

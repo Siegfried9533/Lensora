@@ -54,6 +54,9 @@ public class Order {
     private LocalDateTime deliveredDate;
     private LocalDateTime cancelledDate;
 
+    /** Lý do hủy do khách hàng chọn, hoặc do hệ thống đặt khi GHN hủy vận đơn. */
+    private String cancelReason;
+
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentTransaction> paymentTransactions = new ArrayList<>();

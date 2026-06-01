@@ -7,6 +7,7 @@ import com.camerashop.entity.User;
 import com.camerashop.exception.ResourceNotFoundException;
 import com.camerashop.repository.RentalRepository;
 import com.camerashop.repository.UserRepository;
+import com.camerashop.service.MoMoService;
 import com.camerashop.service.RentalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -33,6 +34,9 @@ public class RentalController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private MoMoService momoService;
+
     @PostMapping
     public ResponseEntity<ApiResponse> createRental(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -52,6 +56,22 @@ public class RentalController {
                 userDetails.getUsername(), assetId, startDate, endDate,
                 shippingAddress, paymentMethod, shippingFee
             );
+
+            // Thuê là pay-first: tạo luôn URL thanh toán MoMo NGAY trong yêu cầu này.
+            // Nếu tạo thanh toán lỗi -> xóa đơn thuê vừa tạo và báo lỗi, để "lỗi thì không tạo gì cả"
+            // (tránh đơn thuê rác còn trơ lại trong màn hình giao dịch sau khi refresh).
+            try {
+                long amount = rental.getTotalRentFee() + rental.getDepositFee()
+                        + (rental.getShippingFee() != null ? rental.getShippingFee() : 0L);
+                String payUrl = momoService.createPaymentUrl(
+                        rental.getRentalId(), amount, "Thanh toan thue: " + rental.getRentalId());
+                rental.setPayUrl(payUrl);
+            } catch (Exception paymentError) {
+                rentalService.deleteRentalIfUnpaid(rental.getRentalId());
+                return ResponseEntity.badRequest().body(ApiResponse.error(
+                        "Không thể tạo thanh toán cho đơn thuê: " + paymentError.getMessage()));
+            }
+
             return ResponseEntity.ok(ApiResponse.success(rental));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));

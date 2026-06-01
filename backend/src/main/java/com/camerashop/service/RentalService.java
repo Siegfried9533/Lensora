@@ -126,6 +126,24 @@ public class RentalService {
     }
 
     /**
+     * Xóa hẳn đơn thuê vừa tạo khi KHỞI TẠO THANH TOÁN THẤT BẠI, để "lỗi thì không tạo gì cả".
+     * Chỉ xóa khi đơn còn PENDING và chưa thanh toán thành công — tránh xóa nhầm đơn đã trả tiền.
+     * Trả lại trạng thái như chưa từng thuê (không để lại đơn rác trong màn hình giao dịch).
+     */
+    @Transactional
+    public void deleteRentalIfUnpaid(String rentalId) {
+        if (rentalId == null) {
+            return;
+        }
+        rentalRepository.findById(rentalId).ifPresent(rental -> {
+            boolean unpaid = !"SUCCESS".equals(rental.getPaymentStatus());
+            if (rental.getStatus() == Rental.RentalStatus.PENDING && unpaid) {
+                rentalRepository.delete(rental);
+            }
+        });
+    }
+
+    /**
      * Release rental holds that were created (PENDING) but never paid within the window.
      * Without this, an abandoned unpaid checkout would block the camera's dates forever.
      * Returns the number of holds released. Invoked by the scheduled job.

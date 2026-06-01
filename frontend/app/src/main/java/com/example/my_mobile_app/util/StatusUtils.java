@@ -40,7 +40,8 @@ public final class StatusUtils {
                 return new Style(context.getString(R.string.status_cancelled),
                         R.color.red_500, R.drawable.bg_status_cancelled);
             case "PENDING":
-                return new Style(context.getString(R.string.status_pending),
+                // Đơn vừa đặt thành công đang được cửa hàng xử lý → hiển thị "Đang xử lý".
+                return new Style(context.getString(R.string.status_processing),
                         R.color.yellow_500, R.drawable.bg_status_pending);
             default:
                 return new Style(status == null ? "" : status,

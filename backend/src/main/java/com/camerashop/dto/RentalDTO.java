@@ -26,4 +26,6 @@ public class RentalDTO {
     private String paymentMethod;
     private Long shippingFee;
     private String paymentStatus;
+    /** URL thanh toán MoMo tạo cùng đơn thuê; chỉ có ở phản hồi tạo đơn. */
+    private String payUrl;
 }

@@ -17,4 +17,11 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     @Query("SELECT o FROM Order o WHERE o.user.userId = :userId AND o.status = :status")
     List<Order> findByUserIdAndStatus(@Param("userId") String userId, @Param("status") OrderStatus status);
+
+    /**
+     * Đơn còn cần đồng bộ trạng thái từ GHN: đã có mã vận đơn và chưa ở trạng thái kết thúc.
+     * Dùng bởi job quét định kỳ để phản ánh việc hủy/giao trên GHN về app.
+     */
+    @Query("SELECT o FROM Order o WHERE o.ghnOrderId IS NOT NULL AND o.ghnOrderId <> '' AND o.status NOT IN :terminal")
+    List<Order> findSyncableGhnOrders(@Param("terminal") List<OrderStatus> terminal);
 }

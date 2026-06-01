@@ -21,6 +21,7 @@ import com.example.my_mobile_app.api.ChatbotService;
 import com.example.my_mobile_app.api.ApiClient;
 import com.example.my_mobile_app.model.ChatMessage;
 import com.example.my_mobile_app.ui.BaseActivity;
+import com.example.my_mobile_app.util.TextNormalizer;
 import com.example.my_mobile_app.ui.home.HomeActivity;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -106,7 +107,7 @@ public class ChatbotActivity extends BaseActivity {
     }
 
     private void send() {
-        String text = inputMessage.getText().toString().trim();
+        String text = TextNormalizer.trimAndNormalize(inputMessage.getText().toString());
         if (text.isEmpty() || isSending) return;
 
         chipSuggestions.setVisibility(View.GONE);

@@ -88,9 +88,11 @@ public class OrderController {
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResponse> cancelOrder(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable String orderId) {
+            @PathVariable String orderId,
+            @RequestBody(required = false) Map<String, String> body) {
         try {
-            OrderDTO result = orderService.cancelOrderForCustomer(userDetails.getUsername(), orderId);
+            String reason = body != null ? body.get("reason") : null;
+            OrderDTO result = orderService.cancelOrderForCustomer(userDetails.getUsername(), orderId, reason);
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
@@ -114,6 +116,7 @@ public class OrderController {
             @RequestBody Map<String, String> body) {
         try {
             String status = body.get("status");
+            String reason = body.get("reason");
             if (status == null) {
                 return ResponseEntity.badRequest()
                         .body(ApiResponse.error("Trạng thái là bắt buộc"));
@@ -144,7 +147,7 @@ public class OrderController {
                 }
             }
 
-            OrderDTO result = orderService.updateOrderStatus(orderId, newStatus);
+            OrderDTO result = orderService.updateOrderStatus(orderId, newStatus, reason);
             return ResponseEntity.ok(ApiResponse.success(result));
 
         } catch (IllegalArgumentException e) {

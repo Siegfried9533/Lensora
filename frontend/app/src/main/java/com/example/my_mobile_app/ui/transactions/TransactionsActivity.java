@@ -2,6 +2,8 @@ package com.example.my_mobile_app.ui.transactions;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.TextView;
 
@@ -37,8 +39,20 @@ public class TransactionsActivity extends BaseActivity
 
     public static final String EXTRA_INITIAL_TAB = "initial_tab";
 
+    /** Chu kỳ tự làm mới danh sách để trạng thái đơn cập nhật gần như realtime khi đang xem. */
+    private static final long POLL_INTERVAL_MS = 12_000L;
+
     private final List<Order> orders = new ArrayList<>();
     private final List<Rental> rentals = new ArrayList<>();
+
+    private final Handler pollHandler = new Handler(Looper.getMainLooper());
+    private final Runnable pollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            load(false); // làm mới im lặng (không hiện spinner / không báo lỗi)
+            pollHandler.postDelayed(this, POLL_INTERVAL_MS);
+        }
+    };
 
     private RecyclerView rvOrders, rvRentals;
     private TextView txtOrdersEmpty, txtRentalsEmpty;
@@ -73,21 +87,30 @@ public class TransactionsActivity extends BaseActivity
         btnRentals.setOnClickListener(v -> showTab(1));
 
         showTab(getIntent().getIntExtra(EXTRA_INITIAL_TAB, 0));
-        load();
+        load(true);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (rvOrders != null) load();
+        if (rvOrders == null) return;
+        load(false); // làm mới ngay khi quay lại màn hình (vd: sau khi hủy đơn ở màn chi tiết)
+        pollHandler.removeCallbacks(pollRunnable);
+        pollHandler.postDelayed(pollRunnable, POLL_INTERVAL_MS);
     }
 
-    private void load() {
-        showLoading();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pollHandler.removeCallbacks(pollRunnable); // ngừng poll khi không còn xem màn hình
+    }
+
+    private void load(boolean showSpinner) {
+        if (showSpinner) showLoading();
         AtomicInteger remaining = new AtomicInteger(2);
         Runnable done = () -> {
             if (remaining.decrementAndGet() == 0) {
-                hideLoading();
+                if (showSpinner) hideLoading();
                 render();
             }
         };
@@ -106,7 +129,7 @@ public class TransactionsActivity extends BaseActivity
 
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<Order>>> call,
                                                     @NonNull Throwable t) {
-                        showError(getString(R.string.error_load_orders));
+                        if (showSpinner) showError(getString(R.string.error_load_orders));
                         done.run();
                     }
                 });
@@ -125,7 +148,7 @@ public class TransactionsActivity extends BaseActivity
 
                     @Override public void onFailure(@NonNull Call<ApiResponse<List<Rental>>> call,
                                                     @NonNull Throwable t) {
-                        showError(getString(R.string.error_load_rentals));
+                        if (showSpinner) showError(getString(R.string.error_load_rentals));
                         done.run();
                     }
                 });

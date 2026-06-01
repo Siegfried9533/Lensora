@@ -70,7 +70,9 @@ cp .env.example .env
 | `APP_JWT_EXPIRATION_MS` | Token lifetime (default `86400000` = 24h) |
 | `APP_FRONTEND_URL` | Frontend URL used in email links |
 | `SPRING_MAIL_*` | SMTP host/port/credentials for email verification |
+| `APP_GHN_API_URL` | GHN API base URL. Use `https://online-gateway.ghn.vn/shiip/public-api/` for orders that should appear in the production GHN portal. |
 | `APP_GHN_TOKEN` / `APP_GHN_SHOP_ID` / `APP_GHN_DISTRICT_ID` | GHN shipping credentials |
+| `APP_GHN_FROM_NAME` / `APP_GHN_FROM_PHONE` / `APP_GHN_FROM_ADDRESS` / `APP_GHN_FROM_WARD_CODE` / `APP_GHN_FROM_DISTRICT_ID` | Pickup address sent when creating GHN shipping orders |
 | `APP_MOMO_PARTNER_CODE` / `APP_MOMO_ACCESS_KEY` / `APP_MOMO_SECRET_KEY` | MoMo payment credentials |
 | `DEEPSEEK_BASE_URL` / `DEEPSEEK_MODEL` / `DEEPSEEK_API_KEY` | Chatbot LLM config |
 

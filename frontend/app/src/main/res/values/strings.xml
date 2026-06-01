@@ -347,6 +347,15 @@
     <string name="order_detail_title">Order Details</string>
     <string name="order_detail_cancel">Cancel order</string>
     <string name="order_cancel_confirm">Cancel this order? The products will be returned to stock.</string>
+    <string name="order_cancel_reason_title">Reason for cancellation</string>
+    <string name="order_cancel_reason_label">Reason: %1$s</string>
+    <string-array name="order_cancel_reasons">
+        <item>Changed my mind</item>
+        <item>Found a better price</item>
+        <item>Wrong product or address</item>
+        <item>Delivery takes too long</item>
+        <item>Other reason</item>
+    </string-array>
     <string name="order_detail_products">Products</string>
     <string name="order_detail_shipping">Shipping</string>
     <string name="order_detail_payment">Payment</string>

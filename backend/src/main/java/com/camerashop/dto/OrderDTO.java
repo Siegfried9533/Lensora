@@ -22,6 +22,8 @@ public class OrderDTO {
     private String ghnOrderId;
     /** Cảnh báo khi tạo vận đơn GHN thất bại (đơn vẫn được tạo thành công). */
     private String ghnWarning;
+    /** Lý do hủy đơn (nếu đã hủy). */
+    private String cancelReason;
     private List<OrderItemDTO> orderItems;
 
     @Getter

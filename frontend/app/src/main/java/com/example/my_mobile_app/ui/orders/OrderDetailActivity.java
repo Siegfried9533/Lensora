@@ -97,39 +97,46 @@ public class OrderDetailActivity extends BaseActivity {
     }
 
     private void confirmCancel(String orderId) {
+        // Yêu cầu khách hàng chọn lý do trước khi hủy đơn.
+        String[] reasons = getResources().getStringArray(R.array.order_cancel_reasons);
+        final int[] selected = {0};
         new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.order_detail_cancel)
-                .setMessage(R.string.order_cancel_confirm)
+                .setTitle(R.string.order_cancel_reason_title)
+                .setSingleChoiceItems(reasons, 0, (dialog, which) -> selected[0] = which)
                 .setNegativeButton(R.string.action_cancel, null)
-                .setPositiveButton(R.string.action_confirm, (dialog, which) -> cancelOrder(orderId))
+                .setPositiveButton(R.string.action_confirm,
+                        (dialog, which) -> cancelOrder(orderId, reasons[selected[0]]))
                 .show();
     }
 
-    private void cancelOrder(String orderId) {
+    private void cancelOrder(String orderId, String reason) {
         setCancelBusy(true);
+        Map<String, String> body = new HashMap<>();
+        body.put("reason", reason);
         OrderService service = ApiClient.get(this).create(OrderService.class);
-        service.cancelOrder(orderId)
+        service.cancelOrder(orderId, body)
                 .enqueue(new Callback<ApiResponse<Order>>() {
                     @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
                                                      @NonNull Response<ApiResponse<Order>> response) {
-                        ApiResponse<Order> body = response.body();
-                        if (response.isSuccessful() && body != null && body.success && body.data != null) {
-                            onCancelSuccess(body.data);
+                        ApiResponse<Order> respBody = response.body();
+                        if (response.isSuccessful() && respBody != null && respBody.success && respBody.data != null) {
+                            onCancelSuccess(respBody.data);
                             return;
                         }
-                        cancelOrderViaStatus(service, orderId, errorMessage(response));
+                        cancelOrderViaStatus(service, orderId, body, errorMessage(response));
                     }
 
                     @Override public void onFailure(@NonNull Call<ApiResponse<Order>> call,
                                                     @NonNull Throwable t) {
-                        cancelOrderViaStatus(service, orderId, getString(R.string.error_cancel_order_connection));
+                        cancelOrderViaStatus(service, orderId, body,
+                                getString(R.string.error_cancel_order_connection));
                     }
                 });
     }
 
-    private void cancelOrderViaStatus(OrderService service, String orderId, String firstError) {
-        Map<String, String> body = new HashMap<>();
-        body.put("status", "CANCELLED");
+    private void cancelOrderViaStatus(OrderService service, String orderId,
+                                      Map<String, String> body, String firstError) {
+        body.put("status", "CANCELLED"); // body đã chứa "reason"; bổ sung "status" cho endpoint /status
         service.updateOrderStatus(orderId, body)
                 .enqueue(new Callback<ApiResponse<Order>>() {
                     @Override public void onResponse(@NonNull Call<ApiResponse<Order>> call,
@@ -192,7 +199,12 @@ public class OrderDetailActivity extends BaseActivity {
 
         Date date = DateUtils.parseIso(order.orderDate);
         txtDate.setText(getString(R.string.order_date_format, valueOrDash(DateUtils.formatDisplay(date))));
-        txtTimeline.setText(buildTimeline(order.status));
+        String timeline = buildTimeline(order.status);
+        if ("CANCELLED".equalsIgnoreCase(order.status)
+                && order.cancelReason != null && !order.cancelReason.isEmpty()) {
+            timeline += "\n" + getString(R.string.order_cancel_reason_label, order.cancelReason);
+        }
+        txtTimeline.setText(timeline);
         btnCancel.setVisibility("PENDING".equalsIgnoreCase(order.status) ? View.VISIBLE : View.GONE);
         txtAddress.setText(valueOrDash(order.shippingAddress));
         if (order.ghnOrderId != null && !order.ghnOrderId.isEmpty()) {

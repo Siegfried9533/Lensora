@@ -19,6 +19,7 @@ import android.content.Intent;
 
 import com.example.my_mobile_app.ui.BaseActivity;
 import com.example.my_mobile_app.ui.home.HomeActivity;
+import com.example.my_mobile_app.util.TextNormalizer;
 import com.example.my_mobile_app.util.TokenManager;
 import com.example.my_mobile_app.util.UserManager;
 import com.google.android.material.button.MaterialButton;
@@ -56,7 +57,7 @@ public class SignupActivity extends BaseActivity {
     }
 
     private void attemptSignup() {
-        String userName = textOf(inputUsername).trim();
+        String userName = TextNormalizer.trimAndNormalize(textOf(inputUsername));
         String email = textOf(inputEmail).trim();
         String password = textOf(inputPassword);
         String confirm = textOf(inputConfirm);

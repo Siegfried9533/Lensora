@@ -145,7 +145,9 @@ public class ProfileActivity extends BaseActivity {
                     @Override public void onResponse(@NonNull Call<ApiResponse<List<Order>>> call,
                                                       @NonNull Response<ApiResponse<List<Order>>> response) {
                         ApiResponse<List<Order>> body = response.body();
-                        int count = body != null && body.success && body.data != null ? body.data.size() : 0;
+                        int count = body != null && body.success && body.data != null
+                                ? countDeliveredOrders(body.data)
+                                : 0;
                         txtOrderCount.setText(String.valueOf(count));
                     }
 
@@ -243,5 +245,19 @@ public class ProfileActivity extends BaseActivity {
 
     private static String valueOrDash(String value) {
         return value == null || value.isEmpty() ? "--" : value;
+    }
+
+    private static int countDeliveredOrders(List<Order> orders) {
+        int count = 0;
+        for (Order order : orders) {
+            if (order != null && isDelivered(order.status)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static boolean isDelivered(String status) {
+        return status != null && "DELIVERED".equalsIgnoreCase(status.trim());
     }
 }
