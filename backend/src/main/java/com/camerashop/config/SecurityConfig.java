@@ -41,6 +41,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/change-password").authenticated()
                 .requestMatchers(
                     "/api/health", "/api/auth/**", "/api/categories/**", "/api/products/**", "/api/assets/**",
                     "/api/payment/momo/ipn", "/api/payment/momo/callback",

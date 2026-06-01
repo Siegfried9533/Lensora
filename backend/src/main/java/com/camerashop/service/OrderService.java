@@ -26,6 +26,10 @@ public class OrderService {
 
     /** Khoi luong mac dinh moi san pham (gram) khi san pham chua khai bao can nang. */
     private static final int DEFAULT_ITEM_WEIGHT_GRAMS = 500;
+    /** GHN rejects declared insurance values above this limit. */
+    private static final long MAX_GHN_INSURANCE_VALUE = 5_000_000L;
+    /** Test COD amount sent to GHN so high-value demo orders are accepted. */
+    private static final long DEFAULT_GHN_COD_AMOUNT = 10_000L;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -148,7 +152,7 @@ public class OrderService {
             long goodsValue = order.getTotalAmount()
                     - (order.getShippingFee() != null ? order.getShippingFee() : 0L);
             long codAmount = order.getPaymentMethod() == Order.PaymentMethod.COD
-                    ? order.getTotalAmount() : 0L;
+                    ? DEFAULT_GHN_COD_AMOUNT : 0L;
 
             String ghnOrderCode = ghnService.createShippingOrder(
                     order.getOrderId(),
@@ -158,7 +162,7 @@ public class OrderService {
                     toWardCode,
                     toDistrictId,
                     totalWeight,
-                    Math.max(0, goodsValue),
+                    Math.min(MAX_GHN_INSURANCE_VALUE, Math.max(0, goodsValue)),
                     codAmount,
                     ghnItems);
 

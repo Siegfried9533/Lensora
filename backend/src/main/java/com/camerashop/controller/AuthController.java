@@ -71,9 +71,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse> changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Map<String, String> body) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Chưa xác thực - vui lòng đăng nhập"));
+        }
         try {
             authService.changePassword(userDetails.getUsername(), body.get("oldPassword"), body.get("newPassword"));
-            return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công"));
+            return ResponseEntity.ok(ApiResponse.success(null));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
@@ -103,7 +106,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse> forgotPassword(@RequestBody Map<String, String> body) {
         try {
             authService.forgotPassword(body.get("email"));
-            return ResponseEntity.ok(ApiResponse.success("Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn."));
+            return ResponseEntity.ok(ApiResponse.success(null));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
@@ -113,7 +116,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody Map<String, String> body) {
         try {
             authService.resetPassword(body.get("token"), body.get("newPassword"));
-            return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công. Bạn có thể đăng nhập ngay bây giờ."));
+            return ResponseEntity.ok(ApiResponse.success(null));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
