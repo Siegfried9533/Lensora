@@ -310,7 +310,9 @@
     <string name="personal_info_role">Role</string>
     <string name="personal_info_role_user">USER</string>
     <string name="change_password_submit">Update password</string>
-    <string name="change_password_success">Password changed</string>
+    <string name="change_password_confirm_title">Confirm password change</string>
+    <string name="change_password_confirm_message">Are you sure you want to change your password?</string>
+    <string name="change_password_success">Password changed successfully</string>
     <string name="change_password_hint">Create a new, strong password that you do not use for other websites.</string>
     <string name="favorites_empty">No favorite products yet</string>
     <string name="favorites_type_product">Product</string>

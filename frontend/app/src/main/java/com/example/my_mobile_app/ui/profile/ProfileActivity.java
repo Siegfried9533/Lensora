@@ -213,6 +213,7 @@ public class ProfileActivity extends BaseActivity {
                 () -> startActivity(new Intent(this, SettingsActivity.class)));
         addMenuRow(settingsMenu, R.drawable.ic_lock_outline, getString(R.string.auth_change_password),
                 () -> startActivity(new Intent(this, ChangePasswordActivity.class)));
+        addMenuRow(settingsMenu, R.drawable.ic_logout, getString(R.string.auth_logout), this::logout);
     }
 
     private void addMenuRow(LinearLayout parent, int iconRes, String label, Runnable action) {

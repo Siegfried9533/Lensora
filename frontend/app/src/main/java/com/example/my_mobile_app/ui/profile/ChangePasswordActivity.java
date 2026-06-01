@@ -13,6 +13,7 @@ import com.example.my_mobile_app.api.ApiResponse;
 import com.example.my_mobile_app.api.AuthService;
 import com.example.my_mobile_app.api.dto.ChangePasswordRequest;
 import com.example.my_mobile_app.ui.BaseActivity;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,6 +57,19 @@ public class ChangePasswordActivity extends BaseActivity {
             return;
         }
 
+        confirmChangePassword(oldPwd, newPwd);
+    }
+
+    private void confirmChangePassword(String oldPwd, String newPwd) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.change_password_confirm_title)
+                .setMessage(R.string.change_password_confirm_message)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_confirm, (dialog, which) -> changePassword(oldPwd, newPwd))
+                .show();
+    }
+
+    private void changePassword(String oldPwd, String newPwd) {
         showLoading();
         ApiClient.get(this).create(AuthService.class)
                 .changePassword(new ChangePasswordRequest(oldPwd, newPwd))
@@ -66,7 +80,7 @@ public class ChangePasswordActivity extends BaseActivity {
                         ApiResponse<Void> body = response.body();
                         if (body != null && body.success) {
                             showSuccess(getString(R.string.change_password_success));
-                            finish();
+                            edtNew.postDelayed(ChangePasswordActivity.this::finish, 900);
                         } else {
                             String msg = body != null && body.message != null
                                     ? body.message : getString(R.string.error_generic);

@@ -310,7 +310,9 @@
     <string name="personal_info_role">Vai trò</string>
     <string name="personal_info_role_user">NGƯỜI DÙNG</string>
     <string name="change_password_submit">Cập nhật mật khẩu</string>
-    <string name="change_password_success">Mật khẩu đã được thay đổi</string>
+    <string name="change_password_confirm_title">Xác nhận đổi mật khẩu</string>
+    <string name="change_password_confirm_message">Bạn có chắc chắn muốn đổi mật khẩu không?</string>
+    <string name="change_password_success">Đã đổi mật khẩu thành công</string>
     <string name="change_password_hint">Tạo mật khẩu mới, mạnh và không dùng cho các trang khác.</string>
     <string name="favorites_empty">Chưa có sản phẩm yêu thích</string>
     <string name="favorites_type_product">Sản phẩm</string>
