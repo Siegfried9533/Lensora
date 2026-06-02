@@ -89,8 +89,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected boolean requireLogin() {
         if (TokenManager.getToken(this) != null) return true;
         startActivity(new Intent(this, LoginActivity.class)
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        | Intent.FLAG_ACTIVITY_NEW_TASK));
+                .putExtra(LoginActivity.EXTRA_RETURN_HOME_ON_CANCEL, true));
         finish();
         return false;
     }

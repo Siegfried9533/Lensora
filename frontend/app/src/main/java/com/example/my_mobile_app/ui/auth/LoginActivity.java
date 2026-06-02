@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 
 import com.example.my_mobile_app.R;
@@ -31,6 +32,8 @@ import retrofit2.Response;
 /** Email/password login screen — mirrors frontend/app/(auth)/login.tsx. */
 public class LoginActivity extends BaseActivity {
 
+    public static final String EXTRA_RETURN_HOME_ON_CANCEL = "return_home_on_cancel";
+
     private TextInputEditText inputEmail;
     private TextInputEditText inputPassword;
     private MaterialButton btnLogin;
@@ -47,12 +50,18 @@ public class LoginActivity extends BaseActivity {
         TextView linkForgot = findViewById(R.id.link_forgot);
         TextView linkSignup = findViewById(R.id.link_signup);
 
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> closeWithoutLogin());
         btnLogin.setOnClickListener(v -> attemptLogin());
         linkForgot.setOnClickListener(v ->
                 startActivity(new Intent(this, ForgotPasswordActivity.class)));
         linkSignup.setOnClickListener(v ->
                 startActivity(new Intent(this, SignupActivity.class)));
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                closeWithoutLogin();
+            }
+        });
     }
 
     private void attemptLogin() {
@@ -118,6 +127,16 @@ public class LoginActivity extends BaseActivity {
         startActivity(new Intent(this, HomeActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finishAffinity();
+    }
+
+    private void closeWithoutLogin() {
+        if (getIntent().getBooleanExtra(EXTRA_RETURN_HOME_ON_CANCEL, false) || isTaskRoot()) {
+            startActivity(new Intent(this, HomeActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
+            return;
+        }
+        finish();
     }
 
     private void setBusy(boolean busy) {
