@@ -1,5 +1,6 @@
 package com.camerashop.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
@@ -23,5 +24,6 @@ public class AddressDTO {
     private String street;
     private String note;
     private String postalCode;
+    @JsonProperty("isDefault")
     private boolean isDefault;
 }
