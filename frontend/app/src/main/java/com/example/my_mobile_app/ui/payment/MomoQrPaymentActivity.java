@@ -214,8 +214,7 @@ public class MomoQrPaymentActivity extends BaseActivity {
                             showError(errorMessage(response));
                             return;
                         }
-                        showSuccess(getString(R.string.momo_qr_confirmed));
-                        goHome();
+                        goSuccess();
                     }
 
                     @Override
@@ -243,6 +242,19 @@ public class MomoQrPaymentActivity extends BaseActivity {
         } catch (Exception ignored) {
             return getString(R.string.error_confirm_momo_qr);
         }
+    }
+
+    private void goSuccess() {
+        Intent i = new Intent(this, PaymentSuccessActivity.class);
+        if (!TextUtils.isEmpty(orderId)) {
+            i.putExtra(PaymentSuccessActivity.EXTRA_ORDER_ID, orderId);
+        }
+        if (!TextUtils.isEmpty(rentalId)) {
+            i.putExtra(PaymentSuccessActivity.EXTRA_RENTAL_ID, rentalId);
+        }
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
+        finish();
     }
 
     private void goHome() {
