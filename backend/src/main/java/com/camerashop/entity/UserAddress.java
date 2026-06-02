@@ -39,6 +39,7 @@ public class UserAddress extends BaseEntity {
     private String wardName;
     private String street;
     private String note;
+    private String postalCode;
 
     @Builder.Default
     @Column(name = "is_default", nullable = false)

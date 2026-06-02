@@ -98,16 +98,13 @@ public class AddressBookActivity extends BaseActivity {
         for (Address address : addresses) {
             View row = inflater.inflate(R.layout.item_address, listContainer, false);
 
-            ((TextView) row.findViewById(R.id.txt_address_recipient))
-                    .setText(getString(R.string.address_recipient_line,
-                            safe(address.recipientName), safe(address.recipientPhone)));
+            String recipientLine = getString(R.string.address_recipient_line,
+                    safe(address.recipientName), safe(address.recipientPhone));
+            if (address.isDefault) {
+                recipientLine += getString(R.string.address_default_suffix);
+            }
+            ((TextView) row.findViewById(R.id.txt_address_recipient)).setText(recipientLine);
             ((TextView) row.findViewById(R.id.txt_address_detail)).setText(address.fullAddress());
-            row.findViewById(R.id.badge_default)
-                    .setVisibility(address.isDefault ? View.VISIBLE : View.GONE);
-
-            MaterialButton btnDefault = row.findViewById(R.id.btn_address_default);
-            btnDefault.setVisibility(address.isDefault ? View.GONE : View.VISIBLE);
-            btnDefault.setOnClickListener(v -> setDefault(address));
 
             row.findViewById(R.id.btn_address_edit).setOnClickListener(v -> openEdit(address));
             row.findViewById(R.id.btn_address_delete).setOnClickListener(v -> confirmDelete(address));
@@ -145,6 +142,7 @@ public class AddressBookActivity extends BaseActivity {
         i.putExtra(AddressFormActivity.EXTRA_WARD_CODE, a.wardCode);
         i.putExtra(AddressFormActivity.EXTRA_STREET, a.street);
         i.putExtra(AddressFormActivity.EXTRA_NOTE, a.note);
+        i.putExtra(AddressFormActivity.EXTRA_POSTAL_CODE, a.postalCode);
         i.putExtra(AddressFormActivity.EXTRA_IS_DEFAULT, a.isDefault);
         startActivity(i);
     }

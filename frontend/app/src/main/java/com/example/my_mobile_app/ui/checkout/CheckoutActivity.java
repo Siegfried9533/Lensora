@@ -115,8 +115,10 @@ public class CheckoutActivity extends BaseActivity {
     // spinners are bypassed at checkout (the backend still computes the shipping fee).
     private static final int REQ_PICK_ADDRESS = 1001;
     private boolean usePickedAddress;
+    private String pickedRecipientName, pickedRecipientPhone;
     private String pickedDistrictId, pickedWardCode, pickedFullAddress;
-    private TextView txtSelectedAddress;
+    private View cardSelectedAddress;
+    private TextView txtSelectedRecipient, txtSelectedDetail;
     private com.google.android.material.button.MaterialButton btnChooseSavedAddress;
 
     @Override
@@ -157,7 +159,9 @@ public class CheckoutActivity extends BaseActivity {
         configurePaymentOptions();
         setupAddressSpinners();
 
-        txtSelectedAddress = findViewById(R.id.txt_selected_address);
+        cardSelectedAddress = findViewById(R.id.card_selected_address);
+        txtSelectedRecipient = findViewById(R.id.txt_selected_recipient);
+        txtSelectedDetail = findViewById(R.id.txt_selected_detail);
         btnChooseSavedAddress = findViewById(R.id.btn_choose_saved_address);
         btnChooseSavedAddress.setOnClickListener(v -> {
             Intent i = new Intent(this, AddressBookActivity.class);
@@ -401,57 +405,15 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void placeOrder() {
-        String recipientName = textOf(etRecipientName);
-        String recipientPhone = textOf(etRecipientPhone);
-        String address;
-        String toDistrictId;
-        String toWardCode;
-        if (usePickedAddress) {
-            if (TextUtils.isEmpty(recipientName)) {
-                showError(getString(R.string.error_enter_recipient_name));
-                return;
-            }
-            if (TextUtils.isEmpty(recipientPhone)) {
-                showError(getString(R.string.error_enter_recipient_phone));
-                return;
-            }
-            address = pickedFullAddress;
-            toDistrictId = pickedDistrictId;
-            toWardCode = pickedWardCode;
-        } else {
-            if (TextUtils.isEmpty(recipientName)) {
-                showError(getString(R.string.error_enter_recipient_name));
-                return;
-            }
-            if (TextUtils.isEmpty(recipientPhone)) {
-                showError(getString(R.string.error_enter_recipient_phone));
-                return;
-            }
-            Province selectedProvince = selectedProvince();
-            if (selectedProvince == null) {
-                showError(getString(R.string.error_select_province));
-                return;
-            }
-            District selectedDistrict = selectedDistrict();
-            if (selectedDistrict == null) {
-                showError(getString(R.string.error_select_district));
-                return;
-            }
-            Ward selectedWard = selectedWard();
-            if (selectedWard == null) {
-                showError(getString(R.string.error_select_ward));
-                return;
-            }
-            String street = textOf(etStreet);
-            if (TextUtils.isEmpty(street)) {
-                showError(getString(R.string.error_enter_street));
-                return;
-            }
-            address = buildAddress(street, selectedWard.wardName,
-                    selectedDistrict.districtName, selectedProvince.provinceName);
-            toDistrictId = selectedDistrict.districtId;
-            toWardCode = selectedWard.wardCode;
+        if (!usePickedAddress) {
+            showError(getString(R.string.error_select_saved_address));
+            return;
         }
+        String recipientName = pickedRecipientName;
+        String recipientPhone = pickedRecipientPhone;
+        String address = pickedFullAddress;
+        String toDistrictId = pickedDistrictId;
+        String toWardCode = pickedWardCode;
         // Rentals are pay-first: COD is not offered, so always pay online.
         boolean useMomo = isRentalCheckout()
                 || rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
@@ -902,24 +864,25 @@ public class CheckoutActivity extends BaseActivity {
         if (TextUtils.isEmpty(fullAddress) || TextUtils.isEmpty(districtId) || TextUtils.isEmpty(wardCode)) {
             return;
         }
-        if (recipientName != null) etRecipientName.setText(recipientName);
-        if (recipientPhone != null) etRecipientPhone.setText(recipientPhone);
-        if (street != null) etStreet.setText(street);
-        if (note != null) etNote.setText(note);
+        pickedRecipientName = recipientName;
+        pickedRecipientPhone = recipientPhone;
         pickedDistrictId = districtId;
         pickedWardCode = wardCode;
         pickedFullAddress = fullAddress;
         usePickedAddress = true;
-        if (txtSelectedAddress != null) {
-            txtSelectedAddress.setText(getString(R.string.address_selected) + ": " + fullAddress);
-            txtSelectedAddress.setVisibility(View.VISIBLE);
+        if (cardSelectedAddress != null) {
+            txtSelectedRecipient.setText(getString(R.string.address_recipient_line,
+                    recipientName == null ? "" : recipientName,
+                    recipientPhone == null ? "" : recipientPhone));
+            txtSelectedDetail.setText(fullAddress);
+            cardSelectedAddress.setVisibility(View.VISIBLE);
         }
     }
 
     private void clearPickedAddress() {
         if (!usePickedAddress) return;
         usePickedAddress = false;
-        if (txtSelectedAddress != null) txtSelectedAddress.setVisibility(View.GONE);
+        if (cardSelectedAddress != null) cardSelectedAddress.setVisibility(View.GONE);
     }
 
     @Override

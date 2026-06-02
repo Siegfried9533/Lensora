@@ -454,4 +454,6 @@
     <string name="profile_address_book">Sổ địa chỉ</string>
     <string name="error_load_addresses">Không tải được danh sách địa chỉ</string>
     <string name="error_save_address">Không lưu được địa chỉ</string>
+    <string name="address_default_suffix"> (Mặc định)</string>
+    <string name="error_select_saved_address">Vui lòng chọn địa chỉ giao hàng</string>
 </resources>

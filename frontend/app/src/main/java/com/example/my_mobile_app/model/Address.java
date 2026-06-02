@@ -13,6 +13,7 @@ public class Address {
     public String wardName;
     public String street;
     public String note;
+    public String postalCode;
     public boolean isDefault;
 
     public Address() {}

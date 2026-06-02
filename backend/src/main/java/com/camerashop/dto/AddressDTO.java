@@ -22,5 +22,6 @@ public class AddressDTO {
     private String wardName;
     private String street;
     private String note;
+    private String postalCode;
     private boolean isDefault;
 }

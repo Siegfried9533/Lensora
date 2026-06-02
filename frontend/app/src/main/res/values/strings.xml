@@ -454,4 +454,6 @@
     <string name="profile_address_book">Address book</string>
     <string name="error_load_addresses">Could not load addresses</string>
     <string name="error_save_address">Could not save address</string>
+    <string name="address_default_suffix"> (Default)</string>
+    <string name="error_select_saved_address">Please choose a shipping address</string>
 </resources>

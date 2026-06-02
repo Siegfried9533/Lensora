@@ -51,6 +51,7 @@ public class AddressService {
                 .wardName(str(body, "wardName"))
                 .street(str(body, "street"))
                 .note(str(body, "note"))
+                .postalCode(str(body, "postalCode"))
                 .build();
 
         List<UserAddress> existing = addressRepository.findByUserId(user.getUserId());
@@ -80,6 +81,7 @@ public class AddressService {
         address.setWardName(str(body, "wardName"));
         address.setStreet(str(body, "street"));
         address.setNote(str(body, "note"));
+        address.setPostalCode(str(body, "postalCode"));
 
         if (bool(body, "isDefault") && !address.isDefault()) {
             clearDefault(addressRepository.findByUserId(user.getUserId()));
@@ -183,6 +185,7 @@ public class AddressService {
                 .wardName(a.getWardName())
                 .street(a.getStreet())
                 .note(a.getNote())
+                .postalCode(a.getPostalCode())
                 .isDefault(a.isDefault())
                 .build();
     }

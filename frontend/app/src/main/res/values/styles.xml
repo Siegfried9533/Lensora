@@ -135,4 +135,24 @@
         <item name="android:textColor">@color/text_muted</item>
         <item name="android:textSize">12sp</item>
     </style>
+    <style name="AddressInput">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingHorizontal">12dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:importantForAutofill">no</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_muted</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="AddressSpinner">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:paddingHorizontal">8dp</item>
+    </style>
 </resources>

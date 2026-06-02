@@ -48,9 +48,10 @@ public class AddressFormActivity extends BaseActivity {
     public static final String EXTRA_WARD_CODE = "ward_code";
     public static final String EXTRA_STREET = "street";
     public static final String EXTRA_NOTE = "note";
+    public static final String EXTRA_POSTAL_CODE = "postal_code";
     public static final String EXTRA_IS_DEFAULT = "is_default";
 
-    private EditText etRecipientName, etRecipientPhone, etStreet, etNote;
+    private EditText etRecipientName, etRecipientPhone, etStreet, etNote, etPostalCode;
     private Spinner spinnerProvince, spinnerDistrict, spinnerWard;
     private CheckBox cbDefault;
     private MaterialButton btnSave;
@@ -75,6 +76,7 @@ public class AddressFormActivity extends BaseActivity {
         spinnerDistrict = findViewById(R.id.spinner_district);
         spinnerWard = findViewById(R.id.spinner_ward);
         etStreet = findViewById(R.id.et_street);
+        etPostalCode = findViewById(R.id.et_postal_code);
         etNote = findViewById(R.id.et_note);
         cbDefault = findViewById(R.id.cb_default);
         btnSave = findViewById(R.id.btn_save_address);
@@ -88,6 +90,7 @@ public class AddressFormActivity extends BaseActivity {
             etRecipientName.setText(getIntent().getStringExtra(EXTRA_RECIPIENT_NAME));
             etRecipientPhone.setText(getIntent().getStringExtra(EXTRA_RECIPIENT_PHONE));
             etStreet.setText(getIntent().getStringExtra(EXTRA_STREET));
+            etPostalCode.setText(getIntent().getStringExtra(EXTRA_POSTAL_CODE));
             etNote.setText(getIntent().getStringExtra(EXTRA_NOTE));
             cbDefault.setChecked(getIntent().getBooleanExtra(EXTRA_IS_DEFAULT, false));
             pendingProvinceId = getIntent().getStringExtra(EXTRA_PROVINCE_ID);
@@ -304,6 +307,7 @@ public class AddressFormActivity extends BaseActivity {
         body.put("wardCode", ward.wardCode);
         body.put("wardName", ward.wardName);
         body.put("street", street);
+        body.put("postalCode", textOf(etPostalCode));
         body.put("note", textOf(etNote));
         body.put("isDefault", cbDefault.isChecked());
 
