@@ -165,7 +165,7 @@ public class ProfileActivity extends BaseActivity {
                                                       @NonNull Response<ApiResponse<List<Rental>>> response) {
                         ApiResponse<List<Rental>> body = response.body();
                         int count = body != null && body.success && body.data != null
-                                ? countNonCancelledRentals(body.data)
+                                ? countMyEquipmentRentals(body.data)
                                 : 0;
                         txtRentalCount.setText(String.valueOf(count));
                     }
@@ -265,20 +265,29 @@ public class ProfileActivity extends BaseActivity {
         return status != null && "DELIVERED".equalsIgnoreCase(status.trim());
     }
 
-    private static int countNonCancelledRentals(List<Rental> rentals) {
+    private static int countMyEquipmentRentals(List<Rental> rentals) {
         int count = 0;
         for (Rental rental : rentals) {
-            if (rental != null && !isCancelled(rental.status)) {
+            if (isMyEquipmentRental(rental)) {
                 count++;
             }
         }
         return count;
     }
 
-    private static boolean isCancelled(String status) {
+    private static boolean isMyEquipmentRental(Rental rental) {
+        if (rental == null) return false;
+        return isDeliveredRentalStatus(rental.status) && isSuccessfulPayment(rental.paymentStatus);
+    }
+
+    private static boolean isDeliveredRentalStatus(String status) {
         if (status == null) return false;
         String normalized = status.trim();
-        return "CANCELLED".equalsIgnoreCase(normalized)
-                || "CANCELED".equalsIgnoreCase(normalized);
+        return "ACTIVE".equalsIgnoreCase(normalized)
+                || "DELIVERED".equalsIgnoreCase(normalized);
+    }
+
+    private static boolean isSuccessfulPayment(String paymentStatus) {
+        return paymentStatus != null && "SUCCESS".equalsIgnoreCase(paymentStatus.trim());
     }
 }

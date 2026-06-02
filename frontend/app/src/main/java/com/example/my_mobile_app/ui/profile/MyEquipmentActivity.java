@@ -60,7 +60,11 @@ public class MyEquipmentActivity extends BaseActivity {
                         items.clear();
                         ApiResponse<List<Rental>> body = response.body();
                         if (body != null && body.success && body.data != null) {
-                            items.addAll(body.data);
+                            for (Rental rental : body.data) {
+                                if (isMyEquipmentRental(rental)) {
+                                    items.add(rental);
+                                }
+                            }
                         }
                         txtEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
                         adapter.notifyDataSetChanged();
@@ -77,5 +81,21 @@ public class MyEquipmentActivity extends BaseActivity {
         Intent i = new Intent(this, RentalDetailActivity.class);
         i.putExtra(RentalDetailActivity.EXTRA_RENTAL_ID, r.rentalId);
         startActivity(i);
+    }
+
+    private static boolean isMyEquipmentRental(Rental rental) {
+        if (rental == null) return false;
+        return isDeliveredRentalStatus(rental.status) && isSuccessfulPayment(rental.paymentStatus);
+    }
+
+    private static boolean isDeliveredRentalStatus(String status) {
+        if (status == null) return false;
+        String normalized = status.trim();
+        return "ACTIVE".equalsIgnoreCase(normalized)
+                || "DELIVERED".equalsIgnoreCase(normalized);
+    }
+
+    private static boolean isSuccessfulPayment(String paymentStatus) {
+        return paymentStatus != null && "SUCCESS".equalsIgnoreCase(paymentStatus.trim());
     }
 }
