@@ -168,6 +168,14 @@
     <string name="payment_success_body">Đơn hàng của bạn đã được tiếp nhận. Cảm ơn bạn đã mua sắm!</string>
     <string name="payment_failed_body">Giao dịch không thành công. Vui lòng thử lại.</string>
     <string name="payment_processing_hint">Vui lòng chờ trong giây lát. Bạn có thể quay lại app sau khi hoàn tất thanh toán.</string>
+    <string name="payment_open_momo">Mở thanh toán MoMo</string>
+    <string name="momo_qr_title">Thanh toán QR MoMo</string>
+    <string name="momo_qr_scan_hint">Quét QR bằng MoMo, sau đó xác nhận khi đã chuyển khoản xong.</string>
+    <string name="momo_qr_confirm">Tôi đã thanh toán</string>
+    <string name="momo_qr_confirmed">Đã xác nhận thanh toán</string>
+    <string name="momo_qr_account_format">%1$s • %2$s</string>
+    <string name="momo_qr_account_not_configured">Chưa cấu hình tài khoản MoMo</string>
+    <string name="common_back">Quay lại</string>
     <string name="error_missing_transaction_code">Thiếu mã giao dịch</string>
     <string name="error_payment_timeout">Hết thời gian chờ thanh toán</string>
 
@@ -284,6 +292,8 @@
     <string name="error_rental_start_in_past">Ngày thuê không được ở quá khứ</string>
     <string name="error_create_momo">Không tạo được thanh toán MoMo</string>
     <string name="error_create_momo_connection">Lỗi kết nối khi tạo thanh toán MoMo</string>
+    <string name="error_confirm_momo_qr">Không thể xác nhận thanh toán QR MoMo</string>
+    <string name="error_momo_qr_missing">Không có dữ liệu QR MoMo hợp lệ</string>
     <string name="error_clear_cart">Không thể xoá giỏ hàng</string>
     <string name="error_update_quantity">Lỗi cập nhật số lượng</string>
     <string name="error_delete_item">Không thể xoá</string>

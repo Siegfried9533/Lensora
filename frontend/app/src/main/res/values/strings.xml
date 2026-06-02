@@ -168,6 +168,14 @@
     <string name="payment_success_body">Your order has been received. Thank you for shopping with us!</string>
     <string name="payment_failed_body">The transaction was not successful. Please try again.</string>
     <string name="payment_processing_hint">Please wait a moment. You can return to the app after completing payment.</string>
+    <string name="payment_open_momo">Open MoMo payment</string>
+    <string name="momo_qr_title">MoMo QR payment</string>
+    <string name="momo_qr_scan_hint">Scan this QR with MoMo, then confirm after the transfer is complete.</string>
+    <string name="momo_qr_confirm">I have paid</string>
+    <string name="momo_qr_confirmed">Payment confirmed</string>
+    <string name="momo_qr_account_format">%1$s • %2$s</string>
+    <string name="momo_qr_account_not_configured">MoMo account not configured</string>
+    <string name="common_back">Back</string>
     <string name="error_missing_transaction_code">Missing transaction code</string>
     <string name="error_payment_timeout">Payment timed out</string>
 
@@ -284,6 +292,8 @@
     <string name="error_rental_start_in_past">Start date cannot be in the past</string>
     <string name="error_create_momo">Unable to create MoMo payment</string>
     <string name="error_create_momo_connection">Connection error while creating MoMo payment</string>
+    <string name="error_confirm_momo_qr">Unable to confirm MoMo QR payment</string>
+    <string name="error_momo_qr_missing">No valid MoMo QR data is available</string>
     <string name="error_clear_cart">Unable to clear cart</string>
     <string name="error_update_quantity">Unable to update quantity</string>
     <string name="error_delete_item">Unable to delete</string>

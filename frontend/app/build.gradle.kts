@@ -11,6 +11,9 @@ val apiBaseUrl = localProps.getProperty(
     "http://10.0.2.2:8080/api/"
 )
 
+fun String.asBuildConfigString(): String =
+    "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
 android {
     namespace = "com.example.my_mobile_app"
     compileSdk = 36
@@ -27,6 +30,10 @@ android {
         // BASE_URL đọc từ local.properties (không commit), fallback về emulator loopback
         val baseUrl = localProps.getProperty("api.base.url", "http://10.0.2.2:8080/api/")
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        buildConfigField("String", "MOMO_QR_PAYLOAD", localProps.getProperty("momo.qr.payload", "").asBuildConfigString())
+        buildConfigField("String", "MOMO_QR_IMAGE_URL", localProps.getProperty("momo.qr.image.url", "").asBuildConfigString())
+        buildConfigField("String", "MOMO_QR_ACCOUNT_NAME", localProps.getProperty("momo.qr.account.name", "Lensora Shop").asBuildConfigString())
+        buildConfigField("String", "MOMO_QR_ACCOUNT_PHONE", localProps.getProperty("momo.qr.account.phone", "").asBuildConfigString())
     }
 
     buildFeatures {
@@ -60,6 +67,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.google.zxing:core:3.5.3")
 
     // Image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")

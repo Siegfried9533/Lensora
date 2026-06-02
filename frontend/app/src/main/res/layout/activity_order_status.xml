@@ -30,4 +30,12 @@
         android:text="@string/payment_processing_hint"
         android:textColor="@color/text_muted"
         android:textSize="13sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_open_payment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/payment_open_momo"
+        android:visibility="gone" />
 </LinearLayout>

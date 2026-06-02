@@ -64,6 +64,9 @@
             android:name=".ui.payment.PaymentFailedActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.payment.MomoQrPaymentActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.payment.OrderStatusActivity"
             android:exported="false" />
         <activity

@@ -70,7 +70,7 @@ public class MoMoService {
      * @param requestType Loai phuong thuc thanh toan
      * @return URL thanh toan MoMo
      */
-    public String createPaymentUrl(String orderId, long amount, String orderInfo, RequestType requestType) {
+    public Map<String, String> createPayment(String orderId, long amount, String orderInfo, RequestType requestType) {
         try {
             validateMerchantConfig();
 
@@ -124,17 +124,34 @@ public class MoMoService {
                 throw new RuntimeException("MoMo trả về resultCode=" + resultCode + ": " + message);
             }
 
-            // Kiem tra thanh cong
-            if (jsonResponse.has("payUrl")) {
-                return jsonResponse.get("payUrl").asText();
-            } else {
+            Map<String, String> result = new HashMap<>();
+            result.put("orderId", orderId);
+            result.put("requestId", requestId);
+            copyTextField(jsonResponse, result, "payUrl");
+            copyTextField(jsonResponse, result, "deeplink");
+            copyTextField(jsonResponse, result, "qrCodeUrl");
+
+            // qrCodeUrl is MoMo's QR payload data. payUrl/deeplink are useful fallbacks
+            // for opening the payment page from the app.
+            if (!result.containsKey("payUrl") && !result.containsKey("deeplink")
+                    && !result.containsKey("qrCodeUrl")) {
                 String message = jsonResponse.has("message") ? jsonResponse.get("message").asText() : "Unknown error";
                 throw new RuntimeException("Lỗi API MoMo: " + message);
             }
+            return result;
 
         } catch (Exception e) {
             throw new RuntimeException("Tạo URL thanh toán MoMo thất bại: " + e.getMessage(), e);
         }
+    }
+
+    public String createPaymentUrl(String orderId, long amount, String orderInfo, RequestType requestType) {
+        Map<String, String> payment = createPayment(orderId, amount, orderInfo, requestType);
+        String payUrl = payment.get("payUrl");
+        if (payUrl == null || payUrl.isBlank()) {
+            throw new RuntimeException("MoMo không trả về payUrl");
+        }
+        return payUrl;
     }
 
     /**
@@ -142,6 +159,10 @@ public class MoMoService {
      */
     public String createPaymentUrl(String orderId, long amount, String orderInfo) {
         return createPaymentUrl(orderId, amount, orderInfo, RequestType.CAPTURE_WALLET);
+    }
+
+    public Map<String, String> createPayment(String orderId, long amount, String orderInfo) {
+        return createPayment(orderId, amount, orderInfo, RequestType.CAPTURE_WALLET);
     }
 
     /**
@@ -414,19 +435,33 @@ public class MoMoService {
         }
     }
 
+    private void copyTextField(JsonNode source, Map<String, String> target, String fieldName) {
+        if (!source.hasNonNull(fieldName)) {
+            return;
+        }
+        String value = source.get(fieldName).asText();
+        if (value != null && !value.isBlank()) {
+            target.put(fieldName, value);
+        }
+    }
+
     private void validateMerchantConfig() {
-        if (partnerCode == null || partnerCode.isBlank()) {
+        if (isMissingOrPlaceholder(partnerCode)) {
             throw new IllegalStateException("MoMo partnerCode is missing");
         }
-        if (accessKey == null || accessKey.isBlank()) {
+        if (isMissingOrPlaceholder(accessKey)) {
             throw new IllegalStateException("MoMo accessKey is missing");
         }
-        if (secretKey == null || secretKey.isBlank()) {
+        if (isMissingOrPlaceholder(secretKey)) {
             throw new IllegalStateException("MoMo secretKey is missing");
         }
         if (momoUrl == null || momoUrl.isBlank()) {
             throw new IllegalStateException("MoMo url is missing");
         }
+    }
+
+    private boolean isMissingOrPlaceholder(String value) {
+        return value == null || value.isBlank() || value.trim().startsWith("your_");
     }
 
     private String momoEndpoint(String endpoint) {

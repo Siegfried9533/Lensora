@@ -49,4 +49,8 @@ public interface PaymentService {
     /** Body: {orderId, requestId}. */
     @POST("payment/momo/query")
     Call<ApiResponse<Map<String, Object>>> queryMoMoTransaction(@Body Map<String, String> body);
+
+    /** Test/manual QR flow. Body: {orderCode}. */
+    @POST("payment/momo/manual-confirm")
+    Call<ApiResponse<PaymentResult>> confirmManualMoMoPayment(@Body Map<String, String> body);
 }

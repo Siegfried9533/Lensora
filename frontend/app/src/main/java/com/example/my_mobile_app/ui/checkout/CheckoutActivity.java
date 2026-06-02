@@ -1,7 +1,6 @@
 package com.example.my_mobile_app.ui.checkout;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,7 +34,7 @@ import com.example.my_mobile_app.model.Province;
 import com.example.my_mobile_app.model.Rental;
 import com.example.my_mobile_app.model.Ward;
 import com.example.my_mobile_app.ui.BaseActivity;
-import com.example.my_mobile_app.ui.payment.OrderStatusActivity;
+import com.example.my_mobile_app.ui.payment.MomoQrPaymentActivity;
 import com.example.my_mobile_app.ui.payment.PaymentSuccessActivity;
 import com.example.my_mobile_app.util.PriceFormatter;
 import com.example.my_mobile_app.util.TextNormalizer;
@@ -43,6 +42,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,11 +57,12 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import okhttp3.ResponseBody;
 
 /**
  * Checkout screen. Customers enter their shipping address directly. Submit
  * calls {@code createOrder()}, then either routes to PaymentSuccess (COD) or
- * opens MoMo payUrl + OrderStatusActivity.
+ * creates a MoMo payment and opens the in-app MoMo QR payment screen.
  *
  * Note: cart ASSET items cannot be ordered via this flow because the backend
  * {@code CreateOrderRequest.Item} only carries {@code productId}. ASSET items
@@ -687,25 +689,11 @@ public class CheckoutActivity extends BaseActivity {
                         btnPlaceOrder.setEnabled(true);
                         ApiResponse<Rental> b = response.body();
                         if (b == null || !b.success || b.data == null) {
-                            showError(b != null && b.message != null
-                                    ? b.message
-                                    : getString(R.string.error_place_rental_failed));
+                            showError(errorMessage(response, R.string.error_place_rental_failed));
                             return;
                         }
                         Rental rental = b.data;
-                        // Backend tạo đơn thuê + URL thanh toán MoMo trong cùng 1 lệnh: nếu thanh toán
-                        // lỗi, backend đã xóa đơn thuê và trả lỗi (xử lý ở nhánh !success ở trên), nên
-                        // tới đây luôn có payUrl. Mở MoMo rồi theo dõi trạng thái thanh toán.
-                        if (rental.payUrl == null || rental.payUrl.isEmpty()) {
-                            showError(getString(R.string.error_create_momo));
-                            return;
-                        }
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(rental.payUrl)));
-                        Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, rental.rentalId);
-                        i.putExtra(OrderStatusActivity.EXTRA_RENTAL_ID, rental.rentalId);
-                        startActivity(i);
-                        finish();
+                        createMomoRentalPayment(rental);
                     }
 
                     @Override
@@ -718,10 +706,14 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void createMomoPayment(Order order) {
-        double total = subtotal + shippingFee;
+        if (order == null || TextUtils.isEmpty(order.orderId)) {
+            showError(getString(R.string.error_missing_transaction_code));
+            return;
+        }
         CreateMoMoPaymentRequest req = new CreateMoMoPaymentRequest(
-                order.orderId, total, getString(R.string.checkout_momo_order_info, order.orderId));
+                order.orderId, order.totalAmount, getString(R.string.checkout_momo_order_info, order.orderId));
         req.requestType = "captureWallet";
+
         showLoading();
         ApiClient.get(this).create(PaymentService.class).createMoMoPayment(req)
                 .enqueue(new Callback<ApiResponse<Map<String, String>>>() {
@@ -730,22 +722,12 @@ public class CheckoutActivity extends BaseActivity {
                                            @NonNull Response<ApiResponse<Map<String, String>>> response) {
                         hideLoading();
                         ApiResponse<Map<String, String>> b = response.body();
-                        if (b == null || !b.success || b.data == null) {
-                            showError(getString(R.string.error_create_momo));
+                        if (b == null || !b.success || b.data == null || !hasMomoPaymentTarget(b.data)) {
+                            showError(errorMessage(response, R.string.error_create_momo));
                             return;
                         }
-                        String payUrl = b.data.get("payUrl");
-                        String orderCode = b.data.get("orderId");
-                        if (orderCode == null)
-                            orderCode = order.orderId;
-                        if (payUrl != null && !payUrl.isEmpty()) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(payUrl)));
-                        }
-                        Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, orderCode);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_ID, order.orderId);
-                        startActivity(i);
-                        finish();
+                        String orderCode = firstNonEmpty(b.data.get("orderId"), order.orderId);
+                        openMomoQrPayment(orderCode, order.orderId, null, order.totalAmount, b.data);
                     }
 
                     @Override
@@ -754,6 +736,93 @@ public class CheckoutActivity extends BaseActivity {
                         showError(getString(R.string.error_create_momo_connection));
                     }
                 });
+    }
+
+    private void createMomoRentalPayment(Rental rental) {
+        if (rental == null || TextUtils.isEmpty(rental.rentalId)) {
+            showError(getString(R.string.error_missing_transaction_code));
+            return;
+        }
+        Map<String, String> body = new HashMap<>();
+        body.put("rentalId", rental.rentalId);
+        body.put("orderInfo", getString(R.string.checkout_momo_rental_info, rental.rentalId));
+
+        showLoading();
+        ApiClient.get(this).create(PaymentService.class).createMoMoPaymentRental(body)
+                .enqueue(new Callback<ApiResponse<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Map<String, String>>> call,
+                                           @NonNull Response<ApiResponse<Map<String, String>>> response) {
+                        hideLoading();
+                        ApiResponse<Map<String, String>> b = response.body();
+                        if (b == null || !b.success || b.data == null || !hasMomoPaymentTarget(b.data)) {
+                            showError(errorMessage(response, R.string.error_create_momo));
+                            return;
+                        }
+                        double total = rental.totalRentFee + rental.depositFee
+                                + (rental.shippingFee == null ? 0 : rental.shippingFee);
+                        String orderCode = firstNonEmpty(b.data.get("rentalId"), rental.rentalId);
+                        openMomoQrPayment(orderCode, null, rental.rentalId, total, b.data);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Throwable t) {
+                        hideLoading();
+                        showError(getString(R.string.error_create_momo_connection));
+                    }
+                });
+    }
+
+    private void openMomoQrPayment(String orderCode, String orderId, String rentalId,
+                                   double amount, Map<String, String> momoPayment) {
+        Intent i = new Intent(this, MomoQrPaymentActivity.class);
+        i.putExtra(MomoQrPaymentActivity.EXTRA_ORDER_CODE, orderCode);
+        if (!TextUtils.isEmpty(orderId)) {
+            i.putExtra(MomoQrPaymentActivity.EXTRA_ORDER_ID, orderId);
+        }
+        if (!TextUtils.isEmpty(rentalId)) {
+            i.putExtra(MomoQrPaymentActivity.EXTRA_RENTAL_ID, rentalId);
+        }
+        i.putExtra(MomoQrPaymentActivity.EXTRA_AMOUNT, amount);
+        putExtraIfPresent(i, MomoQrPaymentActivity.EXTRA_QR_CODE_URL, momoPayment.get("qrCodeUrl"));
+        putExtraIfPresent(i, MomoQrPaymentActivity.EXTRA_PAY_URL, momoPayment.get("payUrl"));
+        putExtraIfPresent(i, MomoQrPaymentActivity.EXTRA_DEEPLINK, momoPayment.get("deeplink"));
+        startActivity(i);
+        finish();
+    }
+
+    private boolean hasMomoPaymentTarget(Map<String, String> data) {
+        return data != null && (!TextUtils.isEmpty(data.get("qrCodeUrl"))
+                || !TextUtils.isEmpty(data.get("deeplink"))
+                || !TextUtils.isEmpty(data.get("payUrl")));
+    }
+
+    private String firstNonEmpty(String preferred, String fallback) {
+        return TextUtils.isEmpty(preferred) ? fallback : preferred;
+    }
+
+    private void putExtraIfPresent(Intent intent, String key, String value) {
+        if (!TextUtils.isEmpty(value)) {
+            intent.putExtra(key, value);
+        }
+    }
+
+    private String errorMessage(Response<? extends ApiResponse<?>> response, int fallbackResId) {
+        ApiResponse<?> body = response.body();
+        if (body != null && body.message != null && !body.message.isEmpty()) {
+            return body.message;
+        }
+        ResponseBody errorBody = response.errorBody();
+        if (errorBody == null) {
+            return getString(fallbackResId);
+        }
+        try {
+            JSONObject obj = new JSONObject(errorBody.string());
+            String message = obj.optString("message");
+            return message.isEmpty() ? getString(fallbackResId) : message;
+        } catch (Exception ignored) {
+            return getString(fallbackResId);
+        }
     }
 
 }

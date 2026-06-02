@@ -15,6 +15,8 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -47,6 +49,66 @@ public class PaymentController {
 
     @Value("${app.frontend-url:http://localhost:8081}")
     private String frontendUrl;
+
+    /**
+     * Xác nhận thanh toán QR MoMo thủ công cho môi trường demo/test.
+     * QR tài khoản cá nhân không có IPN/callback như cổng MoMo merchant, nên app
+     * dùng endpoint này sau khi người dùng bấm "Tôi đã thanh toán".
+     */
+    @PostMapping("/momo/manual-confirm")
+    public ResponseEntity<ApiResponse> confirmManualMomoPayment(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, Object> body) {
+        try {
+            String orderCode = body.get("orderCode") == null ? "" : String.valueOf(body.get("orderCode"));
+            if (orderCode.isBlank()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Thiếu mã đơn thanh toán"));
+            }
+
+            Optional<Order> orderOpt = orderRepository.findById(orderCode);
+            if (orderOpt.isPresent()) {
+                Order order = orderOpt.get();
+                if (!order.getUser().getEmail().equals(userDetails.getUsername())) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền xác nhận đơn này"));
+                }
+                PaymentTransaction transaction = saveManualMomoTransaction(
+                        orderCode, order.getTotalAmount(), order, null);
+                order.setPaymentStatus("SUCCESS");
+                if (order.getStatus() == Order.OrderStatus.PENDING) {
+                    order.setStatus(Order.OrderStatus.SHIPPED);
+                }
+                orderRepository.save(order);
+                return ResponseEntity.ok(ApiResponse.success(transactionResult(transaction)));
+            }
+
+            Optional<Rental> rentalOpt = rentalRepository.findById(orderCode);
+            if (rentalOpt.isPresent()) {
+                Rental rental = rentalOpt.get();
+                if (!rental.getUser().getEmail().equals(userDetails.getUsername())) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Không có quyền xác nhận đơn thuê này"));
+                }
+                if (rental.getStatus() == Rental.RentalStatus.CANCELLED
+                        && !"SUCCESS".equals(rental.getPaymentStatus())) {
+                    return ResponseEntity.badRequest().body(ApiResponse.error("Đơn thuê đã hết hạn hoặc đã bị hủy"));
+                }
+
+                long totalAmount = rental.getTotalRentFee() + rental.getDepositFee()
+                        + (rental.getShippingFee() != null ? rental.getShippingFee() : 0L);
+                PaymentTransaction transaction = saveManualMomoTransaction(orderCode, totalAmount, null, rental);
+                if (rental.getStatus() == Rental.RentalStatus.PENDING) {
+                    rental.setStatus(Rental.RentalStatus.ACTIVE);
+                }
+                rental.setPaymentStatus("SUCCESS");
+                rentalRepository.save(rental);
+                return ResponseEntity.ok(ApiResponse.success(transactionResult(transaction)));
+            }
+
+            return ResponseEntity.badRequest().body(ApiResponse.error("Không tìm thấy đơn thanh toán"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Xác nhận thanh toán thất bại: " + e.getMessage()));
+        }
+    }
 
     /**
      * Tạo URL thanh toán MoMo cho đơn hàng
@@ -84,10 +146,7 @@ public class PaymentController {
                 type = MoMoService.RequestType.PAY_WITH_METHOD;
             }
 
-            String payUrl = momoService.createPaymentUrl(orderId, totalAmount, orderInfo, type);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("payUrl", payUrl);
+            Map<String, String> response = momoService.createPayment(orderId, totalAmount, orderInfo, type);
             response.put("orderId", orderId);
 
             return ResponseEntity.ok(ApiResponse.success(response));
@@ -128,10 +187,7 @@ public class PaymentController {
             }
 
             // Tạo URL thanh toán MoMo
-            String payUrl = momoService.createPaymentUrl(rentalId, totalAmount, orderInfo);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("payUrl", payUrl);
+            Map<String, String> response = momoService.createPayment(rentalId, totalAmount, orderInfo);
             response.put("rentalId", rentalId);
 
             return ResponseEntity.ok(ApiResponse.success(response));
@@ -328,11 +384,36 @@ public class PaymentController {
             Optional<Order> orderOpt = orderRepository.findById(orderCode);
             if (orderOpt.isPresent()) {
                 Order order = orderOpt.get();
+                Optional<PaymentTransaction> syncedTransaction = syncMomoPaymentIfCompleted(
+                        orderCode, order.getTotalAmount(), order, null);
+                if (syncedTransaction.isPresent()) {
+                    return ResponseEntity.ok(ApiResponse.success(transactionResult(syncedTransaction.get())));
+                }
+
                 Map<String, Object> result = new HashMap<>();
                 result.put("success", "SUCCESS".equals(order.getPaymentStatus()));
                 result.put("orderCode", orderCode);
                 result.put("amount", (double) order.getTotalAmount());
                 result.put("paymentStatus", order.getPaymentStatus());
+                return ResponseEntity.ok(ApiResponse.success(result));
+            }
+
+            Optional<Rental> rentalOpt = rentalRepository.findById(orderCode);
+            if (rentalOpt.isPresent()) {
+                Rental rental = rentalOpt.get();
+                long totalAmount = rental.getTotalRentFee() + rental.getDepositFee()
+                        + (rental.getShippingFee() != null ? rental.getShippingFee() : 0L);
+                Optional<PaymentTransaction> syncedTransaction = syncMomoPaymentIfCompleted(
+                        orderCode, totalAmount, null, rental);
+                if (syncedTransaction.isPresent()) {
+                    return ResponseEntity.ok(ApiResponse.success(transactionResult(syncedTransaction.get())));
+                }
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", "SUCCESS".equals(rental.getPaymentStatus()));
+                result.put("orderCode", orderCode);
+                result.put("amount", (double) totalAmount);
+                result.put("paymentStatus", rental.getPaymentStatus());
                 return ResponseEntity.ok(ApiResponse.success(result));
             }
 
@@ -346,6 +427,121 @@ public class PaymentController {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Lấy trạng thái thanh toán thất bại: " + e.getMessage()));
         }
+    }
+
+    private Optional<PaymentTransaction> syncMomoPaymentIfCompleted(String orderCode, long expectedAmount,
+                                                                    Order order, Rental rental) {
+        boolean isMomoOrder = order != null && order.getPaymentMethod() == Order.PaymentMethod.MOMO
+                && !"SUCCESS".equals(order.getPaymentStatus());
+        boolean isMomoRental = rental != null && rental.getPaymentMethod() == Rental.PaymentMethod.MOMO
+                && !"SUCCESS".equals(rental.getPaymentStatus());
+        if (!isMomoOrder && !isMomoRental) {
+            return Optional.empty();
+        }
+
+        Map<String, Object> query = momoService.queryTransaction(
+                orderCode, orderCode + "_status_" + System.currentTimeMillis());
+        if (!Boolean.TRUE.equals(query.get("success"))) {
+            return Optional.empty();
+        }
+
+        long paidAmount = asLong(query.get("amount"));
+        if (paidAmount != expectedAmount) {
+            System.err.println("MoMo amount mismatch for " + orderCode
+                    + ": expected=" + expectedAmount + ", paid=" + paidAmount);
+            return Optional.empty();
+        }
+
+        String transId = stringValue(query.get("transId"));
+        if (transId.isBlank()) {
+            transId = "MOMO_" + orderCode;
+        }
+
+        Optional<PaymentTransaction> existing = paymentTransactionRepository.findByTransactionRef(transId);
+        if (existing.isPresent()) {
+            return existing;
+        }
+
+        PaymentTransaction transaction = PaymentTransaction.builder()
+                .transactionRef(transId)
+                .orderCode(orderCode)
+                .amount((double) paidAmount)
+                .status(PaymentTransaction.PaymentStatus.SUCCESS)
+                .paymentMethod("MoMo")
+                .responseCode(String.valueOf(query.getOrDefault("resultCode", "0")))
+                .responseMessage(stringValue(query.get("message")))
+                .build();
+
+        if (order != null) {
+            transaction.setOrder(order);
+            order.setPaymentStatus("SUCCESS");
+            if (order.getStatus() == Order.OrderStatus.PENDING) {
+                order.setStatus(Order.OrderStatus.SHIPPED);
+            }
+            orderRepository.save(order);
+        }
+
+        if (rental != null) {
+            transaction.setRental(rental);
+            if (rental.getStatus() == Rental.RentalStatus.PENDING) {
+                rental.setStatus(Rental.RentalStatus.ACTIVE);
+                rental.setPaymentStatus("SUCCESS");
+            } else {
+                rental.setPaymentStatus("SUCCESS_LATE");
+            }
+            rentalRepository.save(rental);
+        }
+
+        return Optional.of(paymentTransactionRepository.save(transaction));
+    }
+
+    private PaymentTransaction saveManualMomoTransaction(String orderCode, long amount, Order order, Rental rental) {
+        PaymentTransaction transaction = paymentTransactionRepository.findByOrderCode(orderCode)
+                .orElseGet(() -> PaymentTransaction.builder()
+                        .transactionRef("MANUAL_MOMO_" + orderCode)
+                        .orderCode(orderCode)
+                        .paymentMethod("MoMo QR")
+                        .build());
+        transaction.setAmount((double) amount);
+        transaction.setStatus(PaymentTransaction.PaymentStatus.SUCCESS);
+        transaction.setResponseCode("MANUAL");
+        transaction.setResponseMessage("Thanh toán QR MoMo đã được xác nhận");
+        if (order != null) {
+            transaction.setOrder(order);
+        }
+        if (rental != null) {
+            transaction.setRental(rental);
+        }
+        return paymentTransactionRepository.save(transaction);
+    }
+
+    private Map<String, Object> transactionResult(PaymentTransaction transaction) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", transaction.getStatus() == PaymentTransaction.PaymentStatus.SUCCESS);
+        result.put("message", transaction.getResponseMessage());
+        result.put("orderCode", transaction.getOrderCode());
+        result.put("amount", transaction.getAmount());
+        result.put("transactionRef", transaction.getTransactionRef());
+        result.put("paymentMethod", transaction.getPaymentMethod());
+        return result;
+    }
+
+    private long asLong(Object value) {
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value == null) {
+            return 0L;
+        }
+        try {
+            return Long.parseLong(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
+    }
+
+    private String stringValue(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
     /**
