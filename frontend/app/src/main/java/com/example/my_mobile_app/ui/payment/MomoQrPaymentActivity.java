@@ -87,13 +87,11 @@ public class MomoQrPaymentActivity extends BaseActivity {
         ((TextView) findViewById(R.id.txt_momo_account)).setText(accountLabel());
         ((ImageButton) findViewById(R.id.btn_back)).setOnClickListener(v -> finish());
         btnConfirm = findViewById(R.id.btn_confirm_payment);
-        btnConfirm.setOnClickListener(v -> {
-            if (officialPayment) {
-                trackPaymentStatus();
-            } else {
-                confirmPayment();
-            }
-        });
+        // Test/demo mode: MoMo sandbox QR cannot be paid by a real wallet and has no IPN,
+        // so "I've paid" confirms the order directly via /momo/manual-confirm instead of
+        // tracking a status that never completes. Restore the officialPayment branch when
+        // production MoMo merchant credentials + a public IPN URL are configured.
+        btnConfirm.setOnClickListener(v -> confirmPayment());
 
         MaterialButton btnOpenMomo = findViewById(R.id.btn_open_momo);
         if (btnOpenMomo != null && officialPayment && !TextUtils.isEmpty(openPaymentTarget())) {
