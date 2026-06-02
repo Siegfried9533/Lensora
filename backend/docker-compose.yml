@@ -47,6 +47,9 @@ services:
       - APP_MOMO_PARTNER_CODE=${APP_MOMO_PARTNER_CODE:-}
       - APP_MOMO_ACCESS_KEY=${APP_MOMO_ACCESS_KEY:-}
       - APP_MOMO_SECRET_KEY=${APP_MOMO_SECRET_KEY:-}
+      - APP_MOMO_URL=${APP_MOMO_URL:-https://test-payment.momo.vn}
+      - APP_MOMO_REDIRECT_URL=${APP_MOMO_REDIRECT_URL:-http://localhost:8081/payment/momo/redirect}
+      - APP_MOMO_IPN_URL=${APP_MOMO_IPN_URL:-http://localhost:8080/api/payment/momo/ipn}
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - DEEPSEEK_API_SECRET=${DEEPSEEK_API_SECRET}
       - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}

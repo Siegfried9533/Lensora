@@ -1,9 +1,11 @@
 package com.example.my_mobile_app.ui.payment;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -13,6 +15,7 @@ import com.example.my_mobile_app.api.ApiResponse;
 import com.example.my_mobile_app.api.PaymentService;
 import com.example.my_mobile_app.model.PaymentResult;
 import com.example.my_mobile_app.ui.BaseActivity;
+import com.google.android.material.button.MaterialButton;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,14 +30,16 @@ public class OrderStatusActivity extends BaseActivity {
     public static final String EXTRA_ORDER_CODE = "order_code";
     public static final String EXTRA_ORDER_ID = "order_id";
     public static final String EXTRA_RENTAL_ID = "rental_id";
+    public static final String EXTRA_PAY_URL = "pay_url";
 
     private static final int POLL_INTERVAL_MS = 3000;
-    private static final int MAX_ATTEMPTS = 30;
+    private static final int MAX_ATTEMPTS = 100;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private String orderCode;
     private String orderId;
     private String rentalId;
+    private String payUrl;
     private int attempts;
     private boolean cancelled;
 
@@ -46,11 +51,28 @@ public class OrderStatusActivity extends BaseActivity {
         orderCode = getIntent().getStringExtra(EXTRA_ORDER_CODE);
         orderId = getIntent().getStringExtra(EXTRA_ORDER_ID);
         rentalId = getIntent().getStringExtra(EXTRA_RENTAL_ID);
+        payUrl = getIntent().getStringExtra(EXTRA_PAY_URL);
         if (orderCode == null) {
             failWith(getString(R.string.error_missing_transaction_code));
             return;
         }
+
+        MaterialButton btnOpenPayment = findViewById(R.id.btn_open_payment);
+        if (payUrl != null && !payUrl.isEmpty()) {
+            btnOpenPayment.setVisibility(View.VISIBLE);
+            btnOpenPayment.setOnClickListener(v -> openPaymentPage());
+            handler.post(this::openPaymentPage);
+        }
         scheduleNext();
+    }
+
+    private void openPaymentPage() {
+        if (payUrl == null || payUrl.isEmpty()) return;
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(payUrl)));
+        } catch (Exception e) {
+            showError(getString(R.string.error_create_momo_connection));
+        }
     }
 
     private void scheduleNext() {

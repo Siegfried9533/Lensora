@@ -1,7 +1,6 @@
 package com.example.my_mobile_app.ui.checkout;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,7 +34,10 @@ import com.example.my_mobile_app.model.Province;
 import com.example.my_mobile_app.model.Rental;
 import com.example.my_mobile_app.model.Ward;
 import com.example.my_mobile_app.ui.BaseActivity;
-import com.example.my_mobile_app.ui.payment.OrderStatusActivity;
+import com.example.my_mobile_app.api.AddressService;
+import com.example.my_mobile_app.model.Address;
+import com.example.my_mobile_app.ui.payment.MomoQrPaymentActivity;
+import com.example.my_mobile_app.ui.profile.AddressBookActivity;
 import com.example.my_mobile_app.ui.payment.PaymentSuccessActivity;
 import com.example.my_mobile_app.util.PriceFormatter;
 import com.example.my_mobile_app.util.TextNormalizer;
@@ -43,6 +45,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,11 +60,12 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import okhttp3.ResponseBody;
 
 /**
  * Checkout screen. Customers enter their shipping address directly. Submit
  * calls {@code createOrder()}, then either routes to PaymentSuccess (COD) or
- * opens MoMo payUrl + OrderStatusActivity.
+ * creates a MoMo payment and opens the in-app MoMo QR payment screen.
  *
  * Note: cart ASSET items cannot be ordered via this flow because the backend
  * {@code CreateOrderRequest.Item} only carries {@code productId}. ASSET items
@@ -106,6 +111,16 @@ public class CheckoutActivity extends BaseActivity {
     private long rentalStartMillis;
     private long rentalEndMillis;
 
+    // Address book: when an address is picked or defaulted, these hold its data and the GHN
+    // spinners are bypassed at checkout (the backend still computes the shipping fee).
+    private static final int REQ_PICK_ADDRESS = 1001;
+    private boolean usePickedAddress;
+    private String pickedRecipientName, pickedRecipientPhone;
+    private String pickedDistrictId, pickedWardCode, pickedFullAddress;
+    private View cardSelectedAddress;
+    private TextView txtSelectedRecipient, txtSelectedDetail;
+    private com.google.android.material.button.MaterialButton btnChooseSavedAddress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,6 +158,17 @@ public class CheckoutActivity extends BaseActivity {
                 : R.string.checkout_place_order);
         configurePaymentOptions();
         setupAddressSpinners();
+
+        cardSelectedAddress = findViewById(R.id.card_selected_address);
+        txtSelectedRecipient = findViewById(R.id.txt_selected_recipient);
+        txtSelectedDetail = findViewById(R.id.txt_selected_detail);
+        btnChooseSavedAddress = findViewById(R.id.btn_choose_saved_address);
+        btnChooseSavedAddress.setOnClickListener(v -> {
+            Intent i = new Intent(this, AddressBookActivity.class);
+            i.putExtra(AddressBookActivity.EXTRA_PICK_MODE, true);
+            startActivityForResult(i, REQ_PICK_ADDRESS);
+        });
+        loadDefaultAddress();
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
@@ -379,38 +405,15 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void placeOrder() {
-        String recipientName = textOf(etRecipientName);
-        if (TextUtils.isEmpty(recipientName)) {
-            showError(getString(R.string.error_enter_recipient_name));
+        if (!usePickedAddress) {
+            showError(getString(R.string.error_select_saved_address));
             return;
         }
-        String recipientPhone = textOf(etRecipientPhone);
-        if (TextUtils.isEmpty(recipientPhone)) {
-            showError(getString(R.string.error_enter_recipient_phone));
-            return;
-        }
-        Province selectedProvince = selectedProvince();
-        if (selectedProvince == null) {
-            showError(getString(R.string.error_select_province));
-            return;
-        }
-        District selectedDistrict = selectedDistrict();
-        if (selectedDistrict == null) {
-            showError(getString(R.string.error_select_district));
-            return;
-        }
-        Ward selectedWard = selectedWard();
-        if (selectedWard == null) {
-            showError(getString(R.string.error_select_ward));
-            return;
-        }
-        String street = textOf(etStreet);
-        if (TextUtils.isEmpty(street)) {
-            showError(getString(R.string.error_enter_street));
-            return;
-        }
-        String address = buildAddress(street, selectedWard.wardName,
-                selectedDistrict.districtName, selectedProvince.provinceName);
+        String recipientName = pickedRecipientName;
+        String recipientPhone = pickedRecipientPhone;
+        String address = pickedFullAddress;
+        String toDistrictId = pickedDistrictId;
+        String toWardCode = pickedWardCode;
         // Rentals are pay-first: COD is not offered, so always pay online.
         boolean useMomo = isRentalCheckout()
                 || rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
@@ -446,8 +449,8 @@ public class CheckoutActivity extends BaseActivity {
         req.clearCart = isCartCheckout();
         req.recipientName = recipientName;
         req.recipientPhone = recipientPhone;
-        req.toDistrictId = selectedDistrict.districtId;
-        req.toWardCode = selectedWard.wardCode;
+        req.toDistrictId = toDistrictId;
+        req.toWardCode = toWardCode;
 
         btnPlaceOrder.setEnabled(false);
         showLoading();
@@ -523,6 +526,10 @@ public class CheckoutActivity extends BaseActivity {
         spinnerProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // A manual province choice overrides any picked/defaulted address.
+                if (selectedProvince() != null) {
+                    clearPickedAddress();
+                }
                 // Reset downstream selections whenever the province changes.
                 districts.clear();
                 wards.clear();
@@ -687,25 +694,11 @@ public class CheckoutActivity extends BaseActivity {
                         btnPlaceOrder.setEnabled(true);
                         ApiResponse<Rental> b = response.body();
                         if (b == null || !b.success || b.data == null) {
-                            showError(b != null && b.message != null
-                                    ? b.message
-                                    : getString(R.string.error_place_rental_failed));
+                            showError(errorMessage(response, R.string.error_place_rental_failed));
                             return;
                         }
                         Rental rental = b.data;
-                        // Backend tạo đơn thuê + URL thanh toán MoMo trong cùng 1 lệnh: nếu thanh toán
-                        // lỗi, backend đã xóa đơn thuê và trả lỗi (xử lý ở nhánh !success ở trên), nên
-                        // tới đây luôn có payUrl. Mở MoMo rồi theo dõi trạng thái thanh toán.
-                        if (rental.payUrl == null || rental.payUrl.isEmpty()) {
-                            showError(getString(R.string.error_create_momo));
-                            return;
-                        }
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(rental.payUrl)));
-                        Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, rental.rentalId);
-                        i.putExtra(OrderStatusActivity.EXTRA_RENTAL_ID, rental.rentalId);
-                        startActivity(i);
-                        finish();
+                        createMomoRentalPayment(rental);
                     }
 
                     @Override
@@ -718,12 +711,11 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void createMomoPayment(Order order) {
-        long total = (long)(subtotal + shippingFee);
+        double total = subtotal + shippingFee;
         CreateMoMoPaymentRequest req = new CreateMoMoPaymentRequest(
-                order.orderId,
-                total,
-                "Thanh toan don hang: " + order.orderId);
+                order.orderId, total, getString(R.string.checkout_momo_order_info, order.orderId));
         req.requestType = "captureWallet";
+
         showLoading();
         ApiClient.get(this).create(PaymentService.class).createMoMoPayment(req)
                 .enqueue(new Callback<ApiResponse<Map<String, String>>>() {
@@ -732,22 +724,12 @@ public class CheckoutActivity extends BaseActivity {
                                            @NonNull Response<ApiResponse<Map<String, String>>> response) {
                         hideLoading();
                         ApiResponse<Map<String, String>> b = response.body();
-                        if (b == null || !b.success || b.data == null) {
-                            showError(getString(R.string.error_create_momo));
+                        if (b == null || !b.success || b.data == null || !hasMomoPaymentTarget(b.data)) {
+                            showError(errorMessage(response, R.string.error_create_momo));
                             return;
                         }
-                        String payUrl = b.data.get("payUrl");
-                        String orderCode = b.data.get("orderId");
-                        if (orderCode == null)
-                            orderCode = order.orderId;
-                        if (payUrl != null && !payUrl.isEmpty()) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(payUrl)));
-                        }
-                        Intent i = new Intent(CheckoutActivity.this, OrderStatusActivity.class);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_CODE, orderCode);
-                        i.putExtra(OrderStatusActivity.EXTRA_ORDER_ID, order.orderId);
-                        startActivity(i);
-                        finish();
+                        String orderCode = firstNonEmpty(b.data.get("orderId"), order.orderId);
+                        openMomoQrPayment(orderCode, order.orderId, null, order.totalAmount, b.data);
                     }
 
                     @Override
@@ -758,4 +740,160 @@ public class CheckoutActivity extends BaseActivity {
                 });
     }
 
+    private void createMomoRentalPayment(Rental rental) {
+        if (rental == null || TextUtils.isEmpty(rental.rentalId)) {
+            showError(getString(R.string.error_missing_transaction_code));
+            return;
+        }
+        Map<String, String> body = new HashMap<>();
+        body.put("rentalId", rental.rentalId);
+        body.put("orderInfo", getString(R.string.checkout_momo_rental_info, rental.rentalId));
+
+        showLoading();
+        ApiClient.get(this).create(PaymentService.class).createMoMoPaymentRental(body)
+                .enqueue(new Callback<ApiResponse<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Map<String, String>>> call,
+                                           @NonNull Response<ApiResponse<Map<String, String>>> response) {
+                        hideLoading();
+                        ApiResponse<Map<String, String>> b = response.body();
+                        if (b == null || !b.success || b.data == null || !hasMomoPaymentTarget(b.data)) {
+                            showError(errorMessage(response, R.string.error_create_momo));
+                            return;
+                        }
+                        double total = rental.totalRentFee + rental.depositFee
+                                + (rental.shippingFee == null ? 0 : rental.shippingFee);
+                        String orderCode = firstNonEmpty(b.data.get("rentalId"), rental.rentalId);
+                        openMomoQrPayment(orderCode, null, rental.rentalId, total, b.data);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Map<String, String>>> call, @NonNull Throwable t) {
+                        hideLoading();
+                        showError(getString(R.string.error_create_momo_connection));
+                    }
+                });
+    }
+
+    private void openMomoQrPayment(String orderCode, String orderId, String rentalId,
+                                   double amount, Map<String, String> momoPayment) {
+        Intent i = new Intent(this, MomoQrPaymentActivity.class);
+        i.putExtra(MomoQrPaymentActivity.EXTRA_ORDER_CODE, orderCode);
+        if (!TextUtils.isEmpty(orderId)) {
+            i.putExtra(MomoQrPaymentActivity.EXTRA_ORDER_ID, orderId);
+        }
+        if (!TextUtils.isEmpty(rentalId)) {
+            i.putExtra(MomoQrPaymentActivity.EXTRA_RENTAL_ID, rentalId);
+        }
+        i.putExtra(MomoQrPaymentActivity.EXTRA_AMOUNT, amount);
+        putExtraIfPresent(i, MomoQrPaymentActivity.EXTRA_QR_CODE_URL, momoPayment.get("qrCodeUrl"));
+        putExtraIfPresent(i, MomoQrPaymentActivity.EXTRA_PAY_URL, momoPayment.get("payUrl"));
+        putExtraIfPresent(i, MomoQrPaymentActivity.EXTRA_DEEPLINK, momoPayment.get("deeplink"));
+        startActivity(i);
+        finish();
+    }
+
+    private boolean hasMomoPaymentTarget(Map<String, String> data) {
+        return data != null && (!TextUtils.isEmpty(data.get("qrCodeUrl"))
+                || !TextUtils.isEmpty(data.get("deeplink"))
+                || !TextUtils.isEmpty(data.get("payUrl")));
+    }
+
+    private String firstNonEmpty(String preferred, String fallback) {
+        return TextUtils.isEmpty(preferred) ? fallback : preferred;
+    }
+
+    private void putExtraIfPresent(Intent intent, String key, String value) {
+        if (!TextUtils.isEmpty(value)) {
+            intent.putExtra(key, value);
+        }
+    }
+
+    private String errorMessage(Response<? extends ApiResponse<?>> response, int fallbackResId) {
+        ApiResponse<?> body = response.body();
+        if (body != null && body.message != null && !body.message.isEmpty()) {
+            return body.message;
+        }
+        ResponseBody errorBody = response.errorBody();
+        if (errorBody == null) {
+            return getString(fallbackResId);
+        }
+        try {
+            JSONObject obj = new JSONObject(errorBody.string());
+            String message = obj.optString("message");
+            return message.isEmpty() ? getString(fallbackResId) : message;
+        } catch (Exception ignored) {
+            return getString(fallbackResId);
+        }
+    }
+
+
+    // ----- Address book integration -----
+
+    private void loadDefaultAddress() {
+        ApiClient.get(this).create(AddressService.class).getAddresses()
+                .enqueue(new Callback<ApiResponse<List<Address>>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<List<Address>>> call,
+                                           @NonNull Response<ApiResponse<List<Address>>> response) {
+                        ApiResponse<List<Address>> b = response.body();
+                        if (b == null || !b.success || b.data == null) {
+                            return;
+                        }
+                        for (Address a : b.data) {
+                            if (a.isDefault) {
+                                applyPickedAddress(a.recipientName, a.recipientPhone, a.street, a.note,
+                                        a.districtId, a.wardCode, a.fullAddress());
+                                break;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<List<Address>>> call, @NonNull Throwable t) {
+                        // No saved addresses available — fall back to manual entry.
+                    }
+                });
+    }
+
+    private void applyPickedAddress(String recipientName, String recipientPhone, String street, String note,
+                                    String districtId, String wardCode, String fullAddress) {
+        if (TextUtils.isEmpty(fullAddress) || TextUtils.isEmpty(districtId) || TextUtils.isEmpty(wardCode)) {
+            return;
+        }
+        pickedRecipientName = recipientName;
+        pickedRecipientPhone = recipientPhone;
+        pickedDistrictId = districtId;
+        pickedWardCode = wardCode;
+        pickedFullAddress = fullAddress;
+        usePickedAddress = true;
+        if (cardSelectedAddress != null) {
+            txtSelectedRecipient.setText(getString(R.string.address_recipient_line,
+                    recipientName == null ? "" : recipientName,
+                    recipientPhone == null ? "" : recipientPhone));
+            txtSelectedDetail.setText(fullAddress);
+            cardSelectedAddress.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void clearPickedAddress() {
+        if (!usePickedAddress) return;
+        usePickedAddress = false;
+        if (cardSelectedAddress != null) cardSelectedAddress.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_PICK_ADDRESS && resultCode == RESULT_OK && data != null) {
+            applyPickedAddress(
+                    data.getStringExtra(AddressBookActivity.RESULT_RECIPIENT_NAME),
+                    data.getStringExtra(AddressBookActivity.RESULT_RECIPIENT_PHONE),
+                    data.getStringExtra(AddressBookActivity.RESULT_STREET),
+                    data.getStringExtra(AddressBookActivity.RESULT_NOTE),
+                    data.getStringExtra(AddressBookActivity.RESULT_DISTRICT_ID),
+                    data.getStringExtra(AddressBookActivity.RESULT_WARD_CODE),
+                    data.getStringExtra(AddressBookActivity.RESULT_FULL_ADDRESS));
+        }
+    }
 }

@@ -164,7 +164,9 @@ public class ProfileActivity extends BaseActivity {
                     @Override public void onResponse(@NonNull Call<ApiResponse<List<Rental>>> call,
                                                       @NonNull Response<ApiResponse<List<Rental>>> response) {
                         ApiResponse<List<Rental>> body = response.body();
-                        int count = body != null && body.success && body.data != null ? body.data.size() : 0;
+                        int count = body != null && body.success && body.data != null
+                                ? countNonCancelledRentals(body.data)
+                                : 0;
                         txtRentalCount.setText(String.valueOf(count));
                     }
 
@@ -204,6 +206,8 @@ public class ProfileActivity extends BaseActivity {
 
         addMenuRow(accountMenu, R.drawable.ic_user_outline, getString(R.string.profile_personal_info),
                 () -> startActivity(new Intent(this, PersonalInfoActivity.class)));
+        addMenuRow(accountMenu, R.drawable.ic_box, getString(R.string.profile_address_book),
+                () -> startActivity(new Intent(this, AddressBookActivity.class)));
         addMenuRow(accountMenu, R.drawable.ic_heart_outline, getString(R.string.profile_favorites),
                 () -> startActivity(new Intent(this, FavoritesActivity.class)));
         addMenuRow(accountMenu, R.drawable.ic_box, getString(R.string.profile_my_equipment),
@@ -259,5 +263,22 @@ public class ProfileActivity extends BaseActivity {
 
     private static boolean isDelivered(String status) {
         return status != null && "DELIVERED".equalsIgnoreCase(status.trim());
+    }
+
+    private static int countNonCancelledRentals(List<Rental> rentals) {
+        int count = 0;
+        for (Rental rental : rentals) {
+            if (rental != null && !isCancelled(rental.status)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static boolean isCancelled(String status) {
+        if (status == null) return false;
+        String normalized = status.trim();
+        return "CANCELLED".equalsIgnoreCase(normalized)
+                || "CANCELED".equalsIgnoreCase(normalized);
     }
 }

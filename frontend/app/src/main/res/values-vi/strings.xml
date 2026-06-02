@@ -168,6 +168,14 @@
     <string name="payment_success_body">Đơn hàng của bạn đã được tiếp nhận. Cảm ơn bạn đã mua sắm!</string>
     <string name="payment_failed_body">Giao dịch không thành công. Vui lòng thử lại.</string>
     <string name="payment_processing_hint">Vui lòng chờ trong giây lát. Bạn có thể quay lại app sau khi hoàn tất thanh toán.</string>
+    <string name="payment_open_momo">Mở thanh toán MoMo</string>
+    <string name="momo_qr_title">Thanh toán QR MoMo</string>
+    <string name="momo_qr_scan_hint">Quét QR bằng MoMo, sau đó xác nhận khi đã chuyển khoản xong.</string>
+    <string name="momo_qr_confirm">Tôi đã thanh toán</string>
+    <string name="momo_qr_confirmed">Đã xác nhận thanh toán</string>
+    <string name="momo_qr_account_format">%1$s • %2$s</string>
+    <string name="momo_qr_account_not_configured">Chưa cấu hình tài khoản MoMo</string>
+    <string name="common_back">Quay lại</string>
     <string name="error_missing_transaction_code">Thiếu mã giao dịch</string>
     <string name="error_payment_timeout">Hết thời gian chờ thanh toán</string>
 
@@ -284,6 +292,8 @@
     <string name="error_rental_start_in_past">Ngày thuê không được ở quá khứ</string>
     <string name="error_create_momo">Không tạo được thanh toán MoMo</string>
     <string name="error_create_momo_connection">Lỗi kết nối khi tạo thanh toán MoMo</string>
+    <string name="error_confirm_momo_qr">Không thể xác nhận thanh toán QR MoMo</string>
+    <string name="error_momo_qr_missing">Không có dữ liệu QR MoMo hợp lệ</string>
     <string name="error_clear_cart">Không thể xoá giỏ hàng</string>
     <string name="error_update_quantity">Lỗi cập nhật số lượng</string>
     <string name="error_delete_item">Không thể xoá</string>
@@ -425,4 +435,25 @@
 
     <!-- Rental checkout (pay-first) -->
     <string name="checkout_rental_prepay_note">Thuê thiết bị yêu cầu thanh toán trước. Hãy thanh toán trực tuyến ngay để xác nhận đơn thuê và nhận máy ảnh.</string>
+    <!-- Address book -->
+    <string name="address_book_title">Sổ địa chỉ</string>
+    <string name="address_add">Thêm địa chỉ</string>
+    <string name="address_edit">Sửa địa chỉ</string>
+    <string name="address_delete">Xóa</string>
+    <string name="address_delete_confirm">Xóa địa chỉ này?</string>
+    <string name="address_set_default">Đặt mặc định</string>
+    <string name="address_default_badge">Mặc định</string>
+    <string name="address_save">Lưu địa chỉ</string>
+    <string name="address_set_default_checkbox">Đặt làm địa chỉ mặc định</string>
+    <string name="address_empty">Chưa có địa chỉ nào</string>
+    <string name="address_recipient_line">%1$s · %2$s</string>
+    <string name="address_saved">Đã lưu địa chỉ</string>
+    <string name="address_deleted">Đã xóa địa chỉ</string>
+    <string name="address_pick_from_book">Chọn từ sổ địa chỉ</string>
+    <string name="address_selected">Đã chọn địa chỉ</string>
+    <string name="profile_address_book">Sổ địa chỉ</string>
+    <string name="error_load_addresses">Không tải được danh sách địa chỉ</string>
+    <string name="error_save_address">Không lưu được địa chỉ</string>
+    <string name="address_default_suffix"> (Mặc định)</string>
+    <string name="error_select_saved_address">Vui lòng chọn địa chỉ giao hàng</string>
 </resources>

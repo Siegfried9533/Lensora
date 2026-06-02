@@ -168,6 +168,14 @@
     <string name="payment_success_body">Your order has been received. Thank you for shopping with us!</string>
     <string name="payment_failed_body">The transaction was not successful. Please try again.</string>
     <string name="payment_processing_hint">Please wait a moment. You can return to the app after completing payment.</string>
+    <string name="payment_open_momo">Open MoMo payment</string>
+    <string name="momo_qr_title">MoMo QR payment</string>
+    <string name="momo_qr_scan_hint">Scan this QR with MoMo, then confirm after the transfer is complete.</string>
+    <string name="momo_qr_confirm">I have paid</string>
+    <string name="momo_qr_confirmed">Payment confirmed</string>
+    <string name="momo_qr_account_format">%1$s • %2$s</string>
+    <string name="momo_qr_account_not_configured">MoMo account not configured</string>
+    <string name="common_back">Back</string>
     <string name="error_missing_transaction_code">Missing transaction code</string>
     <string name="error_payment_timeout">Payment timed out</string>
 
@@ -284,6 +292,8 @@
     <string name="error_rental_start_in_past">Start date cannot be in the past</string>
     <string name="error_create_momo">Unable to create MoMo payment</string>
     <string name="error_create_momo_connection">Connection error while creating MoMo payment</string>
+    <string name="error_confirm_momo_qr">Unable to confirm MoMo QR payment</string>
+    <string name="error_momo_qr_missing">No valid MoMo QR data is available</string>
     <string name="error_clear_cart">Unable to clear cart</string>
     <string name="error_update_quantity">Unable to update quantity</string>
     <string name="error_delete_item">Unable to delete</string>
@@ -425,4 +435,25 @@
 
     <!-- Rental checkout (pay-first) -->
     <string name="checkout_rental_prepay_note">Rentals require prepayment. Pay online now to confirm your booking and receive the camera.</string>
+    <!-- Address book -->
+    <string name="address_book_title">Address book</string>
+    <string name="address_add">Add address</string>
+    <string name="address_edit">Edit address</string>
+    <string name="address_delete">Delete</string>
+    <string name="address_delete_confirm">Delete this address?</string>
+    <string name="address_set_default">Set default</string>
+    <string name="address_default_badge">Default</string>
+    <string name="address_save">Save address</string>
+    <string name="address_set_default_checkbox">Set as default address</string>
+    <string name="address_empty">No saved addresses yet</string>
+    <string name="address_recipient_line">%1$s · %2$s</string>
+    <string name="address_saved">Address saved</string>
+    <string name="address_deleted">Address deleted</string>
+    <string name="address_pick_from_book">Choose from address book</string>
+    <string name="address_selected">Address selected</string>
+    <string name="profile_address_book">Address book</string>
+    <string name="error_load_addresses">Could not load addresses</string>
+    <string name="error_save_address">Could not save address</string>
+    <string name="address_default_suffix"> (Default)</string>
+    <string name="error_select_saved_address">Please choose a shipping address</string>
 </resources>
