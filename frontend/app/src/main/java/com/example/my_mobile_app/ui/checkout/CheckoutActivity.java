@@ -718,9 +718,11 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void createMomoPayment(Order order) {
-        double total = subtotal + shippingFee;
+        long total = (long)(subtotal + shippingFee);
         CreateMoMoPaymentRequest req = new CreateMoMoPaymentRequest(
-                order.orderId, total, getString(R.string.checkout_momo_order_info, order.orderId));
+                order.orderId,
+                total,
+                "Thanh toan don hang: " + order.orderId);
         req.requestType = "captureWallet";
         showLoading();
         ApiClient.get(this).create(PaymentService.class).createMoMoPayment(req)

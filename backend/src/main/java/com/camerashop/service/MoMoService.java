@@ -95,6 +95,8 @@ public class MoMoService {
 
             // Tao chu ky TRUOC khi them chu ky vao yeu cau
             String signature = generateSignature(requestBody, secretKey);
+
+            requestBody.remove("accessKey");
             requestBody.put("signature", signature);
 
             // Gui yeu cau den API MoMo
@@ -131,6 +133,12 @@ public class MoMoService {
                 String message = jsonResponse.has("message") ? jsonResponse.get("message").asText() : "Unknown error";
                 throw new RuntimeException("Lỗi API MoMo: " + message);
             }
+
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            // Bắt riêng lỗi HTTP 4xx từ MoMo để in ra trọn vẹn cục JSON lỗi, không lo bị
+            // nuốt log
+            System.err.println("LENSORA_MOMO_GATEWAY_ERROR: " + e.getResponseBodyAsString());
+            throw new RuntimeException("MoMo từ chối yêu cầu (400): " + e.getResponseBodyAsString(), e);
 
         } catch (Exception e) {
             throw new RuntimeException("Tạo URL thanh toán MoMo thất bại: " + e.getMessage(), e);
@@ -371,18 +379,25 @@ public class MoMoService {
      */
     private String generateSignature(Map<String, Object> requestBody, String secretKey) {
         try {
-            String rawData = "accessKey=" + requestBody.get("accessKey") +
-                    "&amount=" + requestBody.get("amount") +
-                    "&extraData=" + requestBody.get("extraData") +
-                    "&ipnUrl=" + requestBody.get("ipnUrl") +
-                    "&orderId=" + requestBody.get("orderId") +
-                    "&orderInfo=" + requestBody.get("orderInfo") +
-                    "&partnerCode=" + requestBody.get("partnerCode") +
-                    "&redirectUrl=" + requestBody.get("redirectUrl") +
-                    "&requestId=" + requestBody.get("requestId") +
-                    "&requestType=" + requestBody.get("requestType");
+            // Dùng String.valueOf() để ép kiểu an toàn cho Object (như Long, Integer)
+            // và chống hiện tượng cộng chuỗi ra chữ "null" nếu biến bị trống.
+            String rawData = "accessKey=" + String.valueOf(requestBody.get("accessKey")) +
+                    "&amount=" + String.valueOf(requestBody.get("amount")) +
+                    "&extraData=" + String.valueOf(requestBody.get("extraData")) +
+                    "&ipnUrl=" + String.valueOf(requestBody.get("ipnUrl")) +
+                    "&orderId=" + String.valueOf(requestBody.get("orderId")) +
+                    "&orderInfo=" + String.valueOf(requestBody.get("orderInfo")) +
+                    "&partnerCode=" + String.valueOf(requestBody.get("partnerCode")) +
+                    "&redirectUrl=" + String.valueOf(requestBody.get("redirectUrl")) +
+                    "&requestId=" + String.valueOf(requestBody.get("requestId")) +
+                    "&requestType=" + String.valueOf(requestBody.get("requestType"));
 
-            return hmacSHA256(secretKey, rawData);
+            // giữ dòng này để nhìn thấy chuỗi Java tính toán in ra log Docker
+            System.out.println("LENSORA_INTERNAL_RAW_DATA: " + rawData);
+
+            String cleanSecretKey = secretKey.trim().replace("\r", "");
+
+            return hmacSHA256(cleanSecretKey, rawData);
 
         } catch (Exception e) {
             throw new RuntimeException("Lỗi tạo chữ ký", e);

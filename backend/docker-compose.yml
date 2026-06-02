@@ -48,6 +48,9 @@ services:
       - APP_MOMO_ACCESS_KEY=${APP_MOMO_ACCESS_KEY:-}
       - APP_MOMO_SECRET_KEY=${APP_MOMO_SECRET_KEY:-}
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_API_SECRET=${DEEPSEEK_API_SECRET}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-gpt-3.5-turbo}
 
 volumes:
   lensora_db_data:
