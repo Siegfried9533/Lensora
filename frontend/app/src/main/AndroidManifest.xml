@@ -113,6 +113,12 @@
             android:name=".ui.profile.PaymentMethodsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.profile.AddressBookActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.AddressFormActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.profile.PrivacySecurityActivity"
             android:exported="false" />
         <activity

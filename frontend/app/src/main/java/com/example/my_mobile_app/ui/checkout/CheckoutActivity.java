@@ -34,7 +34,10 @@ import com.example.my_mobile_app.model.Province;
 import com.example.my_mobile_app.model.Rental;
 import com.example.my_mobile_app.model.Ward;
 import com.example.my_mobile_app.ui.BaseActivity;
+import com.example.my_mobile_app.api.AddressService;
+import com.example.my_mobile_app.model.Address;
 import com.example.my_mobile_app.ui.payment.MomoQrPaymentActivity;
+import com.example.my_mobile_app.ui.profile.AddressBookActivity;
 import com.example.my_mobile_app.ui.payment.PaymentSuccessActivity;
 import com.example.my_mobile_app.util.PriceFormatter;
 import com.example.my_mobile_app.util.TextNormalizer;
@@ -108,6 +111,14 @@ public class CheckoutActivity extends BaseActivity {
     private long rentalStartMillis;
     private long rentalEndMillis;
 
+    // Address book: when an address is picked or defaulted, these hold its data and the GHN
+    // spinners are bypassed at checkout (the backend still computes the shipping fee).
+    private static final int REQ_PICK_ADDRESS = 1001;
+    private boolean usePickedAddress;
+    private String pickedDistrictId, pickedWardCode, pickedFullAddress;
+    private TextView txtSelectedAddress;
+    private com.google.android.material.button.MaterialButton btnChooseSavedAddress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,6 +156,15 @@ public class CheckoutActivity extends BaseActivity {
                 : R.string.checkout_place_order);
         configurePaymentOptions();
         setupAddressSpinners();
+
+        txtSelectedAddress = findViewById(R.id.txt_selected_address);
+        btnChooseSavedAddress = findViewById(R.id.btn_choose_saved_address);
+        btnChooseSavedAddress.setOnClickListener(v -> {
+            Intent i = new Intent(this, AddressBookActivity.class);
+            i.putExtra(AddressBookActivity.EXTRA_PICK_MODE, true);
+            startActivityForResult(i, REQ_PICK_ADDRESS);
+        });
+        loadDefaultAddress();
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
@@ -382,37 +402,56 @@ public class CheckoutActivity extends BaseActivity {
 
     private void placeOrder() {
         String recipientName = textOf(etRecipientName);
-        if (TextUtils.isEmpty(recipientName)) {
-            showError(getString(R.string.error_enter_recipient_name));
-            return;
-        }
         String recipientPhone = textOf(etRecipientPhone);
-        if (TextUtils.isEmpty(recipientPhone)) {
-            showError(getString(R.string.error_enter_recipient_phone));
-            return;
+        String address;
+        String toDistrictId;
+        String toWardCode;
+        if (usePickedAddress) {
+            if (TextUtils.isEmpty(recipientName)) {
+                showError(getString(R.string.error_enter_recipient_name));
+                return;
+            }
+            if (TextUtils.isEmpty(recipientPhone)) {
+                showError(getString(R.string.error_enter_recipient_phone));
+                return;
+            }
+            address = pickedFullAddress;
+            toDistrictId = pickedDistrictId;
+            toWardCode = pickedWardCode;
+        } else {
+            if (TextUtils.isEmpty(recipientName)) {
+                showError(getString(R.string.error_enter_recipient_name));
+                return;
+            }
+            if (TextUtils.isEmpty(recipientPhone)) {
+                showError(getString(R.string.error_enter_recipient_phone));
+                return;
+            }
+            Province selectedProvince = selectedProvince();
+            if (selectedProvince == null) {
+                showError(getString(R.string.error_select_province));
+                return;
+            }
+            District selectedDistrict = selectedDistrict();
+            if (selectedDistrict == null) {
+                showError(getString(R.string.error_select_district));
+                return;
+            }
+            Ward selectedWard = selectedWard();
+            if (selectedWard == null) {
+                showError(getString(R.string.error_select_ward));
+                return;
+            }
+            String street = textOf(etStreet);
+            if (TextUtils.isEmpty(street)) {
+                showError(getString(R.string.error_enter_street));
+                return;
+            }
+            address = buildAddress(street, selectedWard.wardName,
+                    selectedDistrict.districtName, selectedProvince.provinceName);
+            toDistrictId = selectedDistrict.districtId;
+            toWardCode = selectedWard.wardCode;
         }
-        Province selectedProvince = selectedProvince();
-        if (selectedProvince == null) {
-            showError(getString(R.string.error_select_province));
-            return;
-        }
-        District selectedDistrict = selectedDistrict();
-        if (selectedDistrict == null) {
-            showError(getString(R.string.error_select_district));
-            return;
-        }
-        Ward selectedWard = selectedWard();
-        if (selectedWard == null) {
-            showError(getString(R.string.error_select_ward));
-            return;
-        }
-        String street = textOf(etStreet);
-        if (TextUtils.isEmpty(street)) {
-            showError(getString(R.string.error_enter_street));
-            return;
-        }
-        String address = buildAddress(street, selectedWard.wardName,
-                selectedDistrict.districtName, selectedProvince.provinceName);
         // Rentals are pay-first: COD is not offered, so always pay online.
         boolean useMomo = isRentalCheckout()
                 || rgPayment.getCheckedRadioButtonId() == R.id.rb_momo;
@@ -448,8 +487,8 @@ public class CheckoutActivity extends BaseActivity {
         req.clearCart = isCartCheckout();
         req.recipientName = recipientName;
         req.recipientPhone = recipientPhone;
-        req.toDistrictId = selectedDistrict.districtId;
-        req.toWardCode = selectedWard.wardCode;
+        req.toDistrictId = toDistrictId;
+        req.toWardCode = toWardCode;
 
         btnPlaceOrder.setEnabled(false);
         showLoading();
@@ -525,6 +564,10 @@ public class CheckoutActivity extends BaseActivity {
         spinnerProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // A manual province choice overrides any picked/defaulted address.
+                if (selectedProvince() != null) {
+                    clearPickedAddress();
+                }
                 // Reset downstream selections whenever the province changes.
                 districts.clear();
                 wards.clear();
@@ -825,4 +868,72 @@ public class CheckoutActivity extends BaseActivity {
         }
     }
 
+
+    // ----- Address book integration -----
+
+    private void loadDefaultAddress() {
+        ApiClient.get(this).create(AddressService.class).getAddresses()
+                .enqueue(new Callback<ApiResponse<List<Address>>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<List<Address>>> call,
+                                           @NonNull Response<ApiResponse<List<Address>>> response) {
+                        ApiResponse<List<Address>> b = response.body();
+                        if (b == null || !b.success || b.data == null) {
+                            return;
+                        }
+                        for (Address a : b.data) {
+                            if (a.isDefault) {
+                                applyPickedAddress(a.recipientName, a.recipientPhone, a.street, a.note,
+                                        a.districtId, a.wardCode, a.fullAddress());
+                                break;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<List<Address>>> call, @NonNull Throwable t) {
+                        // No saved addresses available — fall back to manual entry.
+                    }
+                });
+    }
+
+    private void applyPickedAddress(String recipientName, String recipientPhone, String street, String note,
+                                    String districtId, String wardCode, String fullAddress) {
+        if (TextUtils.isEmpty(fullAddress) || TextUtils.isEmpty(districtId) || TextUtils.isEmpty(wardCode)) {
+            return;
+        }
+        if (recipientName != null) etRecipientName.setText(recipientName);
+        if (recipientPhone != null) etRecipientPhone.setText(recipientPhone);
+        if (street != null) etStreet.setText(street);
+        if (note != null) etNote.setText(note);
+        pickedDistrictId = districtId;
+        pickedWardCode = wardCode;
+        pickedFullAddress = fullAddress;
+        usePickedAddress = true;
+        if (txtSelectedAddress != null) {
+            txtSelectedAddress.setText(getString(R.string.address_selected) + ": " + fullAddress);
+            txtSelectedAddress.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void clearPickedAddress() {
+        if (!usePickedAddress) return;
+        usePickedAddress = false;
+        if (txtSelectedAddress != null) txtSelectedAddress.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_PICK_ADDRESS && resultCode == RESULT_OK && data != null) {
+            applyPickedAddress(
+                    data.getStringExtra(AddressBookActivity.RESULT_RECIPIENT_NAME),
+                    data.getStringExtra(AddressBookActivity.RESULT_RECIPIENT_PHONE),
+                    data.getStringExtra(AddressBookActivity.RESULT_STREET),
+                    data.getStringExtra(AddressBookActivity.RESULT_NOTE),
+                    data.getStringExtra(AddressBookActivity.RESULT_DISTRICT_ID),
+                    data.getStringExtra(AddressBookActivity.RESULT_WARD_CODE),
+                    data.getStringExtra(AddressBookActivity.RESULT_FULL_ADDRESS));
+        }
+    }
 }

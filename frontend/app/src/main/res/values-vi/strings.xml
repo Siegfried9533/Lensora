@@ -435,4 +435,23 @@
 
     <!-- Rental checkout (pay-first) -->
     <string name="checkout_rental_prepay_note">Thuê thiết bị yêu cầu thanh toán trước. Hãy thanh toán trực tuyến ngay để xác nhận đơn thuê và nhận máy ảnh.</string>
+    <!-- Address book -->
+    <string name="address_book_title">Sổ địa chỉ</string>
+    <string name="address_add">Thêm địa chỉ</string>
+    <string name="address_edit">Sửa địa chỉ</string>
+    <string name="address_delete">Xóa</string>
+    <string name="address_delete_confirm">Xóa địa chỉ này?</string>
+    <string name="address_set_default">Đặt mặc định</string>
+    <string name="address_default_badge">Mặc định</string>
+    <string name="address_save">Lưu địa chỉ</string>
+    <string name="address_set_default_checkbox">Đặt làm địa chỉ mặc định</string>
+    <string name="address_empty">Chưa có địa chỉ nào</string>
+    <string name="address_recipient_line">%1$s · %2$s</string>
+    <string name="address_saved">Đã lưu địa chỉ</string>
+    <string name="address_deleted">Đã xóa địa chỉ</string>
+    <string name="address_pick_from_book">Chọn từ sổ địa chỉ</string>
+    <string name="address_selected">Đã chọn địa chỉ</string>
+    <string name="profile_address_book">Sổ địa chỉ</string>
+    <string name="error_load_addresses">Không tải được danh sách địa chỉ</string>
+    <string name="error_save_address">Không lưu được địa chỉ</string>
 </resources>

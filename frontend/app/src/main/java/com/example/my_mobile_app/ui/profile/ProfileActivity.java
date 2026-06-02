@@ -206,6 +206,8 @@ public class ProfileActivity extends BaseActivity {
 
         addMenuRow(accountMenu, R.drawable.ic_user_outline, getString(R.string.profile_personal_info),
                 () -> startActivity(new Intent(this, PersonalInfoActivity.class)));
+        addMenuRow(accountMenu, R.drawable.ic_box, getString(R.string.profile_address_book),
+                () -> startActivity(new Intent(this, AddressBookActivity.class)));
         addMenuRow(accountMenu, R.drawable.ic_heart_outline, getString(R.string.profile_favorites),
                 () -> startActivity(new Intent(this, FavoritesActivity.class)));
         addMenuRow(accountMenu, R.drawable.ic_box, getString(R.string.profile_my_equipment),
