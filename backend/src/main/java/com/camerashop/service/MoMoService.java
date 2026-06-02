@@ -104,7 +104,7 @@ public class MoMoService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    momoUrl + "/v2/gateway/api/create",
+                    momoEndpoint("create"),
                     HttpMethod.POST,
                     request,
                     String.class);
@@ -312,6 +312,8 @@ public class MoMoService {
      */
     public Map<String, Object> queryTransaction(String orderId, String requestId) {
         try {
+            validateMerchantConfig();
+
             // Xay dung noi dung yeu cau
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("partnerCode", partnerCode);
@@ -321,10 +323,10 @@ public class MoMoService {
             requestBody.put("lang", "vi");
 
             // Tao chu ky
-            String rawData = "partnerCode=" + partnerCode +
-                    "&accessKey=" + accessKey +
-                    "&requestId=" + requestId +
-                    "&orderId=" + orderId;
+            String rawData = "accessKey=" + accessKey +
+                    "&orderId=" + orderId +
+                    "&partnerCode=" + partnerCode +
+                    "&requestId=" + requestId;
             String signature = hmacSHA256(secretKey, rawData);
             requestBody.put("signature", signature);
 
@@ -335,7 +337,7 @@ public class MoMoService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    momoUrl + "/v2/gateway/api/query",
+                    momoEndpoint("query"),
                     HttpMethod.POST,
                     request,
                     String.class);
@@ -344,7 +346,11 @@ public class MoMoService {
             JsonNode jsonResponse = objectMapper.readTree(response.getBody());
 
             Map<String, Object> result = new HashMap<>();
-            result.put("success", jsonResponse.get("errorCode").asInt() == 0);
+            int resultCode = jsonResponse.has("resultCode")
+                    ? jsonResponse.get("resultCode").asInt()
+                    : jsonResponse.path("errorCode").asInt(-1);
+            result.put("success", resultCode == 0);
+            result.put("resultCode", resultCode);
             result.put("message", jsonResponse.has("message") ? jsonResponse.get("message").asText() : "");
             result.put("transId", jsonResponse.has("transId") ? jsonResponse.get("transId").asText() : "");
             result.put("amount", jsonResponse.has("amount") ? jsonResponse.get("amount").asLong() : 0);
@@ -365,18 +371,16 @@ public class MoMoService {
      */
     private String generateSignature(Map<String, Object> requestBody, String secretKey) {
         try {
-            // Xay dung chuoi chu ky tho theo DUNG thu tu MoMo
-            // Thu tu:
-            // partnerCode|accessKey|requestId|amount|orderId|orderInfo|redirectUrl|ipnUrl|extraData
-            String rawData = "partnerCode=" + requestBody.get("partnerCode") +
-                    "&accessKey=" + requestBody.get("accessKey") +
-                    "&requestId=" + requestBody.get("requestId") +
+            String rawData = "accessKey=" + requestBody.get("accessKey") +
                     "&amount=" + requestBody.get("amount") +
+                    "&extraData=" + requestBody.get("extraData") +
+                    "&ipnUrl=" + requestBody.get("ipnUrl") +
                     "&orderId=" + requestBody.get("orderId") +
                     "&orderInfo=" + requestBody.get("orderInfo") +
+                    "&partnerCode=" + requestBody.get("partnerCode") +
                     "&redirectUrl=" + requestBody.get("redirectUrl") +
-                    "&ipnUrl=" + requestBody.get("ipnUrl") +
-                    "&extraData=" + requestBody.get("extraData");
+                    "&requestId=" + requestBody.get("requestId") +
+                    "&requestType=" + requestBody.get("requestType");
 
             return hmacSHA256(secretKey, rawData);
 
@@ -423,5 +427,24 @@ public class MoMoService {
         if (momoUrl == null || momoUrl.isBlank()) {
             throw new IllegalStateException("MoMo url is missing");
         }
+    }
+
+    private String momoEndpoint(String endpoint) {
+        String apiBase = momoApiBaseUrl();
+        return apiBase + "/" + endpoint;
+    }
+
+    private String momoApiBaseUrl() {
+        String base = momoUrl.trim();
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        if (base.endsWith("/v2/gateway/api/create") || base.endsWith("/v2/gateway/api/query")) {
+            return base.substring(0, base.lastIndexOf('/'));
+        }
+        if (base.endsWith("/v2/gateway/api")) {
+            return base;
+        }
+        return base + "/v2/gateway/api";
     }
 }
