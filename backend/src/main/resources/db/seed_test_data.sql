@@ -70,72 +70,72 @@ INSERT INTO products (product_id, category_id, user_id, product_name, brand, des
     ('p-00000001-0000-4000-8000-000000000001', 'c1', @testuser_id,
      'Leica M11', 'Leica',
      'May anh rangefinder dinh cao cua Leica voi sensor 60MP full-frame, ket hop thiet ke co dien va cong nghe hien dai. Phu hop cho nhung ai dam me nhiep anh phong canh va duong pho.',
-     199000000, 5, NOW()),
+     10000, 5, NOW()),
 
     ('p-00000002-0000-4000-8000-000000000002', 'c1', @admin_id,
      'Leica Q3', 'Leica',
      'May anh compact full-frame 60MP voi ong kinh Summilux 28mm f/1.7. Tich hop hy sinh anh va quay video 8K.',
-     125000000, 3, NOW()),
+     10000, 3, NOW()),
 
     -- c2: Định dạng trung bình
     ('p-00000003-0000-4000-8000-000000000003', 'c2', @testuser_id,
      'Hasselblad X2D 100C', 'Hasselblad',
      'May anh medium format 100 megapixel voi sensor trung format lon nhat thi truong. He thong mau tu nhien Hasselblad Color Science danh tieng the gioi.',
-     175000000, 2, NOW()),
+     10000, 2, NOW()),
 
     ('p-00000004-0000-4000-8000-000000000004', 'c2', @admin_id,
      'Fujifilm GFX 100S', 'Fujifilm',
      'May anh medium format 102MP trong lo the nhat thi truong. Sensor IBIS tich hop va 16-bit RAW xu ly mau tuyet voi.',
-     98000000, 4, NOW()),
+     10000, 4, NOW()),
 
     -- c3: Máy ảnh Mirrorless
     ('p-00000005-0000-4000-8000-000000000005', 'c3', @testuser_id,
      'Sony Alpha 1', 'Sony',
      'Flagship mirrorless full-frame 50.1MP, quay lien tuc 30fps, quay video 8K 30fps va 4K 120fps. May anh da nang nhat cua Sony.',
-     145000000, 10, NOW()),
+     10000, 10, NOW()),
 
     ('p-00000006-0000-4000-8000-000000000006', 'c3', @testuser_id,
      'Canon EOS R3', 'Canon',
      'May anh mirrorless full-frame cho the thao va hoang da voi sensor BSI 24.1MP, 30fps, va he thong AF nhan dien mat Eye Control AF.',
-     135000000, 4, NOW()),
+     10000, 4, NOW()),
 
     ('p-00000007-0000-4000-8000-000000000007', 'c3', @admin_id,
      'Nikon Z9', 'Nikon',
      'May anh mirrorless full-frame chuyen nghiep dau tien khong co bu chim co khi. Sensor stacked 45.7MP, 20fps RAW, 120fps JPEG.',
-     125000000, 7, NOW()),
+     10000, 7, NOW()),
 
     ('p-00000008-0000-4000-8000-000000000008', 'c3', @testuser_id,
      'Fujifilm X-H2S', 'Fujifilm',
      'May anh mirrorless APS-C sensor stacked toi uu cho video va chup lien tuc. 40fps va quay video 6.2K. Phu hop cho nguoi lam noi dung.',
-     58000000, 15, NOW()),
+     10000, 15, NOW()),
 
     -- c4: Máy ảnh Compact
     ('p-00000009-0000-4000-8000-000000000009', 'c4', @testuser_id,
      'Sony RX100 VII', 'Sony',
      'May anh compact nho gon voi sensor 1-inch 20.1MP, ong kinh 24-200mm, quay 4K, AF mat nguoi nhanh nhat phan khuc.',
-     32000000, 20, NOW()),
+     10000, 20, NOW()),
 
     -- c5: Ống kính (Ống kính)
     ('p-00000010-0000-4000-8000-000000000010', 'c5', @testuser_id,
      'Sony FE 24-70mm f/2.8 GM II', 'Sony',
      'Ong kinh zoom tieu chuyen nhat cua Sony voi Optical Design moi, nhe hon va nho hon phien ban I. 2 lens XD Linear cho AF nhanh.',
-     52000000, 12, NOW()),
+     10000, 12, NOW()),
 
     ('p-00000011-0000-4000-8000-000000000011', 'c5', @admin_id,
      'Canon RF 70-200mm f/2.8L IS USM', 'Canon',
      'Ong kinh tele zoom chuyen nghiep cho he thong Canon EOS R. Nho gon, AF nhanh, va IS toi uu 5 stop.',
-     68000000, 8, NOW()),
+     10000, 8, NOW()),
 
     -- c6: Phụ kiện (Phụ kiện)
     ('p-00000012-0000-4000-8000-000000000012', 'c6', @testuser_id,
      'Peak Design Everyday Backpack V2', 'Peak Design',
      'Balo chua do anh giai thuong thiet ke, cho phep tuy chinh bo phan ben trong. Phu hop van chuyen may anh va do ca nhan hang ngay.',
-     6500000, 30, NOW()),
+     10000, 30, NOW()),
 
     ('p-00000013-0000-4000-8000-000000000013', 'c6', @testuser_id,
      'ProGrade Digital CFexpress Type B 512GB', 'ProGrade Digital',
      'The nho toc do cao cho quay video 8K va chup anh lien tuc. Toc do doc 1700MB/s, toc do ghi 1200MB/s.',
-     12500000, 25, NOW());
+     10000, 25, NOW());
 
 -- ============================================================================
 -- 4. CHÈN TÀI SẢN (12 mặt hàng cho thuê với giá theo ngày bằng VND)
