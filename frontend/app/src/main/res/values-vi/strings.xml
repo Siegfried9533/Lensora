@@ -40,7 +40,7 @@
     <string name="auth_social_divider">HOẶC TIẾP TỤC VỚI</string>
     <string name="auth_continue_google">Tiếp tục với Google</string>
     <string name="auth_continue_apple">Tiếp tục với Apple</string>
-    <string name="auth_test_credentials">TÀI KHOẢN TEST:\n\nEmail: test@example.com\nMật khẩu: password123\n\nHOẶC (Admin):\nEmail: john@example.com\nMật khẩu: password123</string>
+    <string name="auth_test_credentials">TÀI KHOẢN TEST:\n\nEmail: testuser@lensora.com\nMật khẩu: 123456\n\nHOẶC (Admin):\nEmail: admin@lensora.com\nMật khẩu: 123456</string>
 
     <!-- Tabs -->
     <string name="tab_discover">Khám phá</string>

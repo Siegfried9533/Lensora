@@ -165,8 +165,8 @@ Seeded on first run:
 
 | Email | Password | Role |
 |-------|----------|------|
-| test@example.com | password123 | USER |
-| john@example.com | password123 | ADMIN |
+| testuser@lensora.com | 123456 | USER |
+| admin@lensora.com | 123456 | ADMIN |
 
 ## Deployment
 

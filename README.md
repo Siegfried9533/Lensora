@@ -269,8 +269,8 @@ Sau khi backend khởi động và seed dữ liệu:
 
 | Vai trò | Email | Mật khẩu |
 |---|---|---|
-| 👤 **User** | `test@example.com` | `password123` |
-| 🛡️ **Admin** | `john@example.com` | `password123` |
+| 👤 **User** | `testuser@lensora.com` | `123456` |
+| 🛡️ **Admin** | `admin@lensora.com` | `123456` |
 
 ---
 

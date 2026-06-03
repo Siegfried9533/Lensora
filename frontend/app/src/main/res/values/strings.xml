@@ -40,7 +40,7 @@
     <string name="auth_social_divider">OR CONTINUE WITH</string>
     <string name="auth_continue_google">Continue with Google</string>
     <string name="auth_continue_apple">Continue with Apple</string>
-    <string name="auth_test_credentials">TEST CREDENTIALS:\n\nEmail: test@example.com\nPassword: password123\n\nOR (Admin):\nEmail: john@example.com\nPassword: password123</string>
+    <string name="auth_test_credentials">TEST CREDENTIALS:\n\nEmail: testuser@lensora.com\nPassword: 123456\n\nOR (Admin):\nEmail: admin@lensora.com\nPassword: 123456</string>
 
     <!-- Tabs -->
     <string name="tab_discover">Discovery</string>

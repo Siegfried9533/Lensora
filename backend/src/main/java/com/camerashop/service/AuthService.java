@@ -158,6 +158,7 @@ public class AuthService {
                 .userName(user.getUserName())
                 .role(user.getRole().name())
                 .userId(user.getUserId())
+                .emailVerified(user.isEmailVerified())
                 .build();
     }
 
@@ -172,6 +173,7 @@ public class AuthService {
                 .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole().name())
                 .trustScore(user.getTrustScore())
+                .emailVerified(user.isEmailVerified())
                 .build();
     }
 
@@ -189,6 +191,7 @@ public class AuthService {
                 .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole().name())
                 .trustScore(user.getTrustScore())
+                .emailVerified(user.isEmailVerified())
                 .build();
     }
 
