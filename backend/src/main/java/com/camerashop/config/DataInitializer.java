@@ -92,18 +92,18 @@ public class DataInitializer implements CommandLineRunner {
 
     private Map<String, Category> seedCategories() {
         List<Category> categories = List.of(
-                category("c1", "May anh cao cap", EntityType.PRODUCT),
+                category("c1", "High-End Cameras", EntityType.PRODUCT),
                 category("c2", "Medium Format", EntityType.PRODUCT),
-                category("c3", "May anh Mirrorless", EntityType.PRODUCT),
-                category("c4", "May anh Compact", EntityType.PRODUCT),
-                category("c5", "Ong kinh", EntityType.PRODUCT),
-                category("c6", "Phu kien", EntityType.PRODUCT),
-                category("a1", "Flycam", EntityType.ASSET),
-                category("a2", "Gimbal / On dinh", EntityType.ASSET),
-                category("a3", "Thiet bi am thanh", EntityType.ASSET),
-                category("a4", "Den chup anh", EntityType.ASSET),
-                category("a5", "Ong kinh cho thue", EntityType.ASSET),
-                category("a6", "Chan may anh", EntityType.ASSET));
+                category("c3", "Mirrorless Cameras", EntityType.PRODUCT),
+                category("c4", "Compact Cameras", EntityType.PRODUCT),
+                category("c5", "Lenses", EntityType.PRODUCT),
+                category("c6", "Accessories", EntityType.PRODUCT),
+                category("a1", "Drones", EntityType.ASSET),
+                category("a2", "Gimbals / Stabilizers", EntityType.ASSET),
+                category("a3", "Audio Equipment", EntityType.ASSET),
+                category("a4", "Photography Lighting", EntityType.ASSET),
+                category("a5", "Rental Lenses", EntityType.ASSET),
+                category("a6", "Tripods", EntityType.ASSET));
 
         return categoryRepository.saveAll(categories).stream()
                 .collect(Collectors.toMap(
@@ -116,41 +116,45 @@ public class DataInitializer implements CommandLineRunner {
     private Map<String, Product> seedProducts(Map<String, Category> categories, User testUser, User adminUser) {
         List<Product> products = List.of(
                 product("p-00000001-0000-4000-8000-000000000001", categories.get("c1"), testUser, "Leica M11",
-                        "Leica", "May anh rangefinder dinh cao cua Leica voi sensor 60MP full-frame.", 10000L, 5),
+                        "Leica", "A flagship Leica rangefinder camera with a 60MP full-frame sensor.", 10000L, 5),
                 product("p-00000002-0000-4000-8000-000000000002", categories.get("c1"), adminUser, "Leica Q3",
-                        "Leica", "May anh compact full-frame 60MP voi ong kinh Summilux 28mm f/1.7.", 10000L, 3),
+                        "Leica", "A compact full-frame 60MP camera with a Summilux 28mm f/1.7 lens.", 10000L, 3),
                 product("p-00000003-0000-4000-8000-000000000003", categories.get("c2"), testUser,
                         "Hasselblad X2D 100C", "Hasselblad",
-                        "May anh medium format 100 megapixel voi sensor trung format.", 10000L, 2),
+                        "A 100MP medium format camera with a large-format sensor.", 10000L, 2),
                 product("p-00000004-0000-4000-8000-000000000004", categories.get("c2"), adminUser,
                         "Fujifilm GFX 100S", "Fujifilm",
-                        "May anh medium format 102MP trong lo the nhat thi truong.", 10000L, 4),
+                        "A lightweight 102MP medium format camera for professional photography.", 10000L, 4),
                 product("p-00000005-0000-4000-8000-000000000005", categories.get("c3"), testUser,
-                        "Sony Alpha 1", "Sony", "Flagship mirrorless full-frame 50.1MP, quay lien tuc 30fps.",
+                        "Sony Alpha 1", "Sony",
+                        "Flagship full-frame mirrorless camera with 50.1MP resolution and 30fps continuous shooting.",
                         10000L, 10),
                 product("p-00000006-0000-4000-8000-000000000006", categories.get("c3"), testUser,
-                        "Canon EOS R3", "Canon", "May anh mirrorless full-frame cho the thao va hoang da.",
+                        "Canon EOS R3", "Canon",
+                        "A full-frame mirrorless camera built for sports and wildlife photography.",
                         10000L, 4),
                 product("p-00000007-0000-4000-8000-000000000007", categories.get("c3"), adminUser, "Nikon Z9",
-                        "Nikon", "May anh mirrorless full-frame chuyen nghiep.", 10000L, 7),
+                        "Nikon", "A professional full-frame mirrorless camera.", 10000L, 7),
                 product("p-00000008-0000-4000-8000-000000000008", categories.get("c3"), testUser,
-                        "Fujifilm X-H2S", "Fujifilm", "May anh mirrorless APS-C sensor stacked toi uu cho video.",
+                        "Fujifilm X-H2S", "Fujifilm",
+                        "An APS-C stacked-sensor mirrorless camera optimized for video.",
                         10000L, 15),
                 product("p-00000009-0000-4000-8000-000000000009", categories.get("c4"), testUser,
-                        "Sony RX100 VII", "Sony", "May anh compact nho gon voi sensor 1-inch 20.1MP.", 10000L,
+                        "Sony RX100 VII", "Sony", "A compact pocket camera with a 20.1MP 1-inch sensor.", 10000L,
                         20),
                 product("p-00000010-0000-4000-8000-000000000010", categories.get("c5"), testUser,
-                        "Sony FE 24-70mm f/2.8 GM II", "Sony", "Ong kinh zoom tieu chuyen nhat cua Sony.",
+                        "Sony FE 24-70mm f/2.8 GM II", "Sony",
+                        "Sony's flagship standard professional zoom lens.",
                         10000L, 12),
                 product("p-00000011-0000-4000-8000-000000000011", categories.get("c5"), adminUser,
                         "Canon RF 70-200mm f/2.8L IS USM", "Canon",
-                        "Ong kinh tele zoom chuyen nghiep cho he thong Canon EOS R.", 10000L, 8),
+                        "A professional telephoto zoom lens for the Canon EOS R system.", 10000L, 8),
                 product("p-00000012-0000-4000-8000-000000000012", categories.get("c6"), testUser,
                         "Peak Design Everyday Backpack V2", "Peak Design",
-                        "Balo chua do anh giai thuong thiet ke, cho phep tu tuy chinh.", 10000L, 30),
+                        "An award-winning camera backpack with customizable dividers.", 10000L, 30),
                 product("p-00000013-0000-4000-8000-000000000013", categories.get("c6"), testUser,
                         "ProGrade Digital CFexpress Type B 512GB", "ProGrade Digital",
-                        "The nho toc do cao cho quay video 8K.", 10000L, 25));
+                        "A high-speed memory card for 8K video recording.", 10000L, 25));
 
         return productRepository.saveAll(products).stream()
                 .collect(Collectors.toMap(

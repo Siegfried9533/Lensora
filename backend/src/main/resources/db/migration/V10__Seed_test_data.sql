@@ -34,36 +34,36 @@ INSERT INTO users (user_id, user_name, email, password, role, trust_score, email
 -- 3. Chen danh muc
 -- ============================================================================
 INSERT INTO categories (category_id, category_name, type) VALUES
-    ('c1', 'May anh cao cap',       'PRODUCT'),
+    ('c1', 'High-End Cameras',       'PRODUCT'),
     ('c2', 'Medium Format',          'PRODUCT'),
-    ('c3', 'May anh Mirrorless',    'PRODUCT'),
-    ('c4', 'May anh Compact',       'PRODUCT'),
-    ('c5', 'Ong kinh',              'PRODUCT'),
-    ('c6', 'Phu kien',              'PRODUCT'),
-    ('a1', 'Flycam',                'ASSET'),
-    ('a2', 'Gimbal / On dinh',     'ASSET'),
-    ('a3', 'Thiet bi am thanh',    'ASSET'),
-    ('a4', 'Den chup anh',         'ASSET'),
-    ('a5', 'Ong kinh cho thue',    'ASSET'),
-    ('a6', 'Chan may anh',         'ASSET');
+    ('c3', 'Mirrorless Cameras',     'PRODUCT'),
+    ('c4', 'Compact Cameras',        'PRODUCT'),
+    ('c5', 'Lenses',                 'PRODUCT'),
+    ('c6', 'Accessories',            'PRODUCT'),
+    ('a1', 'Drones',                 'ASSET'),
+    ('a2', 'Gimbals / Stabilizers',  'ASSET'),
+    ('a3', 'Audio Equipment',        'ASSET'),
+    ('a4', 'Photography Lighting',   'ASSET'),
+    ('a5', 'Rental Lenses',          'ASSET'),
+    ('a6', 'Tripods',                'ASSET');
 
 -- ============================================================================
 -- 4. Chen san pham
 -- ============================================================================
 INSERT INTO products (product_id, category_id, user_id, product_name, brand, description, price, stock_quantity, created_at) VALUES
-    ('p-00000001-0000-4000-8000-000000000001', 'c1', 'u-00000000-0000-4000-a000-000000000001', 'Leica M11', 'Leica', 'May anh rangefinder dinh cao cua Leica voi sensor 60MP full-frame.', 10000, 5, NOW()),
-    ('p-00000002-0000-4000-8000-000000000002', 'c1', 'u-00000000-0000-4000-a000-000000000002', 'Leica Q3', 'Leica', 'May anh compact full-frame 60MP voi ong kinh Summilux 28mm f/1.7.', 10000, 3, NOW()),
-    ('p-00000003-0000-4000-8000-000000000003', 'c2', 'u-00000000-0000-4000-a000-000000000001', 'Hasselblad X2D 100C', 'Hasselblad', 'May anh medium format 100 megapixel voi sensor trung format.', 10000, 2, NOW()),
-    ('p-00000004-0000-4000-8000-000000000004', 'c2', 'u-00000000-0000-4000-a000-000000000002', 'Fujifilm GFX 100S', 'Fujifilm', 'May anh medium format 102MP trong lo the nhat thi truong.', 10000, 4, NOW()),
-    ('p-00000005-0000-4000-8000-000000000005', 'c3', 'u-00000000-0000-4000-a000-000000000001', 'Sony Alpha 1', 'Sony', 'Flagship mirrorless full-frame 50.1MP, quay lien tuc 30fps.', 10000, 10, NOW()),
-    ('p-00000006-0000-4000-8000-000000000006', 'c3', 'u-00000000-0000-4000-a000-000000000001', 'Canon EOS R3', 'Canon', 'May anh mirrorless full-frame cho the thao va hoang da.', 10000, 4, NOW()),
-    ('p-00000007-0000-4000-8000-000000000007', 'c3', 'u-00000000-0000-4000-a000-000000000002', 'Nikon Z9', 'Nikon', 'May anh mirrorless full-frame chuyen nghiep.', 10000, 7, NOW()),
-    ('p-00000008-0000-4000-8000-000000000008', 'c3', 'u-00000000-0000-4000-a000-000000000001', 'Fujifilm X-H2S', 'Fujifilm', 'May anh mirrorless APS-C sensor stacked toi uu cho video.', 10000, 15, NOW()),
-    ('p-00000009-0000-4000-8000-000000000009', 'c4', 'u-00000000-0000-4000-a000-000000000001', 'Sony RX100 VII', 'Sony', 'May anh compact nho gon voi sensor 1-inch 20.1MP.', 10000, 20, NOW()),
-    ('p-00000010-0000-4000-8000-000000000010', 'c5', 'u-00000000-0000-4000-a000-000000000001', 'Sony FE 24-70mm f/2.8 GM II', 'Sony', 'Ong kinh zoom tieu chuyen nhat cua Sony.', 10000, 12, NOW()),
-    ('p-00000011-0000-4000-8000-000000000011', 'c5', 'u-00000000-0000-4000-a000-000000000002', 'Canon RF 70-200mm f/2.8L IS USM', 'Canon', 'Ong kinh tele zoom chuyen nghiep cho he thong Canon EOS R.', 10000, 8, NOW()),
-    ('p-00000012-0000-4000-8000-000000000012', 'c6', 'u-00000000-0000-4000-a000-000000000001', 'Peak Design Everyday Backpack V2', 'Peak Design', 'Balo chua do anh giai thuong thiet ke, cho phep tu tuy chinh.', 10000, 30, NOW()),
-    ('p-00000013-0000-4000-8000-000000000013', 'c6', 'u-00000000-0000-4000-a000-000000000001', 'ProGrade Digital CFexpress Type B 512GB', 'ProGrade Digital', 'The nho toc do cao cho quay video 8K.', 10000, 25, NOW());
+    ('p-00000001-0000-4000-8000-000000000001', 'c1', 'u-00000000-0000-4000-a000-000000000001', 'Leica M11', 'Leica', 'A flagship Leica rangefinder camera with a 60MP full-frame sensor.', 10000, 5, NOW()),
+    ('p-00000002-0000-4000-8000-000000000002', 'c1', 'u-00000000-0000-4000-a000-000000000002', 'Leica Q3', 'Leica', 'A compact full-frame 60MP camera with a Summilux 28mm f/1.7 lens.', 10000, 3, NOW()),
+    ('p-00000003-0000-4000-8000-000000000003', 'c2', 'u-00000000-0000-4000-a000-000000000001', 'Hasselblad X2D 100C', 'Hasselblad', 'A 100MP medium format camera with a large-format sensor.', 10000, 2, NOW()),
+    ('p-00000004-0000-4000-8000-000000000004', 'c2', 'u-00000000-0000-4000-a000-000000000002', 'Fujifilm GFX 100S', 'Fujifilm', 'A lightweight 102MP medium format camera for professional photography.', 10000, 4, NOW()),
+    ('p-00000005-0000-4000-8000-000000000005', 'c3', 'u-00000000-0000-4000-a000-000000000001', 'Sony Alpha 1', 'Sony', 'Flagship full-frame mirrorless camera with 50.1MP resolution and 30fps continuous shooting.', 10000, 10, NOW()),
+    ('p-00000006-0000-4000-8000-000000000006', 'c3', 'u-00000000-0000-4000-a000-000000000001', 'Canon EOS R3', 'Canon', 'A full-frame mirrorless camera built for sports and wildlife photography.', 10000, 4, NOW()),
+    ('p-00000007-0000-4000-8000-000000000007', 'c3', 'u-00000000-0000-4000-a000-000000000002', 'Nikon Z9', 'Nikon', 'A professional full-frame mirrorless camera.', 10000, 7, NOW()),
+    ('p-00000008-0000-4000-8000-000000000008', 'c3', 'u-00000000-0000-4000-a000-000000000001', 'Fujifilm X-H2S', 'Fujifilm', 'An APS-C stacked-sensor mirrorless camera optimized for video.', 10000, 15, NOW()),
+    ('p-00000009-0000-4000-8000-000000000009', 'c4', 'u-00000000-0000-4000-a000-000000000001', 'Sony RX100 VII', 'Sony', 'A compact pocket camera with a 20.1MP 1-inch sensor.', 10000, 20, NOW()),
+    ('p-00000010-0000-4000-8000-000000000010', 'c5', 'u-00000000-0000-4000-a000-000000000001', 'Sony FE 24-70mm f/2.8 GM II', 'Sony', 'Sony''s flagship standard professional zoom lens.', 10000, 12, NOW()),
+    ('p-00000011-0000-4000-8000-000000000011', 'c5', 'u-00000000-0000-4000-a000-000000000002', 'Canon RF 70-200mm f/2.8L IS USM', 'Canon', 'A professional telephoto zoom lens for the Canon EOS R system.', 10000, 8, NOW()),
+    ('p-00000012-0000-4000-8000-000000000012', 'c6', 'u-00000000-0000-4000-a000-000000000001', 'Peak Design Everyday Backpack V2', 'Peak Design', 'An award-winning camera backpack with customizable dividers.', 10000, 30, NOW()),
+    ('p-00000013-0000-4000-8000-000000000013', 'c6', 'u-00000000-0000-4000-a000-000000000001', 'ProGrade Digital CFexpress Type B 512GB', 'ProGrade Digital', 'A high-speed memory card for 8K video recording.', 10000, 25, NOW());
 
 -- ============================================================================
 -- 5. Chen tai san
