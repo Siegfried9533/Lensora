@@ -22,6 +22,7 @@ REST API for the Lensora camera-equipment marketplace (buy / sell / rent), built
 - 📦 Order processing and 📱 rentals
 - 💰 Payment integration: **MoMo** (sandbox)
 - 🚚 Shipping integration: **GHN**, with a `provinces.open-api.vn` fallback for province/district/ward lookups
+- 📍 Shipping address book (save / edit / set default per user)
 - 🔔 Notifications + scheduled jobs
 - 🤖 Chatbot powered by **DeepSeek**
 
@@ -115,7 +116,7 @@ Base URL: `http://localhost:8080/api`. Authenticated endpoints require:
 Authorization: Bearer <jwt-token>
 ```
 
-Controllers (each under `/api/<feature>`): `auth`, `products`, `categories`, `assets`, `cart`, `favorites`, `orders`, `rentals`, `reviews`, `notifications`, `payment`, `shipping`, `chatbot`, `health`.
+Controllers (each under `/api/<feature>`): `auth`, `products`, `categories`, `assets`, `cart`, `favorites`, `orders`, `rentals`, `reviews`, `notifications`, `payment`, `payment-methods`, `addresses`, `shipping`, `chatbot`, `health`.
 
 Commonly used endpoints:
 
@@ -130,6 +131,13 @@ GET  /api/cart
 GET  /api/favorites
 GET  /api/orders
 GET  /api/rentals
+
+# Shipping address book
+GET    /api/addresses
+POST   /api/addresses
+PUT    /api/addresses/{id}
+DELETE /api/addresses/{id}
+PUT    /api/addresses/{id}/default
 
 # Shipping (GHN + open-api fallback)
 GET  /api/shipping/provinces

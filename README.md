@@ -84,6 +84,7 @@ Dự án gồm **hai module độc lập**:
 #### 💳 Thanh toán & Vận chuyển
 - Thanh toán **MoMo** (sandbox)
 - Tính phí ship & tra cứu địa chỉ qua **GHN**
+- 📍 Sổ địa chỉ giao hàng (lưu, sửa & đặt mặc định)
 - 🔔 Thông báo + tác vụ định kỳ
 - 🤖 **Chatbot AI** (DeepSeek) tư vấn sản phẩm
 
@@ -290,6 +291,7 @@ Sau khi backend khởi động và seed dữ liệu:
 | `GET` | `/api/favorites` | Yêu thích |
 | `GET` | `/api/orders` | Đơn hàng |
 | `GET` | `/api/rentals` | Đơn thuê |
+| `GET` | `/api/addresses` | Sổ địa chỉ giao hàng |
 | `POST` | `/api/chatbot/chat-sync` | Chatbot AI |
 
 Các API cần đăng nhập dùng header:

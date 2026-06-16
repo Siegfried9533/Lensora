@@ -292,6 +292,29 @@ Table payment_methods {
   }
 }
 
+Table user_addresses {
+  address_id varchar(255) [pk]
+  user_id varchar(255) [not null]
+  recipient_name varchar(255) [not null]
+  recipient_phone varchar(255) [not null]
+  province_id varchar(255)
+  province_name varchar(255)
+  district_id varchar(255) [note: 'GHN district_id for shipping-fee calc']
+  district_name varchar(255)
+  ward_code varchar(255) [note: 'GHN ward_code for shipping-fee calc']
+  ward_name varchar(255)
+  street varchar(255)
+  note varchar(255)
+  postal_code varchar(255) [note: 'Added by V9, optional']
+  is_default boolean [not null, default: false]
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    user_id [name: 'idx_user_addresses_user']
+  }
+}
+
 Table reviews {
   review_id bigint [pk, increment]
   user_id varchar(255)
@@ -348,4 +371,5 @@ Ref fk_notifications_user: notifications.user_id > users.user_id
 Ref fk_email_verification_tokens_user: email_verification_tokens.user_id > users.user_id
 Ref fk_password_reset_tokens_user: password_reset_tokens.user_id > users.user_id
 Ref fk_payment_methods_user: payment_methods.user_id > users.user_id
+Ref fk_user_addresses_user: user_addresses.user_id > users.user_id
 Ref fk_reviews_user: reviews.user_id > users.user_id
